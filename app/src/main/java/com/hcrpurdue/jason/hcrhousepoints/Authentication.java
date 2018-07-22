@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,17 +37,19 @@ public class Authentication extends AppCompatActivity {
         setContentView(R.layout.activity_authentication);
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        // Check if user is signed in (non-null) and update UI accordingly. Authentication should be cached automatically
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser == null) {
+            // TODO: Go to the logged in page
+            finish();
+        }
         getFloorCodes();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = auth.getCurrentUser();
-        if (currentUser == null)
-            return; // TODO: Go to the logged in page
-        // TODO:  Pull house info and floor codes
     }
 
     public void signIn(View view) {
@@ -101,8 +104,8 @@ public class Authentication extends AppCompatActivity {
                             userData.put("FloorID", floorCodes.get(floorCodeText).first);
                             userData.put("House", floorCodes.get(floorCodeText).second);
                             userData.put("Permission Level", 0);
-                            userData.put("TotalPoint", 0);
-                            if(user != null)
+                            userData.put("TotalPoints", 0);
+                            if (user != null)
                                 db.collection("Users").document(user.getUid()).set(userData)
                                         .addOnFailureListener(new OnFailureListener() {
                                             @Override
@@ -125,7 +128,7 @@ public class Authentication extends AppCompatActivity {
         // Hide the virtual keyboard
         InputMethodManager inputManager = (InputMethodManager)
                 getSystemService(Context.INPUT_METHOD_SERVICE);
-        if(inputManager != null && getCurrentFocus() != null) // Avoids null pointer exceptions
+        if (inputManager != null && getCurrentFocus() != null) // Avoids null pointer exceptions
             inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                     InputMethodManager.HIDE_NOT_ALWAYS);
 
@@ -142,7 +145,7 @@ public class Authentication extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Password cannot be empty", Toast.LENGTH_SHORT).show();
             return true;
         }
-        if(passwordText.length() < 6){
+        if (passwordText.length() < 6) {
             Toast.makeText(getApplicationContext(), "Password must be at least 6 characters long", Toast.LENGTH_SHORT).show();
             return true;
         }
@@ -163,13 +166,13 @@ public class Authentication extends AppCompatActivity {
         }
 
         // Checks to make sure that there is at least one space in the name for first and last name
-        if(!nameText.contains(" ")){
+        if (!nameText.contains(" ")) {
             Toast.makeText(getApplicationContext(), "Name must include your first and last name", Toast.LENGTH_SHORT).show();
             return true;
         }
 
         // Checks that the floor code is valid
-        if(floorCodes.get(floorCodeText)  == null){
+        if (floorCodes.get(floorCodeText) == null) {
             Toast.makeText(getApplicationContext(), "Floor code invalid", Toast.LENGTH_SHORT).show();
             return true;
         }
@@ -178,25 +181,21 @@ public class Authentication extends AppCompatActivity {
     }
 
     // Fills floorCodes with key:value pairs in the form of {floorCode}:({floorName}:{houseName})
-    private void getFloorCodes(){
+    private void getFloorCodes() {
         floorCodes = new HashMap<>();
         db.collection("House").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful()){
-                    for(QueryDocumentSnapshot document : task.getResult())
-                    {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
                         Map<String, Object> data = document.getData();
-                        for(Map.Entry<String, Object> entry : data.entrySet())
-                        {
-                            if(entry.getKey().contains("Code") && entry.getValue().getClass() == entry.getKey().getClass())
-                            {
-                                floorCodes.put((String)entry.getValue(), new Pair<>(entry.getKey().replace("Code", ""), document.getId()));
+                        for (Map.Entry<String, Object> entry : data.entrySet()) {
+                            if (entry.getKey().contains("Code") && entry.getValue().getClass() == entry.getKey().getClass()) {
+                                floorCodes.put((String) entry.getValue(), new Pair<>(entry.getKey().replace("Code", ""), document.getId()));
                             }
                         }
                     }
-                }
-                else
+                } else
                     Toast.makeText(getApplicationContext(), "Error retrieving Floor codes from database, please try again later before contacting your RHP", Toast.LENGTH_LONG).show();
             }
         });
