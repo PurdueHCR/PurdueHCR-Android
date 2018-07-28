@@ -6,4 +6,5 @@ import Models.PointType;
 
 public interface FirebaseUtilInterface {
     default void onComplete(List<PointType> data){}
+    default void onCompleteWithError(Exception e){}
 }
