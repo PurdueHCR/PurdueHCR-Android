@@ -1,6 +1,7 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,16 +41,10 @@ public class Authentication extends AppCompatActivity {
 
         // Check if user is signed in (non-null) and update UI accordingly. Authentication should be cached automatically
         FirebaseUser currentUser = auth.getCurrentUser();
-        if (currentUser == null) {
-            // TODO: Go to the logged in page
-            finish();
+        if (currentUser != null) {
+            launchNextActivity();
         }
         getFloorCodes();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
     }
 
     public void signIn(View view) {
@@ -66,8 +61,7 @@ public class Authentication extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            FirebaseUser user = auth.getCurrentUser();
-                            // TODO: Go to next page
+                            launchNextActivity();
                         } else {
                             Toast.makeText(getApplicationContext(), "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
@@ -92,34 +86,26 @@ public class Authentication extends AppCompatActivity {
             return;
 
         auth.createUserWithEmailAndPassword(emailText, passwordText)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = auth.getCurrentUser();
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = auth.getCurrentUser();
 
-                            // Generates all of the other data for the user in the DB
-                            Map<String, Object> userData = new HashMap<>();
-                            userData.put("Name", nameText);
-                            userData.put("FloorID", floorCodes.get(floorCodeText).first);
-                            userData.put("House", floorCodes.get(floorCodeText).second);
-                            userData.put("Permission Level", 0);
-                            userData.put("TotalPoints", 0);
-                            if (user != null)
-                                db.collection("Users").document(user.getUid()).set(userData)
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                Toast.makeText(getApplicationContext(), "User DB binds failed, please tell your RHP to tell Jason", Toast.LENGTH_LONG).show();
-                                            }
-                                        });
-                            else
-                                Toast.makeText(getApplicationContext(), "User was created but not loaded, please tell your RHP to tell Jason", Toast.LENGTH_SHORT).show();
-                            // TODO: Show rest of stuff after signed in
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Authentication failed, try again later before contacting your RHP",
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                        // Generates all of the other data for the user in the DB
+                        Map<String, Object> userData = new HashMap<>();
+                        userData.put("Name", nameText);
+                        userData.put("FloorID", floorCodes.get(floorCodeText).first);
+                        userData.put("House", floorCodes.get(floorCodeText).second);
+                        userData.put("Permission Level", 0);
+                        userData.put("TotalPoints", 0);
+                        if (user != null)
+                            db.collection("Users").document(user.getUid()).set(userData)
+                                    .addOnSuccessListener(aVoid -> launchNextActivity())
+                                    .addOnFailureListener(e -> Toast.makeText(getApplicationContext(), "User DB binds failed, please tell your RHP to tell Jason", Toast.LENGTH_LONG).show());
+                        else
+                            Toast.makeText(getApplicationContext(), "User was created but not loaded, please tell your RHP to tell Jason", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Authentication failed, try again later before contacting your RHP",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -183,21 +169,24 @@ public class Authentication extends AppCompatActivity {
     // Fills floorCodes with key:value pairs in the form of {floorCode}:({floorName}:{houseName})
     private void getFloorCodes() {
         floorCodes = new HashMap<>();
-        db.collection("House").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        Map<String, Object> data = document.getData();
-                        for (Map.Entry<String, Object> entry : data.entrySet()) {
-                            if (entry.getKey().contains("Code") && entry.getValue().getClass() == entry.getKey().getClass()) {
-                                floorCodes.put((String) entry.getValue(), new Pair<>(entry.getKey().replace("Code", ""), document.getId()));
-                            }
+        db.collection("House").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    Map<String, Object> data = document.getData();
+                    data.entrySet().parallelStream().forEach((entry) -> {
+                        if (entry.getKey().contains("Code") && entry.getValue().getClass() == String.class) {
+                            floorCodes.put((String) entry.getValue(), new Pair<>(entry.getKey().replace("Code", ""), document.getId()));
                         }
-                    }
-                } else
-                    Toast.makeText(getApplicationContext(), "Error retrieving Floor codes from database, please try again later before contacting your RHP", Toast.LENGTH_LONG).show();
-            }
+                    });
+                }
+            } else
+                Toast.makeText(getApplicationContext(), "Error retrieving floor codes from database, please try again later before contacting your RHP", Toast.LENGTH_LONG).show();
         });
+    }
+
+    private void launchNextActivity(){
+        Intent intent = new Intent(this, SubmitPoints.class);
+        startActivity(intent);
+        finish();
     }
 }
