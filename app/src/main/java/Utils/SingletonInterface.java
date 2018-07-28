@@ -1,5 +1,11 @@
 package Utils;
 
+import java.util.List;
+
+import Models.PointType;
+
 public interface SingletonInterface {
-    default void onComplete(boolean success){}
+    default void onPointTypeComplete(List<PointType> data){}
+    default void onPostSuccess(){}
+    default void onError(Exception e){}
 }

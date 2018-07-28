@@ -43,8 +43,9 @@ public class Authentication extends AppCompatActivity {
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
             launchNextActivity();
+        } else {
+            getFloorCodes();
         }
-        getFloorCodes();
     }
 
     public void signIn(View view) {
@@ -57,15 +58,12 @@ public class Authentication extends AppCompatActivity {
             return;
 
         auth.signInWithEmailAndPassword(emailText, passwordText)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            launchNextActivity();
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        launchNextActivity();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Authentication failed.",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -184,7 +182,7 @@ public class Authentication extends AppCompatActivity {
         });
     }
 
-    private void launchNextActivity(){
+    private void launchNextActivity() {
         Intent intent = new Intent(this, SubmitPoints.class);
         startActivity(intent);
         finish();

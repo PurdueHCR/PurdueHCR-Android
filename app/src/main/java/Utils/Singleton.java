@@ -25,16 +25,21 @@ public class Singleton {
     public void getPointTypes(final SingletonInterface si) {
         fbutil.getPointTypes(new FirebaseUtilInterface() {
             @Override
-            public void onComplete(List<PointType> data) {
+            public void onPointTypeComplete(List<PointType> data) {
                 if(data != null && !data.isEmpty())
                 {
                     pointTypeList = data;
-                    si.onComplete(true);
+                    si.onPointTypeComplete(data);
                 }
                 else
                 {
-                    si.onComplete(false);
+                    si.onError(new IllegalStateException(""));
                 }
+            }
+            @Override
+            public void onError(Exception e)
+            {
+
             }
         });
     }

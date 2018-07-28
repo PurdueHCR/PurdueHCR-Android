@@ -1,24 +1,20 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import Models.PointLog;
 import Models.PointType;
-import Utils.FirebaseUtil;
-import Utils.FirebaseUtilInterface;
 import Utils.Singleton;
 import Utils.SingletonInterface;
 
@@ -30,22 +26,32 @@ public class SubmitPoints extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_submit_points);
         singleton = Singleton.getInstance();
+        getPointTypes();
     }
 
 
     private void getPointTypes() {
         singleton.getPointTypes(new SingletonInterface() {
             @Override
-            public void onComplete(boolean success) {
-                if (success)
+            public void onPointTypeComplete(List<PointType> data) {
+                data.sort(Comparator.comparing(PointType::getPointID));
+                List<Map<String, String>> formattedPointTypes = new ArrayList<>();
+                Spinner spinner = findViewById(R.id.pointTypeSpinner);
+                for(PointType type : data)
                 {
-                    List<PointType> list = singleton.getPointTypeList();
-                    List<Map<String, String>> pointTypes = new ArrayList<>();
-                    list.forEach()
+                    Map<String, String> map = new HashMap<>();
+                    map.put("text", type.getPointDescription());
+                    map.put("subText", String.valueOf(type.getPointValue()) + " points");
+                    formattedPointTypes.add(map);
                 }
-                else{
-                    Toast.makeText(getApplicationContext(), "Error retrieving point type from database, please try again later before contacting your RHP", Toast.LENGTH_LONG).show();
-                }
+                SimpleAdapter adapter = new SimpleAdapter(SubmitPoints.this, formattedPointTypes, android.R.layout.simple_list_item_2, new String[] {"text", "subText"}, new int[] {android.R.id.text1, android.R.id.text2});
+                adapter.setDropDownViewResource(android.R.layout.simple_list_item_2);
+                spinner.setAdapter(adapter);
+            }
+
+            @Override
+            public void onError(Exception e) {
+
             }
         });
     }
