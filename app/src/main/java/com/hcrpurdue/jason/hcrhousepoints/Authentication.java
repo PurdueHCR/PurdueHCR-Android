@@ -13,24 +13,22 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import Utils.Singleton;
+import Utils.SingletonInterface;
 
 public class Authentication extends AppCompatActivity {
     private FirebaseAuth auth;
     private Map<String, Pair<String, String>> floorCodes;
     private FirebaseFirestore db;
+    private Singleton singleton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +36,13 @@ public class Authentication extends AppCompatActivity {
         setContentView(R.layout.activity_authentication);
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+        singleton = Singleton.getInstance();
 
         // Check if user is signed in (non-null) and update UI accordingly. Authentication should be cached automatically
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
+            singleton.getUserData(new SingletonInterface() {
+            });
             launchNextActivity();
         } else {
             getFloorCodes();
@@ -89,15 +90,20 @@ public class Authentication extends AppCompatActivity {
                         FirebaseUser user = auth.getCurrentUser();
 
                         // Generates all of the other data for the user in the DB
+                        String floor = floorCodes.get(floorCodeText).first;
+                        String house = floorCodes.get(floorCodeText).second;
                         Map<String, Object> userData = new HashMap<>();
                         userData.put("Name", nameText);
-                        userData.put("FloorID", floorCodes.get(floorCodeText).first);
-                        userData.put("House", floorCodes.get(floorCodeText).second);
+                        userData.put("FloorID", floor);
+                        userData.put("House", house);
                         userData.put("Permission Level", 0);
                         userData.put("TotalPoints", 0);
                         if (user != null)
                             db.collection("Users").document(user.getUid()).set(userData)
-                                    .addOnSuccessListener(aVoid -> launchNextActivity())
+                                    .addOnSuccessListener(aVoid -> {
+                                        singleton.setUserData(nameText, floor, house, 0, 0);
+                                        launchNextActivity();
+                                    })
                                     .addOnFailureListener(e -> Toast.makeText(getApplicationContext(), "User DB binds failed, please tell your RHP to tell Jason", Toast.LENGTH_LONG).show());
                         else
                             Toast.makeText(getApplicationContext(), "User was created but not loaded, please tell your RHP to tell Jason", Toast.LENGTH_SHORT).show();

@@ -6,6 +6,7 @@ import Models.PointType;
 
 public interface FirebaseUtilInterface {
     default void onPointTypeComplete(List<PointType> data){}
-    default void onPostSuccess(){}
+    default void onUserGetSuccess(){}
+    default void onSuccess(){}
     default void onError(Exception e){}
 }

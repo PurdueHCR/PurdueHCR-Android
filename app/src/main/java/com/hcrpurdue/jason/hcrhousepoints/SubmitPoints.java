@@ -7,12 +7,9 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import Models.PointType;
 import Utils.Singleton;
@@ -34,7 +31,6 @@ public class SubmitPoints extends AppCompatActivity {
         singleton.getPointTypes(new SingletonInterface() {
             @Override
             public void onPointTypeComplete(List<PointType> data) {
-                data.sort(Comparator.comparing(PointType::getPointID));
                 List<Map<String, String>> formattedPointTypes = new ArrayList<>();
                 Spinner spinner = findViewById(R.id.pointTypeSpinner);
                 for(PointType type : data)
@@ -51,7 +47,7 @@ public class SubmitPoints extends AppCompatActivity {
 
             @Override
             public void onError(Exception e) {
-
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }

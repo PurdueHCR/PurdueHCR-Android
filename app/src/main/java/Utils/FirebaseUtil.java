@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class FirebaseUtil {
                                 .set(userPointData)
                                 .addOnSuccessListener(aVoid -> {
                                     //Congrats it is now added to both the house and the user. Tell your caller you succeeded
-                                    fui.onPostSuccess();
+                                    fui.onSuccess();
                                 })
                                 .addOnFailureListener(fui::onError);
                     })
@@ -85,6 +86,7 @@ public class FirebaseUtil {
                     Map<String, Object> data = document.getData();
                     pointTypeList.add(new PointType(((Long) data.get("Value")).intValue(), (String) data.get("Description"), (boolean) data.get("ResidentsCanSubmit"), Integer.parseInt(document.getId())));
                 }
+                pointTypeList.sort(Comparator.comparing(PointType::getPointID));
                 fui.onPointTypeComplete(pointTypeList);
             } else {
                 fui.onError(task.getException());

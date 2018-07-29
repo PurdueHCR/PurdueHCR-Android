@@ -8,6 +8,12 @@ import Models.PointType;
 public class Singleton {
     private static Singleton instance = null;
     private FirebaseUtil fbutil = new FirebaseUtil();
+    private List<PointType> pointTypeList = null;
+    private String floorName = null;
+    private String houseName = null;
+    private String userName = null;
+    private int permissionLevel = 0;
+    private int totalPoints = 0;
 
     private Singleton() {
         // Exists only to defeat instantiation. Get rekt, instantiation
@@ -20,7 +26,6 @@ public class Singleton {
         return instance;
     }
 
-    private List<PointType> pointTypeList = null;
 
     public void getPointTypes(final SingletonInterface si) {
         fbutil.getPointTypes(new FirebaseUtilInterface() {
@@ -33,7 +38,7 @@ public class Singleton {
                 }
                 else
                 {
-                    si.onError(new IllegalStateException(""));
+                    si.onError(new IllegalStateException("Point Type list is empty"));
                 }
             }
             @Override
@@ -46,5 +51,17 @@ public class Singleton {
 
     public List<PointType> getPointTypeList() {
         return pointTypeList;
+    }
+
+    public void setUserData(String floor, String house, String name, int permission, int points){
+        floorName = floor;
+        houseName = house;
+        userName = name;
+        permissionLevel = permission;
+        totalPoints = points;
+    }
+
+    public void getUserData(SingletonInterface si){
+
     }
 }
