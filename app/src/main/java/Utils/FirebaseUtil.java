@@ -115,6 +115,8 @@ public class FirebaseUtil {
         data.put("PointTypeID", log.getType().getPointID());
         data.put("ApprovedBy", user);
         data.put("ApprovedOn", Timestamp.now());
+        data.put("Description", "DENIED: "+log.getPointDescription());
+
 
         //update the point log
         housePointRef.update(data)
