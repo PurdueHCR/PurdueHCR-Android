@@ -1,9 +1,13 @@
 package Utils;
 
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -27,7 +31,7 @@ public class FirebaseUtil {
      * @param preapproved boolean:    true if it does not require RHP approval, false otherwise
      * @param fui         FirebaseUtilInterface: Implement the CompleteWithErrors(Exception e)
      */
-    public void submitPointLog(PointLog log, String documentID, Boolean preapproved, FirebaseUtilInterface fui) {
+    public void submitPointLog(PointLog log, String documentID, Boolean preapproved, final FirebaseUtilInterface fui) {
         String house = "HOUSE"; //TODO set House
         DocumentReference userRef; //TODO set userref
         int multiplier = (preapproved) ? 1 : -1;
@@ -92,5 +96,25 @@ public class FirebaseUtil {
                 fui.onError(task.getException());
             }
         });
+    }
+
+    public void getUserData(String id, final FirebaseUtilInterface fui) {
+        db.collection("Users").document(id)
+                .get()
+                .addOnCompleteListener(task -> {
+                            if(task.isSuccessful())
+                            {
+                                Map<String, Object> data = task.getResult().getData();
+                                if(data != null)
+                                    fui.onUserGetSuccess((String)data.get("Name"), (String)data.get("FloorID"), (String)data.get("House"), ((Long)data.get("Permission Level")).intValue(), ((Long)data.get("TotalPoints")).intValue());
+                                else
+                                    fui.onError(new IllegalStateException("Data is null"));
+                            }
+                            else
+                            {
+                                fui.onError(task.getException());
+                            }
+                        }
+                );
     }
 }

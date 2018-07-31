@@ -9,6 +9,7 @@ public class Singleton {
     private static Singleton instance = null;
     private FirebaseUtil fbutil = new FirebaseUtil();
     private List<PointType> pointTypeList = null;
+    private String userID = null;
     private String floorName = null;
     private String houseName = null;
     private String userName = null;
@@ -44,7 +45,7 @@ public class Singleton {
             @Override
             public void onError(Exception e)
             {
-
+                si.onError(e);
             }
         });
     }
@@ -53,15 +54,34 @@ public class Singleton {
         return pointTypeList;
     }
 
-    public void setUserData(String floor, String house, String name, int permission, int points){
+    public void setUserData(String floor, String house, String name, int permission, int points, String id){
         floorName = floor;
         houseName = house;
         userName = name;
         permissionLevel = permission;
         totalPoints = points;
+        userID = id;
     }
 
-    public void getUserData(SingletonInterface si){
+    public void getUserData(String id, SingletonInterface si){
+        if(houseName == null)
+            fbutil.getUserData(id, new FirebaseUtilInterface() {
+                @Override
+                public void onUserGetSuccess(String floor, String house, String name, int permission, int points) {
+                    setUserData(floor, house, name, permission, points, id);
+                    si.onSuccess();
+                }
 
+                @Override
+                public void onError(Exception e) {
+                    si.onError(e);
+                }
+            });
+        else
+            si.onSuccess();
+    }
+
+    public String getHouse(){
+        return houseName;
     }
 }

@@ -2,7 +2,6 @@ package com.hcrpurdue.jason.hcrhousepoints;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -20,6 +19,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import Utils.Singleton;
 import Utils.SingletonInterface;
@@ -41,9 +41,18 @@ public class Authentication extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly. Authentication should be cached automatically
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
-            singleton.getUserData(new SingletonInterface() {
+            findViewById(R.id.authenticationProgressBar).setVisibility(View.VISIBLE);
+            singleton.getUserData(currentUser.getUid(), new SingletonInterface() {
+                @Override
+                public void onSuccess() {
+                    launchNextActivity();
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                }
             });
-            launchNextActivity();
         } else {
             getFloorCodes();
         }
@@ -58,10 +67,21 @@ public class Authentication extends AppCompatActivity {
         if (signInInvalid(email, password))
             return;
 
+        findViewById(R.id.authenticationProgressBar).setVisibility(View.VISIBLE);
         auth.signInWithEmailAndPassword(emailText, passwordText)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        launchNextActivity();
+                        singleton.getUserData(Objects.requireNonNull(auth.getCurrentUser()).getUid(), new SingletonInterface() {
+                            @Override
+                            public void onSuccess() {
+                                launchNextActivity();
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        });
                     } else {
                         Toast.makeText(getApplicationContext(), "Authentication failed.",
                                 Toast.LENGTH_SHORT).show();
@@ -84,6 +104,7 @@ public class Authentication extends AppCompatActivity {
         if (signInInvalid(email, password) || signUpInvalid(password, passwordConfirm, name, floorCode))
             return;
 
+        findViewById(R.id.authenticationProgressBar).setVisibility(View.VISIBLE);
         auth.createUserWithEmailAndPassword(emailText, passwordText)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
@@ -98,14 +119,15 @@ public class Authentication extends AppCompatActivity {
                         userData.put("House", house);
                         userData.put("Permission Level", 0);
                         userData.put("TotalPoints", 0);
-                        if (user != null)
-                            db.collection("Users").document(user.getUid()).set(userData)
+                        if (user != null) {
+                            String id = user.getUid();
+                            db.collection("Users").document(id).set(userData)
                                     .addOnSuccessListener(aVoid -> {
-                                        singleton.setUserData(nameText, floor, house, 0, 0);
+                                        singleton.setUserData(nameText, floor, house, 0, 0, id);
                                         launchNextActivity();
                                     })
                                     .addOnFailureListener(e -> Toast.makeText(getApplicationContext(), "User DB binds failed, please tell your RHP to tell Jason", Toast.LENGTH_LONG).show());
-                        else
+                        } else
                             Toast.makeText(getApplicationContext(), "User was created but not loaded, please tell your RHP to tell Jason", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getApplicationContext(), "Authentication failed, try again later before contacting your RHP",
@@ -189,6 +211,7 @@ public class Authentication extends AppCompatActivity {
     }
 
     private void launchNextActivity() {
+        findViewById(R.id.authenticationProgressBar).setVisibility(View.GONE);
         Intent intent = new Intent(this, SubmitPoints.class);
         startActivity(intent);
         finish();

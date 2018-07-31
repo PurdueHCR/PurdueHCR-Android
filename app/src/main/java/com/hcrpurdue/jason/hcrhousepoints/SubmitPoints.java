@@ -1,7 +1,9 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
+import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -24,6 +26,12 @@ public class SubmitPoints extends AppCompatActivity {
         setContentView(R.layout.activity_submit_points);
         singleton = Singleton.getInstance();
         getPointTypes();
+        try {
+            ((ImageView)findViewById(R.id.houseLogoImageView)).setImageResource(Drawable.class.getDeclaredField(singleton.getHouse().toLowerCase()).getInt(Drawable.class.getDeclaredField(singleton.getHouse().toLowerCase())));
+        }
+        catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "Failed to load house image, please have your RHP tell Jason", Toast.LENGTH_LONG).show();
+        }
     }
 
 
@@ -32,7 +40,6 @@ public class SubmitPoints extends AppCompatActivity {
             @Override
             public void onPointTypeComplete(List<PointType> data) {
                 List<Map<String, String>> formattedPointTypes = new ArrayList<>();
-                Spinner spinner = findViewById(R.id.pointTypeSpinner);
                 for(PointType type : data)
                 {
                     Map<String, String> map = new HashMap<>();
@@ -42,7 +49,7 @@ public class SubmitPoints extends AppCompatActivity {
                 }
                 SimpleAdapter adapter = new SimpleAdapter(SubmitPoints.this, formattedPointTypes, android.R.layout.simple_list_item_2, new String[] {"text", "subText"}, new int[] {android.R.id.text1, android.R.id.text2});
                 adapter.setDropDownViewResource(android.R.layout.simple_list_item_2);
-                spinner.setAdapter(adapter);
+                ((Spinner)findViewById(R.id.pointTypeSpinner)).setAdapter(adapter);
             }
 
             @Override
