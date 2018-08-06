@@ -41,7 +41,6 @@ public class SubmitPoints extends AppCompatActivity {
 
     private void getPointTypes() {
         singleton.getPointTypes(new SingletonInterface() {
-            @Override
             public void onPointTypeComplete(List<PointType> data) {
                 List<Map<String, String>> formattedPointTypes = new ArrayList<>();
                 for (PointType type : data) {
@@ -66,5 +65,7 @@ public class SubmitPoints extends AppCompatActivity {
                         Toast.makeText(SubmitPoints.this,"Point successfully added", Toast.LENGTH_SHORT).show();
                     }
                 });
+
     }
+
 }
