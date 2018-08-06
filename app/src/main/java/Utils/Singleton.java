@@ -1,7 +1,12 @@
 package Utils;
 
+import android.content.Context;
+
+import com.google.firebase.firestore.DocumentReference;
+
 import java.util.List;
 
+import Models.PointLog;
 import Models.PointType;
 
 // Because non-global variables are for people who care about technical debt
@@ -12,12 +17,16 @@ public class Singleton {
     private String userID = null;
     private String floorName = null;
     private String houseName = null;
-    private String userName = null;
+    private String name = null;
     private int permissionLevel = 0;
     private int totalPoints = 0;
 
     private Singleton() {
         // Exists only to defeat instantiation. Get rekt, instantiation
+    }
+
+    public void setApplicationContext(Context c){
+        fbutil.setApplicationContext(c);
     }
 
     public static Singleton getInstance() {
@@ -28,7 +37,7 @@ public class Singleton {
     }
 
 
-    public void getPointTypes(final SingletonInterface si) {
+    public void getPointTypes(final SingletonInterface si, Context context) {
         fbutil.getPointTypes(new FirebaseUtilInterface() {
             @Override
             public void onPointTypeComplete(List<PointType> data) {
@@ -39,13 +48,8 @@ public class Singleton {
                 }
                 else
                 {
-                    si.onError(new IllegalStateException("Point Type list is empty"));
+                    si.onError(new IllegalStateException("Point Type list is empty"), context);
                 }
-            }
-            @Override
-            public void onError(Exception e)
-            {
-                si.onError(e);
             }
         });
     }
@@ -54,10 +58,10 @@ public class Singleton {
         return pointTypeList;
     }
 
-    public void setUserData(String floor, String house, String name, int permission, int points, String id){
+    public void setUserData(String floor, String house, String n, int permission, int points, String id){
         floorName = floor;
         houseName = house;
-        userName = name;
+        name = n;
         permissionLevel = permission;
         totalPoints = points;
         userID = id;
@@ -71,11 +75,6 @@ public class Singleton {
                     setUserData(floor, house, name, permission, points, id);
                     si.onSuccess();
                 }
-
-                @Override
-                public void onError(Exception e) {
-                    si.onError(e);
-                }
             });
         else
             si.onSuccess();
@@ -83,5 +82,16 @@ public class Singleton {
 
     public String getHouse(){
         return houseName;
+    }
+
+    public void submitPoints(String description, PointType type, SingletonInterface si){
+        PointLog log = new PointLog(description, name, type, floorName);
+        boolean preApproved = permissionLevel > 0;
+        fbutil.submitPointLog(log, null, houseName, userID, preApproved, new FirebaseUtilInterface() {
+            @Override
+            public void onSuccess() {
+                si.onSuccess();
+            }
+        });
     }
 }

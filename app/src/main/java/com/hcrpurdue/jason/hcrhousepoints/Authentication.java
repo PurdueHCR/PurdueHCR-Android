@@ -37,6 +37,7 @@ public class Authentication extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         singleton = Singleton.getInstance();
+        singleton.setApplicationContext(getApplicationContext());
 
         // Check if user is signed in (non-null) and update UI accordingly. Authentication should be cached automatically
         FirebaseUser currentUser = auth.getCurrentUser();
@@ -46,11 +47,6 @@ public class Authentication extends AppCompatActivity {
                 @Override
                 public void onSuccess() {
                     launchNextActivity();
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -75,11 +71,6 @@ public class Authentication extends AppCompatActivity {
                             @Override
                             public void onSuccess() {
                                 launchNextActivity();
-                            }
-
-                            @Override
-                            public void onError(Exception e) {
-                                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                             }
                         });
                     } else {
@@ -199,11 +190,11 @@ public class Authentication extends AppCompatActivity {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     Map<String, Object> data = document.getData();
-                    data.entrySet().parallelStream().forEach((entry) -> {
+                    for(Map.Entry<String, Object> entry : data.entrySet()){
                         if (entry.getKey().contains("Code") && entry.getValue().getClass() == String.class) {
                             floorCodes.put((String) entry.getValue(), new Pair<>(entry.getKey().replace("Code", ""), document.getId()));
                         }
-                    });
+                    }
                 }
             } else
                 Toast.makeText(getApplicationContext(), "Error retrieving floor codes from database, please try again later before contacting your RHP", Toast.LENGTH_LONG).show();

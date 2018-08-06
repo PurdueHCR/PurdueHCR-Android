@@ -3,23 +3,19 @@ package Models;
 import com.google.firebase.firestore.DocumentReference;
 
 public class PointLog {
-    String pointDescription;
-    PointType type;
-    String resident;
-    DocumentReference residentRef;
-    String floorID;
-    String logID;
+    private String pointDescription;
+    private PointType type;
+    private String resident;
+    private DocumentReference residentRef;
+    private String floorID;
+    private String logID;
 
-    public PointLog(String pointDescription, String resident, PointType type, String floorID, DocumentReference residentRef){
+    public PointLog(String pointDescription, String resident, PointType type, String floorID){
         this.pointDescription = pointDescription;
         this.type = type;
         this.resident = resident;
         this.floorID = floorID;
-        this.residentRef = residentRef;
-    }
-
-    public void setLogID(String logID){
-        this.logID = logID;
+        this.residentRef = null;
     }
 
     public String getPointDescription() {
@@ -32,6 +28,10 @@ public class PointLog {
 
     public String getResident() {
         return resident;
+    }
+
+    public void setResidentRef(DocumentReference ref){
+        residentRef = ref;
     }
 
     public DocumentReference getResidentRef() {

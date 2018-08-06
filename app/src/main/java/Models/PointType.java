@@ -1,6 +1,8 @@
 package Models;
 
-public class PointType {
+import android.support.annotation.NonNull;
+
+public class PointType implements Comparable<PointType> {
 
     private int pointValue;
     private String pointDescription;
@@ -28,5 +30,10 @@ public class PointType {
 
     public int getPointID() {
         return pointID;
+    }
+
+    @Override
+    public int compareTo(@NonNull PointType other) {
+        return pointID - other.pointID;
     }
 }
