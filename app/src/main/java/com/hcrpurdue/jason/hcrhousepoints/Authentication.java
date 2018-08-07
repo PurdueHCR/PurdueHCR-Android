@@ -203,7 +203,7 @@ public class Authentication extends AppCompatActivity {
 
     private void launchNextActivity() {
         findViewById(R.id.authenticationProgressBar).setVisibility(View.GONE);
-        Intent intent = new Intent(this, SubmitPoints.class);
+        Intent intent = new Intent(this, NavigationDrawer.class);
         startActivity(intent);
         finish();
     }

@@ -6,10 +6,10 @@ public class PointType implements Comparable<PointType> {
 
     private int pointValue;
     private String pointDescription;
-    private Boolean residentsCanSubmit;
+    private boolean residentsCanSubmit;
     private int pointID;
 
-    public PointType(int pointValue, String pointDescription, Boolean residentsCanSubmit, int pointID) {
+    public PointType(int pointValue, String pointDescription, boolean residentsCanSubmit, int pointID) {
         this.pointValue = pointValue;
         this.pointDescription = pointDescription;
         this.residentsCanSubmit = residentsCanSubmit;
@@ -34,6 +34,8 @@ public class PointType implements Comparable<PointType> {
 
     @Override
     public int compareTo(@NonNull PointType other) {
-        return pointID - other.pointID;
+        if(residentsCanSubmit == other.residentsCanSubmit)
+            return pointID - other.pointID;
+        return Boolean.compare(other.residentsCanSubmit, residentsCanSubmit);
     }
 }
