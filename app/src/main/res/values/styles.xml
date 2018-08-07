@@ -1,11 +1,40 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="copper" parent="AppTheme">
+        <item name="colorPrimary">#F8971C</item>
+        <item name="colorPrimaryDark">#F8971C</item>
+        <item name="android:navigationBarColor">#F8971C</item>
+    </style>
+
+    <style name="palladium" parent="AppTheme">
+        <item name="colorPrimary">#A7AAAB</item>
+        <item name="colorPrimaryDark">#A7AAAB</item>
+        <item name="android:navigationBarColor">#A7AAAB</item>
+    </style>
+
+    <style name="platinum" parent="AppTheme">
+        <item name="colorPrimary">#5AC0C7</item>
+        <item name="colorPrimaryDark">#5AC0C7</item>
+        <item name="android:navigationBarColor">#5AC0C7</item>
+    </style>
+
+    <style name="silver" parent="AppTheme">
+        <item name="colorPrimary">#84B940</item>
+        <item name="colorPrimaryDark">#84B940</item>
+        <item name="android:navigationBarColor">#84B940</item>
+    </style>
+
+    <style name="titanium" parent="AppTheme">
+        <item name="colorPrimary">#A380BA</item>
+        <item name="colorPrimaryDark">#A380BA</item>
+        <item name="android:navigationBarColor">#A380BA</item>
+    </style>
 </resources>

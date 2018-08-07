@@ -1,5 +1,6 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -12,11 +13,24 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+
+import Utils.Singleton;
+
 public class NavigationDrawer extends AppCompatActivity {
     private DrawerLayout drawerLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        try {
+            String houseName = getIntent().getStringExtra("HouseName");
+            int themeID = getResources().getIdentifier(houseName.toLowerCase(), "style", this.getPackageName());
+            setTheme(themeID);
+        } catch (Exception e) {
+            Toast.makeText(this, "Error loading house color, please screenshot the Logs page and send it to your RHP", Toast.LENGTH_LONG).show();
+            Log.e("NavigationDrawer", "Failed to load house color", e);
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.drawer_layout);
 
@@ -35,16 +49,18 @@ public class NavigationDrawer extends AppCompatActivity {
                     // close drawer when item is tapped
                     drawerLayout.closeDrawers();
 
-                    // Add code here to update the UI based on the item selected
-                    // For example, swap UI fragments here
+                    switch(menuItem.getItemId()){
+                        case R.id.nav_signout:
+                            signOut();
+                            break;
+                    }
 
                     return true;
                 });
         Fragment fragment = null;
         try {
             fragment = SubmitPoints.class.newInstance();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Toast.makeText(this, "An error occured, please screenshot the Logs screen and send it to your RHP", Toast.LENGTH_LONG).show();
             Log.e("NavigationDrawer", "Failed to load initial fragment", e);
         }
@@ -60,5 +76,14 @@ public class NavigationDrawer extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void signOut(){
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        auth.signOut();
+        Singleton.getInstance().clearUserData();
+        Intent intent = new Intent(this, Authentication.class);
+        startActivity(intent);
+        finish();
     }
 }

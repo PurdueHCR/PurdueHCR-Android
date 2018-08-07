@@ -103,4 +103,13 @@ public class Singleton {
             }
         });
     }
+
+    public void clearUserData(){
+        floorName = null;
+        houseName = null;
+        name = null;
+        permissionLevel = 0;
+        totalPoints = 0;
+        userID = null;
+    }
 }

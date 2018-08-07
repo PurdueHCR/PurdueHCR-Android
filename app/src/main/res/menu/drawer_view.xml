@@ -11,8 +11,8 @@
             android:icon="@drawable/ic_person"
             android:title="Profile" />
         <item
-            android:id="@+id/nav_logout"
+            android:id="@+id/nav_signout"
             android:icon="@android:drawable/ic_lock_power_off"
-            android:title="Log Out" />
+            android:title="Sign Out" />
     </group>
 </menu>

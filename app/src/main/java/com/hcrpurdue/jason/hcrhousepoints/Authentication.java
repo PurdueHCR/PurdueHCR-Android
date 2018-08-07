@@ -206,6 +206,7 @@ public class Authentication extends AppCompatActivity {
     private void launchNextActivity() {
         findViewById(R.id.authenticationProgressBar).setVisibility(View.GONE);
         Intent intent = new Intent(this, NavigationDrawer.class);
+        intent.putExtra("HouseName", singleton.getHouse());
         startActivity(intent);
         finish();
     }
