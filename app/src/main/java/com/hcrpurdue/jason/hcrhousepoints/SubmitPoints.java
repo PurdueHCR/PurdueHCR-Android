@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
@@ -45,7 +46,7 @@ public class SubmitPoints extends Fragment {
             Toast.makeText(getContext(), "Failed to load house image, please screenshot the Logs page and send it to your RHP", Toast.LENGTH_LONG).show();
             Log.e("SubmitPoints", "Error loading house image", e);
         }
-        // Inflate the layout for this fragment
+        view.findViewById(R.id.submitPointButton).setOnClickListener(this::submitPoint);
         return view;
     }
 
