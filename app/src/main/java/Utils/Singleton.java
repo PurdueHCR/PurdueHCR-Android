@@ -54,6 +54,15 @@ public class Singleton {
         });
     }
 
+    public PointType getTypeWithPointId(int pointId){
+        for (PointType p: this.pointTypeList) {
+            if(p.getPointValue() == pointId){
+                return p;
+            }
+        }
+        return null;
+    }
+
     public List<PointType> getPointTypeList() {
         return pointTypeList;
     }

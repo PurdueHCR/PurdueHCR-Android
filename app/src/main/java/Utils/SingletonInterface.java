@@ -15,4 +15,5 @@ public interface SingletonInterface {
         Toast.makeText(context, "An error occured. Please screenshot the log page and send it to your RHP", Toast.LENGTH_LONG).show();
         Log.e("Singleton", e.getMessage(), e);
     }
+
 }

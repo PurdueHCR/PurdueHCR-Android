@@ -30,7 +30,7 @@ public class Authentication extends AppCompatActivity {
     private FirebaseFirestore db;
     private Singleton singleton;
 
-    @Override
+    
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_authentication);
@@ -44,10 +44,11 @@ public class Authentication extends AppCompatActivity {
         if (currentUser != null) {
             findViewById(R.id.authenticationProgressBar).setVisibility(View.VISIBLE);
             singleton.getUserData(currentUser.getUid(), new SingletonInterface() {
-                @Override
+                
                 public void onSuccess() {
                     launchNextActivity();
                 }
+
             });
         } else {
             getFloorCodes();
@@ -68,10 +69,11 @@ public class Authentication extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         singleton.getUserData(Objects.requireNonNull(auth.getCurrentUser()).getUid(), new SingletonInterface() {
-                            @Override
+                            
                             public void onSuccess() {
                                 launchNextActivity();
                             }
+
                         });
                     } else {
                         Toast.makeText(getApplicationContext(), "Authentication failed.",

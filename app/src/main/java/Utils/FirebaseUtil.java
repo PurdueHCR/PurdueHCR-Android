@@ -1,13 +1,18 @@
 package Utils;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
@@ -98,23 +103,29 @@ public class FirebaseUtil {
     }
 
     /**
-     * Handles the updating the database for approving points. It will update the point in the house and the TotalPoints for both user and house
+     * Handles the updating the database for approving or denying points. It will update the point in the house and the TotalPoints for both user and house
      *
      * @param log      PointLog:   The PointLog that is to be either approved or denied
      * @param approved boolean:    Was the log approved?
+     * @param approvingOrDenyingUser    String:     Username of the account who is approving or denying point log
      * @param house    String:     The house that the pointlog belongs to
      * @param fui      FirebaseUtilInterface: Implement the OnError and onSuccess methods
      */
-    public void approvePointLog(PointLog log, boolean approved, String house, FirebaseUtilInterface fui) {
-        String user = "This RHP";//TODO set the name of the RHP who is approving
+    public void hanldePointLog(PointLog log, boolean approved, String house, String approvingOrDenyingUser, FirebaseUtilInterface fui) {
         DocumentReference housePointRef = db.collection("House").document(house).collection("Points").document(log.getLogID());
+
+
+        String descript = log.getPointDescription();
+        if(!approved){
+            descript = "DENIED: "+descript;
+        }
 
         //Create the map that will update the point log
         Map<String, Object> data = new HashMap<>();
         data.put("PointTypeID", log.getType().getPointID());
-        data.put("ApprovedBy", user);
+        data.put("ApprovedBy", approvingOrDenyingUser);
         data.put("ApprovedOn", Timestamp.now());
-        data.put("Description", "DENIED: " + log.getPointDescription());
+        data.put("Description", descript);
 
 
         //update the point log
@@ -239,5 +250,40 @@ public class FirebaseUtil {
                             }
                         }
                 );
+    }
+
+    public void getUnconfirmedPoints(String house, String floorId, final FirebaseUtilInterface fui){
+        CollectionReference housePointRef = db.collection("House").document(house).collection("Points");
+        housePointRef.whereLessThan("PointTypeID",0).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            ArrayList<PointLog> logs = new ArrayList<>();
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                String logFloorId = (String) document.get("FloorID");
+                                if(floorId.equals(logFloorId)){
+                                    String logId = document.getId();
+                                    String description = (String) document.get("Description");
+                                    int pointTypeId = document.getLong("PointTypeID").intValue();
+                                    String resident = (String) document.get("Resident");
+                                    Object ref = document.get("ResidentRef");
+                                    DocumentReference residentRef;
+                                    if(ref == null){
+                                        residentRef = (DocumentReference) ref;
+                                    }
+                                    PointType pointType = Singleton.getInstance().getTypeWithPointId(pointTypeId);
+                                    PointLog log = new PointLog(description, resident, pointType, floorId);
+                                    log.setLogID(logId);
+                                    logs.add(log);
+                                }
+                                fui.onGetUnconfirmedPointsSuccess(logs);
+                            }
+                        } else {
+                            System.out.println("Error getting documents: "+ task.getException());
+                            fui.onError(task.getException(),context);
+                        }
+                    }
+                });
     }
 }

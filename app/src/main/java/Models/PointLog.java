@@ -18,6 +18,10 @@ public class PointLog {
         this.residentRef = null;
     }
 
+    public void setLogID(String id){
+        this.logID = id;
+    }
+
     public String getPointDescription() {
         return pointDescription;
     }
