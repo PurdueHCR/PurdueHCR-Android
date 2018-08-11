@@ -10,6 +10,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -22,8 +23,9 @@ public class NavigationDrawer extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Intent intent = getIntent();
         try {
-            String houseName = getIntent().getStringExtra("HouseName");
+            String houseName = intent.getStringExtra("HouseName");
             int themeID = getResources().getIdentifier(houseName.toLowerCase(), "style", this.getPackageName());
             setTheme(themeID);
         } catch (Exception e) {
@@ -34,6 +36,14 @@ public class NavigationDrawer extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.drawer_layout);
 
+        try {
+            getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, SubmitPoints.class.newInstance()).commit();
+        } catch (Exception e) {
+            Toast.makeText(this, "An error occurred, please screenshot the Logs screen and send it to your RHP", Toast.LENGTH_LONG).show();
+            Log.e("NavigationDrawer", "Failed to load initial fragment", e);
+        }
+
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -42,6 +52,18 @@ public class NavigationDrawer extends AppCompatActivity {
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        Menu menu = navigationView.getMenu();
+
+        try {
+            int permissionLevel = intent.getIntExtra("PermissionLevel", 0);
+            if (permissionLevel > 0) {
+                menu.findItem(R.id.nav_approve).setVisible(true);
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Error loading permission level, please screenshot the Logs page and send it to your RHP", Toast.LENGTH_LONG).show();
+            Log.e("NavigationDrawer", "Failed to load Permission Level", e);
+        }
+
         navigationView.setNavigationItemSelectedListener(
                 menuItem -> {
                     // set item as selected to persist highlight
@@ -49,23 +71,36 @@ public class NavigationDrawer extends AppCompatActivity {
                     // close drawer when item is tapped
                     drawerLayout.closeDrawers();
 
-                    switch(menuItem.getItemId()){
+                    int currentItem = 0;
+                    int selectedItem = menuItem.getItemId();
+                    for (int i = 0; i < menu.size(); i++) {
+                        if (menu.getItem(i).isChecked()) {
+                            currentItem = menu.getItem(i).getItemId();
+                            break;
+                        }
+                    }
+                    Class fragmentClass = null;
+                    switch (selectedItem) {
                         case R.id.nav_signout:
                             signOut();
                             break;
+                        case R.id.nav_submit:
+                            fragmentClass = SubmitPoints.class;
                     }
 
+                    if(fragmentClass != null && currentItem != selectedItem) {
+                        Fragment fragment = null;
+                        try {
+                            fragment = (Fragment) fragmentClass.newInstance();
+                        } catch (Exception e) {
+                            Toast.makeText(this, "An error occured, please screenshot the Logs screen and send it to your RHP", Toast.LENGTH_LONG).show();
+                            Log.e("NavigationDrawer", "Failed to load initial fragment", e);
+                        }
+                        assert fragment != null;
+                        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                    }
                     return true;
                 });
-        Fragment fragment = null;
-        try {
-            fragment = SubmitPoints.class.newInstance();
-        } catch (Exception e) {
-            Toast.makeText(this, "An error occured, please screenshot the Logs screen and send it to your RHP", Toast.LENGTH_LONG).show();
-            Log.e("NavigationDrawer", "Failed to load initial fragment", e);
-        }
-        assert fragment != null;
-        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
     }
 
     @Override
@@ -78,7 +113,7 @@ public class NavigationDrawer extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void signOut(){
+    private void signOut() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         auth.signOut();
         Singleton.getInstance().clearUserData();

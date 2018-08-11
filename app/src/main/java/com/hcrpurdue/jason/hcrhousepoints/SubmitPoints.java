@@ -3,15 +3,16 @@ package com.hcrpurdue.jason.hcrhousepoints;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -56,13 +57,12 @@ public class SubmitPoints extends Fragment {
             public void onPointTypeComplete(List<PointType> data) {
                 List<Map<String, String>> formattedPointTypes = new ArrayList<>();
                 for (PointType type : data) {
-                    if(type.getResidentsCanSubmit()){
+                    if (type.getResidentsCanSubmit()) {
                         Map<String, String> map = new HashMap<>();
                         map.put("text", type.getPointDescription());
                         map.put("subText", String.valueOf(type.getPointValue()) + " points");
                         formattedPointTypes.add(map);
-                    }
-                    else
+                    } else
                         break;
                 }
                 SimpleAdapter adapter = new SimpleAdapter(getContext(), formattedPointTypes, android.R.layout.simple_list_item_2, new String[]{"text", "subText"}, new int[]{android.R.id.text1, android.R.id.text2});
@@ -73,14 +73,22 @@ public class SubmitPoints extends Fragment {
     }
 
     public void submitPoint(View view) {
-        singleton.submitPoints(((EditText) Objects.requireNonNull(getView()).findViewById(R.id.descriptionInput)).getText().toString(),
-                singleton.getPointTypeList().get(((Spinner) Objects.requireNonNull(getView()).findViewById(R.id.pointTypeSpinner)).getSelectedItemPosition()),
-                new SingletonInterface() {
-                    @Override
-                    public void onSuccess() {
-                        Toast.makeText(getContext(), "Point successfully added", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        TextView descriptionInput = Objects.requireNonNull(getActivity()).findViewById(R.id.descriptionInput);
+        if (TextUtils.isEmpty(descriptionInput.getText().toString()))
+            Toast.makeText(getContext(), "Description is Required", Toast.LENGTH_SHORT).show();
+        else {
+            getActivity().findViewById(R.id.navigationProgressBar).setVisibility(View.VISIBLE);
+            singleton.submitPoints(((EditText) Objects.requireNonNull(getView()).findViewById(R.id.descriptionInput)).getText().toString(),
+                    singleton.getPointTypeList().get(((Spinner) Objects.requireNonNull(getView()).findViewById(R.id.pointTypeSpinner)).getSelectedItemPosition()),
+                    new SingletonInterface() {
+                        @Override
+                        public void onSuccess() {
+                            Toast.makeText(getContext(), "Point successfully added", Toast.LENGTH_SHORT).show();
+                            descriptionInput.setText("");
+                            getActivity().findViewById(R.id.navigationProgressBar).setVisibility(View.GONE);
+                        }
+                    });
+        }
 
     }
 

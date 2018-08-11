@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import Models.Link;
 import Models.PointLog;
@@ -133,7 +134,7 @@ public class FirebaseUtil {
      * @param house    String:     The house that the pointlog belongs to
      * @param fui      FirebaseUtilInterface: Implement the OnError and onSuccess methods
      */
-    public void hanldePointLog(PointLog log, boolean approved, String house, String approvingOrDenyingUser, FirebaseUtilInterface fui) {
+    public void handlePointLog(PointLog log, boolean approved, String house, String approvingOrDenyingUser, FirebaseUtilInterface fui) {
         DocumentReference housePointRef = db.collection("House").document(house).collection("Points").document(log.getLogID());
 
 
@@ -153,7 +154,7 @@ public class FirebaseUtil {
         //update the point log
         housePointRef.update(data)
                 .addOnSuccessListener((Void aVoid) -> {
-                    //If the point log was sucessfully updated, update the points in house and user
+                    //If the point log was successfully updated, update the points in house and user
                     if (approved) {
                         updateHouseAndUserPointsWithApprovedLog(log, house, fui);
                     }
@@ -272,54 +273,39 @@ public class FirebaseUtil {
                             }
                         }
                 )
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        fui.onError(e,context);
-                    }
-                }
+                .addOnFailureListener(e -> fui.onError(e,context)
                 );
     }
 
     public void getUnconfirmedPoints(String house, String floorId, final FirebaseUtilInterface fui){
         CollectionReference housePointRef = db.collection("House").document(house).collection("Points");
         housePointRef.whereLessThan("PointTypeID",0).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            ArrayList<PointLog> logs = new ArrayList<>();
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                String logFloorId = (String) document.get("FloorID");
-                                if(floorId.equals(logFloorId)){
-                                    String logId = document.getId();
-                                    String description = (String) document.get("Description");
-                                    int pointTypeId = document.getLong("PointTypeID").intValue();
-                                    String resident = (String) document.get("Resident");
-                                    Object ref = document.get("ResidentRef");
-                                    DocumentReference residentRef;
-                                    if(ref == null){
-                                        residentRef = (DocumentReference) ref;
-                                    }
-                                    PointType pointType = Singleton.getInstance().getTypeWithPointId(pointTypeId);
-                                    PointLog log = new PointLog(description, resident, pointType, floorId);
-                                    log.setLogID(logId);
-                                    logs.add(log);
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        ArrayList<PointLog> logs = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String logFloorId = (String) document.get("FloorID");
+                            if(floorId.equals(logFloorId)){
+                                String logId = document.getId();
+                                String description = (String) document.get("Description");
+                                int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
+                                String resident = (String) document.get("Resident");
+                                Object ref = document.get("ResidentRef");
+                                PointType pointType = Singleton.getInstance().getTypeWithPointId(pointTypeId);
+                                PointLog log = new PointLog(description, resident, pointType, floorId);
+                                if(ref != null){
+                                    log.setResidentRef((DocumentReference)ref);
                                 }
-                                fui.onGetUnconfirmedPointsSuccess(logs);
+                                log.setLogID(logId);
+                                logs.add(log);
                             }
-                        } else {
-                            System.out.println("Error getting documents: "+ task.getException());
-                            fui.onError(task.getException(),context);
+                            fui.onGetUnconfirmedPointsSuccess(logs);
                         }
+                    } else {
+                        fui.onError(task.getException(), context);
                     }
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        fui.onError(e,context);
-                    }
-                });
+                .addOnFailureListener(e -> fui.onError(e, context));
     }
 
     /**
@@ -336,7 +322,7 @@ public class FirebaseUtil {
                        DocumentSnapshot doc = task.getResult();
                        if(doc.exists()){
                             String descr = doc.getString("Description");
-                            int pointId = doc.getLong("PointID").intValue();
+                            int pointId = Objects.requireNonNull(doc.getLong("PointID")).intValue();
                             boolean single = doc.getBoolean("SingleUse");
                            boolean enabled = doc.getBoolean("Enabled");
                            boolean archived = doc.getBoolean("Archived");

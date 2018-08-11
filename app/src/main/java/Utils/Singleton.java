@@ -56,6 +56,10 @@ public class Singleton {
         });
     }
 
+    public void getUnapprovedPoints(final SingletonInterface si, Context context){
+        fbutil.getUnconfirmedPoints();
+    }
+
     public PointType getTypeWithPointId(int pointId){
         for(int i = 0; i < this.pointTypeList.size(); i++){
             if( this.pointTypeList.get(i).getPointID() == pointId){
@@ -93,6 +97,10 @@ public class Singleton {
 
     public String getHouse(){
         return houseName;
+    }
+
+    public int getPermissionLevel(){
+        return permissionLevel;
     }
 
     public void submitPoints(String description, PointType type, SingletonInterface si){
@@ -147,7 +155,6 @@ public class Singleton {
             }
         });
     }
-
 
     public void clearUserData(){
         floorName = null;

@@ -4,9 +4,11 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Models.Link;
+import Models.PointLog;
 import Models.PointType;
 
 public interface SingletonInterface {
@@ -17,5 +19,5 @@ public interface SingletonInterface {
         Log.e("Singleton", e.getMessage(), e);
     }
     default void onGetLinkWithIdSuccess(Link link){}
-
+    default void onUnconfirmedPointsSuccess(ArrayList<PointLog> logs){}
 }

@@ -81,8 +81,9 @@ public class Authentication extends AppCompatActivity {
 
                         });
                     } else {
-                        Toast.makeText(getApplicationContext(), "Authentication failed.",
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Authentication failed. Please verify your email and password and try again.",
+                                Toast.LENGTH_LONG).show();
+                        findViewById(R.id.authenticationProgressBar).setVisibility(View.GONE);
                     }
                 });
     }
@@ -130,6 +131,7 @@ public class Authentication extends AppCompatActivity {
                     } else {
                         Toast.makeText(getApplicationContext(), "Authentication failed, try again later before contacting your RHP",
                                 Toast.LENGTH_SHORT).show();
+                        findViewById(R.id.authenticationProgressBar).setVisibility(View.GONE);
                     }
                 });
     }
@@ -209,9 +211,9 @@ public class Authentication extends AppCompatActivity {
     }
 
     private void launchNextActivity() {
-        findViewById(R.id.authenticationProgressBar).setVisibility(View.GONE);
         Intent intent = new Intent(this, NavigationDrawer.class);
         intent.putExtra("HouseName", singleton.getHouse());
+        intent.putExtra("PermissionLevel", singleton.getPermissionLevel());
         startActivity(intent);
         finish();
     }

@@ -3,9 +3,14 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_submit"
-            android:icon="@android:drawable/ic_menu_add"
             android:checked="true"
+            android:icon="@drawable/ic_add"
             android:title="Submit Points" />
+        <item
+            android:id="@+id/nav_approve"
+            android:icon="@drawable/ic_check"
+            android:title="Approve Points"
+            android:visible="false" />
         <item
             android:id="@+id/nav_profile"
             android:icon="@drawable/ic_person"

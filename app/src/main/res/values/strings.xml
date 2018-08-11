@@ -2,7 +2,7 @@
     <string name="app_name">HCR House Points</string>
     <string name="passwordInputHint">Password (6 character minimum)</string>
     <string name="signInButton">Sign In</string>
-    <string name="emailInputHint">E-mail</string>
+    <string name="emailInputHint">E-mail (Must be a valid Purdue email)</string>
     <string name="signUpButton">Sign Up</string>
     <string name="confirmPasswordInputHint">Confirm Password</string>
     <string name="nameInputHint">Name (First and Last)</string>

@@ -64,7 +64,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="top"
-            android:hint="Description" />
+            android:hint="Description (Required)"
+            android:inputType="text" />
     </android.support.design.widget.TextInputLayout>
 
     <Button
