@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -66,19 +67,20 @@ public class NavigationDrawer extends AppCompatActivity {
 
         navigationView.setNavigationItemSelectedListener(
                 menuItem -> {
-                    // set item as selected to persist highlight
-                    menuItem.setChecked(true);
-                    // close drawer when item is tapped
-                    drawerLayout.closeDrawers();
-
                     int currentItem = 0;
-                    int selectedItem = menuItem.getItemId();
                     for (int i = 0; i < menu.size(); i++) {
                         if (menu.getItem(i).isChecked()) {
                             currentItem = menu.getItem(i).getItemId();
                             break;
                         }
                     }
+                    // set item as selected to persist highlight
+                    menuItem.setChecked(true);
+                    // close drawer when item is tapped
+                    drawerLayout.closeDrawers();
+
+                    int selectedItem = menuItem.getItemId();
+
                     Class fragmentClass = null;
                     switch (selectedItem) {
                         case R.id.nav_signout:
@@ -86,9 +88,22 @@ public class NavigationDrawer extends AppCompatActivity {
                             break;
                         case R.id.nav_submit:
                             fragmentClass = SubmitPoints.class;
+                            break;
+                        case R.id.nav_approve:
+                            fragmentClass = ApprovePoints.class;
+                            break;
+                        case R.id.nav_profile:
+                            fragmentClass = Construction.class;
+                            break;
+                        case R.id.nav_logs:
+                            fragmentClass = Logs.class;
+                            break;
+                        default:
+                            fragmentClass = SubmitPoints.class;
+                            break;
                     }
 
-                    if(fragmentClass != null && currentItem != selectedItem) {
+                    if (fragmentClass != null && currentItem != selectedItem) {
                         Fragment fragment = null;
                         try {
                             fragment = (Fragment) fragmentClass.newInstance();
@@ -99,6 +114,7 @@ public class NavigationDrawer extends AppCompatActivity {
                         assert fragment != null;
                         getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                     }
+                    findViewById(R.id.navigationProgressBar).setVisibility(View.GONE);
                     return true;
                 });
     }

@@ -5,6 +5,7 @@ import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import Models.Link;
@@ -16,6 +17,7 @@ public class Singleton {
     private static Singleton instance = null;
     private FirebaseUtil fbutil = new FirebaseUtil();
     private List<PointType> pointTypeList = null;
+    private ArrayList<PointLog> unconfirmedPointList = null;
     private String userID = null;
     private String floorName = null;
     private String houseName = null;
@@ -56,8 +58,14 @@ public class Singleton {
         });
     }
 
-    public void getUnapprovedPoints(final SingletonInterface si, Context context){
-        fbutil.getUnconfirmedPoints();
+    public void getUnconfirmedPoints(final SingletonInterface si){
+        fbutil.getUnconfirmedPoints(houseName, floorName, new FirebaseUtilInterface() {
+            @Override
+            public void onGetUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
+                unconfirmedPointList = logs;
+                si.onUnconfirmedPointsSuccess(logs);
+            }
+        });
     }
 
     public PointType getTypeWithPointId(int pointId){
@@ -94,6 +102,8 @@ public class Singleton {
         else
             si.onSuccess();
     }
+
+    public String getName(){return name;}
 
     public String getHouse(){
         return houseName;

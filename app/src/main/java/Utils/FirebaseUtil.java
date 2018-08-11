@@ -3,6 +3,7 @@ package Utils;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -31,7 +32,7 @@ public class FirebaseUtil {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Context context;
 
-    protected void setApplicationContext(Context c){
+    protected void setApplicationContext(Context c) {
         context = c;
     }
 
@@ -85,17 +86,14 @@ public class FirebaseUtil {
                     })
                     .addOnFailureListener(e -> fui.onError(e, context));
         } else {
-            System.out.println("YO: submit point with doc id");
             //Add a value ot the Points collection in the house with the id: documentID
-            DocumentReference ref = db.collection("House").document(house).collection("Points").document(log.getResidentRef().getId()+ documentID);
+            DocumentReference ref = db.collection("House").document(house).collection("Points").document(log.getResidentRef().getId() + documentID);
             ref.get()
-                    .addOnSuccessListener(task->{
-                        if(!task.exists()){
+                    .addOnSuccessListener(task -> {
+                        if (!task.exists()) {
                             ref.set(data)
                                     // add an action listener to handle the event when it goes Async
                                     .addOnSuccessListener(aVoid -> {
-
-                                        System.out.println("YO: firutil submitlog with doc id success");
                                         //Now that it is written to the house, we must write it to the user
                                         Map<String, Object> userPointData = new HashMap<>();
                                         userPointData.put("Point", ref);
@@ -114,33 +112,30 @@ public class FirebaseUtil {
                                                 .addOnFailureListener(e -> fui.onError(e, context));
                                     })
                                     .addOnFailureListener(e -> fui.onError(e, context));
-                        }
-                        else{
-                            fui.onError(new Exception("Code was already submitted"),context);
+                        } else {
+                            fui.onError(new Exception("Code was already submitted"), context);
                         }
                     })
-            .addOnFailureListener(e -> fui.onError(e,context));
-            ;
-
+                    .addOnFailureListener(e -> fui.onError(e, context));
         }
     }
 
     /**
      * Handles the updating the database for approving or denying points. It will update the point in the house and the TotalPoints for both user and house
      *
-     * @param log      PointLog:   The PointLog that is to be either approved or denied
-     * @param approved boolean:    Was the log approved?
-     * @param approvingOrDenyingUser    String:     Username of the account who is approving or denying point log
-     * @param house    String:     The house that the pointlog belongs to
-     * @param fui      FirebaseUtilInterface: Implement the OnError and onSuccess methods
+     * @param log                    PointLog:   The PointLog that is to be either approved or denied
+     * @param approved               boolean:    Was the log approved?
+     * @param approvingOrDenyingUser String:     Username of the account who is approving or denying point log
+     * @param house                  String:     The house that the pointlog belongs to
+     * @param fui                    FirebaseUtilInterface: Implement the OnError and onSuccess methods
      */
     public void handlePointLog(PointLog log, boolean approved, String house, String approvingOrDenyingUser, FirebaseUtilInterface fui) {
         DocumentReference housePointRef = db.collection("House").document(house).collection("Points").document(log.getLogID());
 
 
         String descript = log.getPointDescription();
-        if(!approved){
-            descript = "DENIED: "+descript;
+        if (!approved) {
+            descript = "DENIED: " + descript;
         }
 
         //Create the map that will update the point log
@@ -158,6 +153,8 @@ public class FirebaseUtil {
                     if (approved) {
                         updateHouseAndUserPointsWithApprovedLog(log, house, fui);
                     }
+                    else
+                        fui.onSuccess();
                 })
                 //If failed, call the onError
                 .addOnFailureListener(e -> fui.onError(e, context));
@@ -179,10 +176,14 @@ public class FirebaseUtil {
                 //If house is updated sucessfully, update the user's points.
                 //The reason we update house points first is if one of the writes
                 // fails, we want either no one gets the points, or the house gets the points.
-                updateUserPoints(log, fui);
+                updateUserPoints(log, new FirebaseUtilInterface() {
+                    @Override
+                    public void onSuccess() {
+                        fui.onSuccess();
+                    }
+                });
             }
         });
-
     }
 
     /**
@@ -273,28 +274,33 @@ public class FirebaseUtil {
                             }
                         }
                 )
-                .addOnFailureListener(e -> fui.onError(e,context)
+                .addOnFailureListener(e -> fui.onError(e, context)
                 );
     }
 
-    public void getUnconfirmedPoints(String house, String floorId, final FirebaseUtilInterface fui){
+    public void getUnconfirmedPoints(String house, String floorId, final FirebaseUtilInterface fui) {
         CollectionReference housePointRef = db.collection("House").document(house).collection("Points");
-        housePointRef.whereLessThan("PointTypeID",0).get()
-                .addOnCompleteListener(task -> {
+        housePointRef.whereLessThan("PointTypeID", 0).get()
+                .addOnCompleteListener((Task<QuerySnapshot> task) -> {
                     if (task.isSuccessful()) {
+                        if(task.getResult().size() == 0)
+                        {
+                            Toast.makeText(context, "No unapproved points", Toast.LENGTH_SHORT).show();
+                            fui.onGetUnconfirmedPointsSuccess(new ArrayList<>());
+                        }
                         ArrayList<PointLog> logs = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String logFloorId = (String) document.get("FloorID");
-                            if(floorId.equals(logFloorId)){
+                            if (floorId.equals(logFloorId)) {
                                 String logId = document.getId();
                                 String description = (String) document.get("Description");
                                 int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
                                 String resident = (String) document.get("Resident");
                                 Object ref = document.get("ResidentRef");
-                                PointType pointType = Singleton.getInstance().getTypeWithPointId(pointTypeId);
+                                PointType pointType = Singleton.getInstance().getTypeWithPointId(Math.abs(pointTypeId));
                                 PointLog log = new PointLog(description, resident, pointType, floorId);
-                                if(ref != null){
-                                    log.setResidentRef((DocumentReference)ref);
+                                if (ref != null) {
+                                    log.setResidentRef((DocumentReference) ref);
                                 }
                                 log.setLogID(logId);
                                 logs.add(log);
@@ -310,37 +316,36 @@ public class FirebaseUtil {
 
     /**
      * Get the Link model for an id from firebase
-     * @param id    String id that you want to check the firebase for
-     * @param fui  firebaseutilInterface, implement onError, and onGetLinkWithIdSuccess
+     *
+     * @param id  String id that you want to check the firebase for
+     * @param fui firebaseutilInterface, implement onError, and onGetLinkWithIdSuccess
      */
-    public void getLinkWithId(String id, final FirebaseUtilInterface fui){
+    public void getLinkWithId(String id, final FirebaseUtilInterface fui) {
         System.out.println("YO: Get link id");
         DocumentReference linkRef = this.db.collection("Links").document(id);
         linkRef.get()
                 .addOnCompleteListener(task -> {
-                   if(task.isSuccessful()){
-                       DocumentSnapshot doc = task.getResult();
-                       if(doc.exists()){
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot doc = task.getResult();
+                        if (doc.exists()) {
                             String descr = doc.getString("Description");
                             int pointId = Objects.requireNonNull(doc.getLong("PointID")).intValue();
                             boolean single = doc.getBoolean("SingleUse");
-                           boolean enabled = doc.getBoolean("Enabled");
-                           boolean archived = doc.getBoolean("Archived");
-                            Link link = new Link(id,descr, single, pointId,enabled, archived);
+                            boolean enabled = doc.getBoolean("Enabled");
+                            boolean archived = doc.getBoolean("Archived");
+                            Link link = new Link(id, descr, single, pointId, enabled, archived);
                             fui.onGetLinkWithIdSuccess(link);
-                       }
-                       else{
-                           fui.onError(new Exception("No Link"),context);
-                       }
-                   }
-                   else{
-                       fui.onError(task.getException(), context);
-                   }
+                        } else {
+                            fui.onError(new Exception("No Link"), context);
+                        }
+                    } else {
+                        fui.onError(task.getException(), context);
+                    }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        fui.onError(e,context);
+                        fui.onError(e, context);
                     }
                 });
     }
