@@ -1,11 +1,13 @@
 package Utils;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentReference;
 
 import java.util.List;
 
+import Models.Link;
 import Models.PointLog;
 import Models.PointType;
 
@@ -55,9 +57,9 @@ public class Singleton {
     }
 
     public PointType getTypeWithPointId(int pointId){
-        for (PointType p: this.pointTypeList) {
-            if(p.getPointValue() == pointId){
-                return p;
+        for(int i = 0; i < this.pointTypeList.size(); i++){
+            if( this.pointTypeList.get(i).getPointID() == pointId){
+                return this.pointTypeList.get(i);
             }
         }
         return null;
@@ -103,6 +105,49 @@ public class Singleton {
             }
         });
     }
+
+    public void submitPointWithLink(Link link, SingletonInterface si){
+        if(link.isEnabled()){
+            PointType type = getTypeWithPointId(link.getPointTypeId());
+            PointLog log = new PointLog(link.getDescription(), name, type , floorName);
+            fbutil.submitPointLog(log, (link.isSingleUse())?link.getLinkId():null, houseName, userID, true, new FirebaseUtilInterface() {
+                @Override
+                public void onSuccess() {
+                    si.onSuccess();
+                }
+                @Override
+                public void onError(Exception e, Context c){
+                    if(e.getLocalizedMessage().equals("The operation couldn’t be completed. (Document Exists error 0.)")){
+                        Toast.makeText(c, "You have already submitted this code.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    si.onError(e,c);
+                }
+            });
+        }
+        else{
+            si.onError(new Exception("Link is not enabled."),fbutil.getContext());
+        }
+
+    }
+
+    public void getLinkWithLinkId(String linkId, SingletonInterface si){
+        System.out.println("YO: getlink: "+linkId);
+        fbutil.getLinkWithId(linkId, new FirebaseUtilInterface() {
+            @Override
+            public void onError(Exception e, Context context) {
+                System.out.println("YO: on error singleton");
+                si.onError(e,context);
+            }
+
+            @Override
+            public void onGetLinkWithIdSuccess(Link link) {
+                System.out.println("on get link success");
+                si.onGetLinkWithIdSuccess(link);
+            }
+        });
+    }
+
 
     public void clearUserData(){
         floorName = null;

@@ -6,6 +6,7 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import Models.Link;
 import Models.PointType;
 
 public interface SingletonInterface {
@@ -15,5 +16,6 @@ public interface SingletonInterface {
         Toast.makeText(context, "An error occured. Please screenshot the log page and send it to your RHP", Toast.LENGTH_LONG).show();
         Log.e("Singleton", e.getMessage(), e);
     }
+    default void onGetLinkWithIdSuccess(Link link){}
 
 }

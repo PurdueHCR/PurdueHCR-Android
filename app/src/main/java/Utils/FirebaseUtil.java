@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import Models.Link;
 import Models.PointLog;
 import Models.PointType;
 
@@ -32,6 +34,10 @@ public class FirebaseUtil {
         context = c;
     }
 
+    public Context getContext() {
+        return context;
+    }
+
     /**
      * Submits the log to Firebase. It will save the log in House/'House'/Points/ and then will save a reference to the point in Users/'user'/Points/
      *
@@ -41,6 +47,7 @@ public class FirebaseUtil {
      * @param fui         FirebaseUtilInterface: Implement the CompleteWithErrors(Exception e). Exception will be null if no Exception is recieved
      */
     public void submitPointLog(PointLog log, String documentID, String house, String userID, boolean preapproved, final FirebaseUtilInterface fui) {
+        System.out.println("YO: submit point log");
         log.setResidentRef(db.collection("Users").document(userID));
         int multiplier = (preapproved) ? 1 : -1;
 
@@ -54,6 +61,7 @@ public class FirebaseUtil {
         // If the pointLog does not care about its id, add value to the database with random ID
         if (TextUtils.isEmpty(documentID)) {
             //Add a value to the Points collection in a house
+            System.out.println("YO: Submit point for no doc id");
             db.collection("House").document(house).collection("Points")
                     .add(data)
                     // add an action listener to handle the event when it goes Async
@@ -76,29 +84,43 @@ public class FirebaseUtil {
                     })
                     .addOnFailureListener(e -> fui.onError(e, context));
         } else {
+            System.out.println("YO: submit point with doc id");
             //Add a value ot the Points collection in the house with the id: documentID
-            DocumentReference ref = db.collection("Houses").document(house).collection("Points").document(documentID);
-            ref.set(data)
-                    // add an action listener to handle the event when it goes Async
-                    .addOnSuccessListener(aVoid -> {
-                        //Now that it is written to the house, we must write it to the user
-                        Map<String, Object> userPointData = new HashMap<>();
-                        userPointData.put("Point", ref);
+            DocumentReference ref = db.collection("House").document(house).collection("Points").document(log.getResidentRef().getId()+ documentID);
+            ref.get()
+                    .addOnSuccessListener(task->{
+                        if(!task.exists()){
+                            ref.set(data)
+                                    // add an action listener to handle the event when it goes Async
+                                    .addOnSuccessListener(aVoid -> {
 
-                        // add the value to the Points table in a user
-                        log.getResidentRef().collection("Points").document(documentID)
-                                .set(userPointData)
-                                .addOnSuccessListener(aVoid1 -> {
-                                    //if the point is preapproved, update the house and user points
-                                    if (preapproved) {
-                                        updateHouseAndUserPointsWithApprovedLog(log, house, fui);
-                                    } else {
-                                        fui.onSuccess();
-                                    }
-                                })
-                                .addOnFailureListener(e -> fui.onError(e, context));
+                                        System.out.println("YO: firutil submitlog with doc id success");
+                                        //Now that it is written to the house, we must write it to the user
+                                        Map<String, Object> userPointData = new HashMap<>();
+                                        userPointData.put("Point", ref);
+
+                                        // add the value to the Points table in a user
+                                        log.getResidentRef().collection("Points").document(documentID)
+                                                .set(userPointData)
+                                                .addOnSuccessListener(aVoid1 -> {
+                                                    //if the point is preapproved, update the house and user points
+                                                    if (preapproved) {
+                                                        updateHouseAndUserPointsWithApprovedLog(log, house, fui);
+                                                    } else {
+                                                        fui.onSuccess();
+                                                    }
+                                                })
+                                                .addOnFailureListener(e -> fui.onError(e, context));
+                                    })
+                                    .addOnFailureListener(e -> fui.onError(e, context));
+                        }
+                        else{
+                            fui.onError(new Exception("Code was already submitted"),context);
+                        }
                     })
-                    .addOnFailureListener(e -> fui.onError(e, context));
+            .addOnFailureListener(e -> fui.onError(e,context));
+            ;
+
         }
     }
 
@@ -249,6 +271,13 @@ public class FirebaseUtil {
                                 fui.onError(task.getException(), context);
                             }
                         }
+                )
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        fui.onError(e,context);
+                    }
+                }
                 );
     }
 
@@ -284,6 +313,51 @@ public class FirebaseUtil {
                             fui.onError(task.getException(),context);
                         }
                     }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        fui.onError(e,context);
+                    }
                 });
     }
+
+    /**
+     * Get the Link model for an id from firebase
+     * @param id    String id that you want to check the firebase for
+     * @param fui  firebaseutilInterface, implement onError, and onGetLinkWithIdSuccess
+     */
+    public void getLinkWithId(String id, final FirebaseUtilInterface fui){
+        System.out.println("YO: Get link id");
+        DocumentReference linkRef = this.db.collection("Links").document(id);
+        linkRef.get()
+                .addOnCompleteListener(task -> {
+                   if(task.isSuccessful()){
+                       DocumentSnapshot doc = task.getResult();
+                       if(doc.exists()){
+                            String descr = doc.getString("Description");
+                            int pointId = doc.getLong("PointID").intValue();
+                            boolean single = doc.getBoolean("SingleUse");
+                           boolean enabled = doc.getBoolean("Enabled");
+                           boolean archived = doc.getBoolean("Archived");
+                            Link link = new Link(id,descr, single, pointId,enabled, archived);
+                            fui.onGetLinkWithIdSuccess(link);
+                       }
+                       else{
+                           fui.onError(new Exception("No Link"),context);
+                       }
+                   }
+                   else{
+                       fui.onError(task.getException(), context);
+                   }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        fui.onError(e,context);
+                    }
+                });
+    }
+
+
 }

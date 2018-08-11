@@ -7,6 +7,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import Models.Link;
 import Models.PointLog;
 import Models.PointType;
 
@@ -19,5 +20,5 @@ public interface FirebaseUtilInterface {
         Log.e("FirebaseUtil", e.getMessage(), e);
     }
     default void onGetUnconfirmedPointsSuccess(ArrayList<PointLog> logs){}
-
+    default void onGetLinkWithIdSuccess(Link link){};
 }
