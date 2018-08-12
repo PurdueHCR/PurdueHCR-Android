@@ -59,6 +59,8 @@ public class FirebaseUtil {
         data.put("PointTypeID", (log.getType().getPointID() * multiplier));
         data.put("Resident", log.getResident());
         data.put("ResidentRef", log.getResidentRef());
+        data.put("FloorID", log.getFloorID());
+        data.put("ResidentReportTime", Timestamp.now());
 
         // If the pointLog does not care about its id, add value to the database with random ID
         if (TextUtils.isEmpty(documentID)) {
