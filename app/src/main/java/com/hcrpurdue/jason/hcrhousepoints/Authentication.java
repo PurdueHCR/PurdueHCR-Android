@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
 import android.view.View;
@@ -32,7 +33,7 @@ public class Authentication extends AppCompatActivity {
     private FirebaseFirestore db;
     private Singleton singleton;
 
-    
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -49,7 +50,7 @@ public class Authentication extends AppCompatActivity {
         if (currentUser != null) {
             findViewById(R.id.authenticationProgressBar).setVisibility(View.VISIBLE);
             singleton.getUserData(currentUser.getUid(), new SingletonInterface() {
-                
+
                 public void onSuccess() {
                     launchNextActivity();
                 }
@@ -74,7 +75,7 @@ public class Authentication extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         singleton.getUserData(Objects.requireNonNull(auth.getCurrentUser()).getUid(), new SingletonInterface() {
-                            
+
                             public void onSuccess() {
                                 launchNextActivity();
                             }
@@ -122,12 +123,14 @@ public class Authentication extends AppCompatActivity {
                             String id = user.getUid();
                             db.collection("Users").document(id).set(userData)
                                     .addOnSuccessListener(aVoid -> {
-                                        singleton.setUserData(nameText, floor, house, 0, 0, id);
+                                        singleton.setUserData(floor, house, nameText, 0, 0, id);
                                         launchNextActivity();
                                     })
                                     .addOnFailureListener(e -> Toast.makeText(getApplicationContext(), "User DB binds failed, please tell your RHP to tell Jason", Toast.LENGTH_LONG).show());
-                        } else
-                            Toast.makeText(getApplicationContext(), "User was created but not loaded, please tell your RHP to tell Jason", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "An error occurred, please screenshot the Logs page and send to your RHP", Toast.LENGTH_SHORT).show();
+                            Log.e("Authentication", "User was generated in FirebaseAuth but was not loaded");
+                        }
                     } else {
                         Toast.makeText(getApplicationContext(), "Authentication failed, try again later before contacting your RHP",
                                 Toast.LENGTH_SHORT).show();
@@ -199,9 +202,9 @@ public class Authentication extends AppCompatActivity {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     Map<String, Object> data = document.getData();
-                    for(Map.Entry<String, Object> entry : data.entrySet()){
-                        if (entry.getKey().contains("Code") && entry.getValue().getClass() == String.class) {
-                            floorCodes.put((String) entry.getValue(), new Pair<>(entry.getKey().replace("Code", ""), document.getId()));
+                    for (Map.Entry<String, Object> entry : data.entrySet()) {
+                        if (entry.getKey().contains(":Code") && entry.getValue().getClass() == String.class) {
+                            floorCodes.put((String) entry.getValue(), new Pair<>(entry.getKey().replace(":Code", ""), document.getId()));
                         }
                     }
                 }
@@ -218,57 +221,53 @@ public class Authentication extends AppCompatActivity {
         finish();
     }
 
-    private void handleLinks(){
+    private void handleLinks() {
         //Toast.makeText(getApplicationContext(), "Handling link",
-                //Toast.LENGTH_SHORT).show();
+        //Toast.LENGTH_SHORT).show();
         Intent intent = getIntent();
-        if(intent != null && intent.getData() != null){
+        if (intent != null && intent.getData() != null) {
             //Toast.makeText(getApplicationContext(), intent.getData().toString(),
-                    //Toast.LENGTH_SHORT).show();
+            //Toast.LENGTH_SHORT).show();
             String host = intent.getData().getHost();
             String path = intent.getData().getPath();
 
             //Toast.makeText(getApplicationContext(), "Host: "+host,
-                    //Toast.LENGTH_SHORT).show();
+            //Toast.LENGTH_SHORT).show();
             //Toast.makeText(getApplicationContext(), "path: "+path,
-                //    Toast.LENGTH_SHORT).show();
+            //    Toast.LENGTH_SHORT).show();
 
-            if(host.equals("addpoints")){
-                System.out.println("YO: add points");
+            if (host.equals("addpoints")) {
                 String[] parts = path.split("/");
-                System.out.println("YO: lenght: "+parts.length);
-                if(parts.length == 2){
+                if (parts.length == 2) {
                     System.out.println("YO: inside");
-                    String linkId = parts[1].replace("/","");
+                    String linkId = parts[1].replace("/", "");
                     Singleton.getInstance().getLinkWithLinkId(linkId, new SingletonInterface() {
                         @Override
                         public void onError(Exception e, Context context) {
-                            System.out.println("YO:Error in Auth onerror");
-                            Toast.makeText(getApplicationContext(), "Failed to count link with issue: "+e.getLocalizedMessage(),
+                            Toast.makeText(getApplicationContext(), "Failed to count link with issue: " + e.getLocalizedMessage(),
                                     Toast.LENGTH_SHORT).show();
                         }
+
                         @Override
                         public void onGetLinkWithIdSuccess(Link link) {
                             System.out.println("YO:Ongetlinksuckess");
                             Singleton.getInstance().submitPointWithLink(link, new SingletonInterface() {
                                 @Override
                                 public void onSuccess() {
-                                    System.out.println("YO:on usbmitpoints siccess");
                                     Toast.makeText(getApplicationContext(), "Points submitted",
                                             Toast.LENGTH_SHORT).show();
-                                }@Override
+                                }
+
+                                @Override
                                 public void onError(Exception e, Context context) {
-                                    System.out.println("YO:on error submitlink");
-                                    Toast.makeText(getApplicationContext(), "Failed to count link with issue: "+e.getLocalizedMessage(),
+                                    Toast.makeText(getApplicationContext(), "Failed to count link with issue: " + e.getLocalizedMessage(),
                                             Toast.LENGTH_SHORT).show();
                                 }
                             });
                         }
                     });
                 }
-            }
-            else{
-                System.out.println("YO:Error in qr code");
+            } else {
                 Toast.makeText(getApplicationContext(), "Invalid QR Code",
                         Toast.LENGTH_SHORT).show();
 

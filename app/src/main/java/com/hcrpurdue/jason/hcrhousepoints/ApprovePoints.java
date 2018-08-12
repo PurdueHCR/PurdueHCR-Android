@@ -3,6 +3,7 @@ package com.hcrpurdue.jason.hcrhousepoints;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,23 +32,27 @@ public class ApprovePoints extends Fragment {
         singleton = Singleton.getInstance();
         spinner = getActivity().findViewById(R.id.navigationProgressBar);
         spinner.setVisibility(View.VISIBLE);
-        getUnconfirmedPoints();
+        getUnconfirmedPoints(null);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.approve_points, container, false);
+        SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.approve_list_swipe_refresh);
+        swipeRefresh.setOnRefreshListener(() -> getUnconfirmedPoints(swipeRefresh));
         return view;
     }
 
-    private void getUnconfirmedPoints() {
+    private void getUnconfirmedPoints(SwipeRefreshLayout swipeRefresh) {
         singleton.getUnconfirmedPoints(new SingletonInterface() {
             @Override
             public void onUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
                 ApprovePointListAdapter adapter = new ApprovePointListAdapter(logs, getContext(), singleton.getHouse(), singleton.getName(), spinner);
                 ((ListView) Objects.requireNonNull(getActivity()).findViewById(R.id.approve_list)).setAdapter(adapter);
                 spinner.setVisibility(View.GONE);
+                if(swipeRefresh != null)
+                    swipeRefresh.setRefreshing(false);
             }
         });
     }
