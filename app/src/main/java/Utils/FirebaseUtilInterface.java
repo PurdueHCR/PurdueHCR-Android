@@ -14,6 +14,7 @@ import Models.House;
 import Models.Link;
 import Models.PointLog;
 import Models.PointType;
+import Models.Reward;
 
 public interface FirebaseUtilInterface {
     default void onPointTypeComplete(List<PointType> data) {
@@ -36,13 +37,11 @@ public interface FirebaseUtilInterface {
     default void onGetLinkWithIdSuccess(Link link) {
     }
 
-    default void onGetUserPointSuccess(int data) {
-    }
-
-    default void onGetPointStatisticsSuccess(List<House> data) {
+    default void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
     }
 
     default void onGetFloorCodesSuccess(Map<String, Pair<String, String>> data) {
 
     }
+
 }

@@ -15,6 +15,7 @@ import Models.House;
 import Models.Link;
 import Models.PointLog;
 import Models.PointType;
+import Models.Reward;
 
 // Because non-global variables are for people who care about technical debt
 public class Singleton {
@@ -29,6 +30,7 @@ public class Singleton {
     private int permissionLevel = 0;
     private int totalPoints = 0;
     private List<House> houseList = null;
+    public List<Reward> rewardList = null;
 
     private Singleton() {
         // Exists only to defeat instantiation. Get rekt, instantiation
@@ -178,16 +180,15 @@ public class Singleton {
     }
 
     public void getPointStatistics(SingletonInterface si) {
-        fbutil.getPointStatistics(userID, new FirebaseUtilInterface() {
+        boolean getRewards = rewardList == null;
+        fbutil.getPointStatistics(userID, getRewards, new FirebaseUtilInterface() {
             @Override
-            public void onGetUserPointSuccess(int data){
-                totalPoints = data;
-            }
-
-            @Override
-            public void onGetPointStatisticsSuccess(List<House> data) {
-                houseList = data;
-                si.onGetPointStatisticsSuccess(data);
+            public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
+                houseList = houses;
+                totalPoints = userPoints;
+                if(getRewards)
+                    rewardList = rewards;
+                si.onGetPointStatisticsSuccess(houseList, totalPoints, rewardList);
             }
         });
     }

@@ -15,12 +15,13 @@
             android:layout_height="wrap_content">
 
             <ImageView
-                android:id="@+id/statistics_house_logo"
+                android:id="@+id/statistics_house_icon"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginEnd="64dp"
                 android:layout_marginStart="64dp"
                 android:layout_marginTop="8dp"
+                android:contentDescription="House Icon Big"
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -39,7 +40,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/statistics_house_logo" />
+                app:layout_constraintTop_toBottomOf="@+id/statistics_house_icon" />
 
             <TextView
                 android:id="@+id/statistics_floor_name"
@@ -67,19 +68,78 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/statistics_floor_name" />
 
+            <ImageView
+                android:id="@+id/statistics_house_icon_small"
+                android:layout_width="64dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="24dp"
+                android:contentDescription="House Icon Small"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/statistics_user_points"
+                app:srcCompat="@drawable/platinum" />
+
+            <TextView
+                android:id="@+id/statistics_next_reward"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:text="Next Reward: "
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                app:layout_constraintEnd_toStartOf="@+id/statistics_reward_icon"
+                app:layout_constraintStart_toEndOf="@+id/statistics_house_icon_small"
+                app:layout_constraintTop_toTopOf="@+id/statistics_house_icon_small" />
+
+            <TextView
+                android:id="@+id/statistics_reward_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="0/0"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                app:layout_constraintEnd_toStartOf="@+id/statistics_reward_icon"
+                app:layout_constraintStart_toEndOf="@+id/statistics_house_icon_small"
+                app:layout_constraintTop_toBottomOf="@+id/statistics_next_reward" />
+
+            <ProgressBar
+                android:id="@+id/statistics_progress_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                app:layout_constraintBottom_toBottomOf="@+id/statistics_house_icon_small"
+                app:layout_constraintEnd_toStartOf="@+id/statistics_reward_icon"
+                app:layout_constraintStart_toEndOf="@+id/statistics_house_icon_small" />
+
+            <ImageView
+                android:id="@+id/statistics_reward_icon"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Next Reward"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/statistics_house_icon_small"
+                app:srcCompat="@drawable/icecream" />
+
             <TextView
                 android:id="@+id/statistics_chart_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="16dp"
                 android:text="Points Per Resident"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/statistics_user_points" />
+                app:layout_constraintTop_toBottomOf="@+id/statistics_progress_bar" />
 
             <com.github.mikephil.charting.charts.BarChart
                 android:id="@+id/statistics_point_chart"
@@ -90,23 +150,9 @@
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/statistics_chart_title">
-
+                app:layout_constraintTop_toTopOf="@+id/statistics_chart_title">
             </com.github.mikephil.charting.charts.BarChart>
 
-            <TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                android:text="Rewards statistics coming tomorrow!"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/statistics_point_chart" />
         </android.support.constraint.ConstraintLayout>
     </ScrollView>
 </android.support.v4.widget.SwipeRefreshLayout>

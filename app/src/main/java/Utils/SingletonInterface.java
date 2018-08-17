@@ -13,6 +13,7 @@ import Models.House;
 import Models.Link;
 import Models.PointLog;
 import Models.PointType;
+import Models.Reward;
 
 public interface SingletonInterface {
     default void onPointTypeComplete(List<PointType> data) {
@@ -32,8 +33,7 @@ public interface SingletonInterface {
     default void onUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
     }
 
-    default void onGetPointStatisticsSuccess(List<House> data) {
-
+    default void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
     }
 
     default void onGetFloorCodesSuccess(Map<String, Pair<String, String>> data) {

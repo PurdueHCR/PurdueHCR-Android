@@ -1,6 +1,7 @@
 package Utils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.widget.Toast;
@@ -26,6 +27,7 @@ import Models.House;
 import Models.Link;
 import Models.PointLog;
 import Models.PointType;
+import Models.Reward;
 
 public class FirebaseUtil {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -363,7 +365,7 @@ public class FirebaseUtil {
                 .addOnFailureListener(e -> fui.onError(e, context));
     }
 
-    public void getPointStatistics(String userID, FirebaseUtilInterface fui) {
+    public void getPointStatistics(String userID, boolean getRewards, FirebaseUtilInterface fui) {
         List<House> houseList = new ArrayList<>();
         DocumentReference userRef = db.collection("Users").document(userID);
         userRef.get()
@@ -371,7 +373,7 @@ public class FirebaseUtil {
                     if (task.isSuccessful()) {
                         Map<String, Object> data = task.getResult().getData();
                         if (data != null) {
-                            fui.onGetUserPointSuccess(((Long) data.get("TotalPoints")).intValue());
+                            int userPoints = ((Long) data.get("TotalPoints")).intValue();
                             db.collection("House").get()
                                     .addOnCompleteListener(houseTask -> {
                                         if (houseTask.isSuccessful()) {
@@ -382,7 +384,32 @@ public class FirebaseUtil {
                                                 House house = new House(doc.getId(), numRes, housePoints);
                                                 houseList.add(house);
                                             }
-                                            fui.onGetPointStatisticsSuccess(houseList);
+                                            if (getRewards) // Rewards don't update often, don't make an extra query if not needed
+                                            {
+                                                db.collection("Rewards").get()
+                                                        .addOnCompleteListener(rewardTask -> {
+                                                            if (rewardTask.isSuccessful()) {
+                                                                List<Reward> rewardList = new ArrayList<>();
+                                                                Resources resources = context.getResources();
+                                                                String packageName = context.getPackageName();
+                                                                for (QueryDocumentSnapshot doc : rewardTask.getResult()) {
+                                                                    Map<String, Object> rewardData = doc.getData();
+                                                                    String fileName = (String) rewardData.get("FileName");
+                                                                    String rewardIcon = fileName.replace(".png", "").toLowerCase();
+                                                                    int rewardIconResource = resources.getIdentifier(rewardIcon, "drawable", packageName);
+                                                                    int rewardPoints = ((Long) rewardData.get("RequiredValue")).intValue();
+                                                                    Reward reward = new Reward(doc.getId(), rewardPoints, rewardIconResource);
+                                                                    rewardList.add(reward);
+                                                                }
+                                                                fui.onGetPointStatisticsSuccess(houseList, userPoints, rewardList);
+                                                            } else
+                                                                fui.onError(rewardTask.getException(), context);
+                                                        })
+                                                        .addOnFailureListener(e -> fui.onError(e, context));
+                                            }
+                                            else{
+                                                fui.onGetPointStatisticsSuccess(houseList, userPoints, null);
+                                            }
                                         } else {
                                             fui.onError(houseTask.getException(), context);
                                         }

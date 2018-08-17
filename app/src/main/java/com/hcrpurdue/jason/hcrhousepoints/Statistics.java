@@ -21,11 +21,13 @@ import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 import Models.House;
+import Models.Reward;
 import Utils.Singleton;
 import Utils.SingletonInterface;
 
@@ -61,7 +63,8 @@ public class Statistics extends Fragment {
         packageName = context.getPackageName();
 
         int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", packageName);
-        ((ImageView) view.findViewById(R.id.statistics_house_logo)).setImageResource(drawableID);
+        ((ImageView) view.findViewById(R.id.statistics_house_icon)).setImageResource(drawableID);
+        ((ImageView) view.findViewById(R.id.statistics_house_icon_small)).setImageResource(drawableID);
         ((TextView) view.findViewById(R.id.statistics_user_name)).setText(singleton.getName());
         ((TextView) view.findViewById(R.id.statistics_floor_name)).setText(floorText);
 
@@ -90,16 +93,27 @@ public class Statistics extends Fragment {
     }
 
     private void updatePointData(View view, BarChart chart, SwipeRefreshLayout swipeRefreshLayout) {
+        TextView housePointsTextView = view.findViewById(R.id.statistics_user_points);
         singleton.getPointStatistics(new SingletonInterface() {
             @Override
-            public void onGetPointStatisticsSuccess(List<House> data) {
+            public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
                 List<IBarDataSet> dataSetList = new ArrayList<>();
+
+                int housePoints = 0;
+                // So that things are in podium order (4, 2, 1, 3, 5)
+                Collections.sort(houses);
+                Collections.swap(houses, 0, 2);
+                Collections.swap(houses, 0, 3);
+
                 float i = 0f;
-                for (House house : singleton.getHouseList()) {
+                for (House house : houses) {
                     String houseName = house.getName();
-                    if (houseName.equals(singleton.getHouse()))
-                        ((TextView) view.findViewById(R.id.statistics_user_points)).setText(String.format(Locale.getDefault(),
-                                "%d House Points | %d Individual Points", house.getTotalPoints(), singleton.getTotalPoints()));
+                    if (houseName.equals(singleton.getHouse())) {
+                        housePoints = house.getTotalPoints();
+                        housePointsTextView.setText(String.format(Locale.getDefault(),
+                                "%d House Points | %d Individual Points", housePoints, userPoints));
+                    }
+
                     BarEntry barEntry = new BarEntry(i++, house.getPointsPerResident());
                     ArrayList<BarEntry> barEntryList = new ArrayList<>();
                     barEntryList.add(barEntry);
@@ -114,6 +128,29 @@ public class Statistics extends Fragment {
                 chart.setData(barData);
                 chart.notifyDataSetChanged();
                 chart.invalidate();
+
+                Collections.sort(rewards); // Just in case
+                int requiredPoints = 0;
+                for (Reward reward : rewards) {
+                    requiredPoints = reward.getRequiredPoints();
+                    if (housePoints < requiredPoints) {
+                        String nextRewardText = "Next Reward: " + reward.getName();
+                        String progressText = housePoints + "/" + requiredPoints;
+                        ((TextView)view.findViewById(R.id.statistics_next_reward)).setText(nextRewardText);
+                        ((TextView)view.findViewById(R.id.statistics_reward_progress)).setText(progressText);
+                        ((ImageView) view.findViewById(R.id.statistics_reward_icon)).setImageResource(reward.getImageResource());
+                        ProgressBar progressBar = view.findViewById(R.id.statistics_progress_bar);
+                        progressBar.setMax(requiredPoints);
+                        progressBar.setProgress(housePoints);
+                        break;
+                    }
+                }
+                if(housePoints >= requiredPoints){
+                    progressBar.setProgress(100);
+                    ((ImageView) view.findViewById(R.id.statistics_reward_icon)).setImageResource(R.drawable.ic_check);
+                    ((TextView)view.findViewById(R.id.statistics_next_reward)).setText("No rewards left to get!");
+                    ((TextView)view.findViewById(R.id.statistics_reward_progress)).setText("");
+                }
 
                 progressBar.setVisibility(View.GONE);
                 if (swipeRefreshLayout != null)

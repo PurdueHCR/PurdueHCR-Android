@@ -122,7 +122,7 @@ public class NavigationDrawer extends AppCompatActivity {
                         case R.id.nav_report_issue:
                             Intent reportIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sites.google.com/view/hcr-points/home"));
                             reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                            startActivity(reportIntent);
                         default:
                             fragmentClass = SubmitPoints.class;
                             break;
