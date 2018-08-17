@@ -6,8 +6,8 @@ android {
         applicationId "com.hcrpurdue.jason.hcrhousepoints"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 5
-        versionName "1.0.4"
+        versionCode 14
+        versionName "1.2.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -24,10 +24,10 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.support:appcompat-v7:28.0.0-beta01'
-    implementation 'com.android.support:support-media-compat:28.0.0-beta01'
-    implementation 'com.android.support:support-v4:28.0.0-beta01'
-    implementation 'com.android.support:design:28.0.0-beta01'
+    implementation 'com.android.support:appcompat-v7:28.0.0-rc01'
+    implementation 'com.android.support:support-media-compat:28.0.0-rc01'
+    implementation 'com.android.support:support-v4:28.0.0-rc01'
+    implementation 'com.android.support:design:28.0.0-rc01'
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     testImplementation 'junit:junit:4.12'
@@ -37,6 +37,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.1'
     implementation 'com.google.firebase:firebase-firestore:17.0.4'
     implementation 'com.google.firebase:firebase-auth:16.0.2'
+
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
+
+    implementation 'com.google.android.gms:play-services-vision:15.0.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

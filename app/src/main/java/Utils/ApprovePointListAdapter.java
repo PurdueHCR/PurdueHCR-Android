@@ -54,7 +54,7 @@ public class ApprovePointListAdapter extends BaseAdapter implements ListAdapter 
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             assert inflater != null;
-            view = inflater.inflate(R.layout.approve_list_item, null);
+            view = inflater.inflate(R.layout.approve_list_item, parent, false);
         }
 
         //Handle TextView and display string from your list

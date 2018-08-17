@@ -1,5 +1,7 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
+import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -24,15 +26,22 @@ import Utils.SingletonInterface;
 
 public class ApprovePoints extends Fragment {
     private Singleton singleton;
-    ProgressBar spinner;
+    private Activity activity;
+    private ProgressBar spinner;
+    private ListView approveList;
+
+    @Override
+    public void onAttach(Context context){
+        super.onAttach(context);
+        activity = getActivity();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         singleton = Singleton.getInstance();
-        spinner = getActivity().findViewById(R.id.navigationProgressBar);
+        spinner = activity.findViewById(R.id.navigationProgressBar);
         spinner.setVisibility(View.VISIBLE);
-        getUnconfirmedPoints(null);
     }
 
     @Override
@@ -41,6 +50,8 @@ public class ApprovePoints extends Fragment {
         View view = inflater.inflate(R.layout.approve_points, container, false);
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.approve_list_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> getUnconfirmedPoints(swipeRefresh));
+        approveList = view.findViewById(R.id.approve_list);
+        getUnconfirmedPoints(null);
         return view;
     }
 
@@ -49,7 +60,7 @@ public class ApprovePoints extends Fragment {
             @Override
             public void onUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
                 ApprovePointListAdapter adapter = new ApprovePointListAdapter(logs, getContext(), singleton.getHouse(), singleton.getName(), spinner);
-                ((ListView) Objects.requireNonNull(getActivity()).findViewById(R.id.approve_list)).setAdapter(adapter);
+                approveList.setAdapter(adapter);
                 spinner.setVisibility(View.GONE);
                 if(swipeRefresh != null)
                     swipeRefresh.setRefreshing(false);

@@ -111,8 +111,9 @@ public class Authentication extends AppCompatActivity {
                         FirebaseUser user = auth.getCurrentUser();
 
                         // Generates all of the other data for the user in the DB
-                        String floor = floorCodes.get(floorCodeText).first;
-                        String house = floorCodes.get(floorCodeText).second;
+                        Pair pair = floorCodes.get(floorCodeText);
+                        String floor = (String) pair.first;
+                        String house = (String) pair.second;
                         Map<String, Object> userData = new HashMap<>();
                         userData.put("Name", nameText);
                         userData.put("FloorID", floor);
@@ -128,7 +129,7 @@ public class Authentication extends AppCompatActivity {
                                     })
                                     .addOnFailureListener(e -> Toast.makeText(getApplicationContext(), "User DB binds failed, please tell your RHP to tell Jason", Toast.LENGTH_LONG).show());
                         } else {
-                            Toast.makeText(getApplicationContext(), "An error occurred, please screenshot the Logs page and send to your RHP", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "Error loading user after authentication, please try logging in", Toast.LENGTH_LONG).show();
                             Log.e("Authentication", "User was generated in FirebaseAuth but was not loaded");
                         }
                     } else {
@@ -148,7 +149,7 @@ public class Authentication extends AppCompatActivity {
                     InputMethodManager.HIDE_NOT_ALWAYS);
 
         // Checks the email text, makes sure it's a valid email address, and makes sure its a Purdue address
-        String emailText = email.getText().toString();
+        String emailText = email.getText().toString().toLowerCase();
         if (TextUtils.isEmpty(emailText) || !Patterns.EMAIL_ADDRESS.matcher(emailText).matches() || !emailText.matches("[A-Z0-9a-z._%+-]+@purdue\\.edu")) {
             Toast.makeText(getApplicationContext(), "Email is not a valid Purdue email address", Toast.LENGTH_SHORT).show();
             return true;
@@ -197,19 +198,11 @@ public class Authentication extends AppCompatActivity {
 
     // Fills floorCodes with key:value pairs in the form of {floorCode}:({floorName}:{houseName})
     private void getFloorCodes() {
-        floorCodes = new HashMap<>();
-        db.collection("House").get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    Map<String, Object> data = document.getData();
-                    for (Map.Entry<String, Object> entry : data.entrySet()) {
-                        if (entry.getKey().contains(":Code") && entry.getValue().getClass() == String.class) {
-                            floorCodes.put((String) entry.getValue(), new Pair<>(entry.getKey().replace(":Code", ""), document.getId()));
-                        }
-                    }
-                }
-            } else
-                Toast.makeText(getApplicationContext(), "Error retrieving floor codes from database, please try again later before contacting your RHP", Toast.LENGTH_LONG).show();
+        singleton.getFloorCodes(new SingletonInterface() {
+            @Override
+            public void onGetFloorCodesSuccess(Map<String, Pair<String, String>> data) {
+                floorCodes = data;
+            }
         });
     }
 
@@ -270,7 +263,6 @@ public class Authentication extends AppCompatActivity {
             } else {
                 Toast.makeText(getApplicationContext(), "Invalid QR Code",
                         Toast.LENGTH_SHORT).show();
-
             }
         }
     }

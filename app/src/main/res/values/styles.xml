@@ -9,32 +9,37 @@
     </style>
 
     <style name="copper" parent="AppTheme">
-        <item name="colorPrimary">#F8971C</item>
-        <item name="colorPrimaryDark">#F8971C</item>
-        <item name="android:navigationBarColor">#F8971C</item>
+        <item name="colorPrimary">@color/copper</item>
+        <item name="colorPrimaryDark">@color/copper</item>
+        <item name="android:navigationBarColor">@color/copper</item>
+        <item name="colorAccent">@color/copper</item>
     </style>
 
     <style name="palladium" parent="AppTheme">
-        <item name="colorPrimary">#A7AAAB</item>
-        <item name="colorPrimaryDark">#A7AAAB</item>
-        <item name="android:navigationBarColor">#A7AAAB</item>
+        <item name="colorPrimary">@color/palladium</item>
+        <item name="colorPrimaryDark">@color/palladium</item>
+        <item name="android:navigationBarColor">@color/palladium</item>
+        <item name="colorAccent">@color/palladium</item>
     </style>
 
     <style name="platinum" parent="AppTheme">
-        <item name="colorPrimary">#5AC0C7</item>
-        <item name="colorPrimaryDark">#5AC0C7</item>
-        <item name="android:navigationBarColor">#5AC0C7</item>
+        <item name="colorPrimary">@color/platinum</item>
+        <item name="colorPrimaryDark">@color/platinum</item>
+        <item name="android:navigationBarColor">@color/platinum</item>
+        <item name="colorAccent">@color/platinum</item>
     </style>
 
     <style name="silver" parent="AppTheme">
-        <item name="colorPrimary">#84B940</item>
-        <item name="colorPrimaryDark">#84B940</item>
-        <item name="android:navigationBarColor">#84B940</item>
+        <item name="colorPrimary">@color/silver</item>
+        <item name="colorPrimaryDark">@color/silver</item>
+        <item name="android:navigationBarColor">@color/silver</item>
+        <item name="colorAccent">@color/silver</item>
     </style>
 
     <style name="titanium" parent="AppTheme">
-        <item name="colorPrimary">#A380BA</item>
-        <item name="colorPrimaryDark">#A380BA</item>
-        <item name="android:navigationBarColor">#A380BA</item>
+        <item name="colorPrimary">@color/titanium</item>
+        <item name="colorPrimaryDark">@color/titanium</item>
+        <item name="android:navigationBarColor">@color/titanium</item>
+        <item name="colorAccent">@color/titanium</item>
     </style>
 </resources>

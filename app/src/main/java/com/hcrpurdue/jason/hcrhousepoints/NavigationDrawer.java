@@ -1,9 +1,15 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -13,9 +19,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.Objects;
 
 import Utils.Singleton;
 
@@ -24,13 +34,14 @@ public class NavigationDrawer extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Singleton singleton = Singleton.getInstance();
         Intent intent = getIntent();
         try {
             String houseName = intent.getStringExtra("HouseName");
             int themeID = getResources().getIdentifier(houseName.toLowerCase(), "style", this.getPackageName());
             setTheme(themeID);
         } catch (Exception e) {
-            Toast.makeText(this, "Error loading house color, please screenshot the Logs page and send it to your RHP", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error loading house theme", Toast.LENGTH_LONG).show();
             Log.e("NavigationDrawer", "Failed to load house color", e);
         }
 
@@ -40,7 +51,7 @@ public class NavigationDrawer extends AppCompatActivity {
         try {
             getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, SubmitPoints.class.newInstance()).commit();
         } catch (Exception e) {
-            Toast.makeText(this, "An error occurred, please screenshot the Logs screen and send it to your RHP", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error loading SubmitPoints Frament", Toast.LENGTH_LONG).show();
             Log.e("NavigationDrawer", "Failed to load initial fragment", e);
         }
 
@@ -53,6 +64,19 @@ public class NavigationDrawer extends AppCompatActivity {
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+
+        View headerView = navigationView.getHeaderView(0);
+        try {
+            int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", getPackageName());
+            ((ImageView) headerView.findViewById(R.id.header_house_image)).setImageResource(drawableID);
+        } catch (Exception e) {
+            Toast.makeText(this, "Failed to load house image", Toast.LENGTH_LONG).show();
+            Log.e("SubmitPoints", "Error loading house image", e);
+        }
+        ((TextView) headerView.findViewById(R.id.header_resident_name)).setText(singleton.getName());
+        String floorName = singleton.getHouse() + " - " + singleton.getFloorName();
+        ((TextView) headerView.findViewById(R.id.header_floor_name)).setText(floorName);
+
         Menu menu = navigationView.getMenu();
 
         try {
@@ -61,25 +85,19 @@ public class NavigationDrawer extends AppCompatActivity {
                 menu.findItem(R.id.nav_approve).setVisible(true);
             }
         } catch (Exception e) {
-            Toast.makeText(this, "Error loading permission level, please screenshot the Logs page and send it to your RHP", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error loading permission level", Toast.LENGTH_LONG).show();
             Log.e("NavigationDrawer", "Failed to load Permission Level", e);
         }
 
         navigationView.setNavigationItemSelectedListener(
                 menuItem -> {
-                    int currentItem = 0;
-                    for (int i = 0; i < menu.size(); i++) {
-                        if (menu.getItem(i).isChecked()) {
-                            currentItem = menu.getItem(i).getItemId();
-                            break;
-                        }
-                    }
-                    // set item as selected to persist highlight
-                    menuItem.setChecked(true);
-                    // close drawer when item is tapped
-                    drawerLayout.closeDrawers();
+                    MenuItem checkedItem = navigationView.getCheckedItem();
+                    int currentItem = checkedItem == null ? 0 : checkedItem.getItemId();
 
+                    drawerLayout.closeDrawers();
                     int selectedItem = menuItem.getItemId();
+                    if(selectedItem != R.id.nav_report_issue)
+                        menuItem.setChecked(true);
 
                     Class fragmentClass = null;
                     switch (selectedItem) {
@@ -92,12 +110,19 @@ public class NavigationDrawer extends AppCompatActivity {
                         case R.id.nav_approve:
                             fragmentClass = ApprovePoints.class;
                             break;
-                        case R.id.nav_profile:
-                            fragmentClass = Construction.class;
+                        case R.id.nav_statistics:
+                            fragmentClass = Statistics.class;
                             break;
-                        case R.id.nav_logs:
-                            fragmentClass = Logs.class;
+                        case R.id.nav_scanner:
+                            if (ContextCompat.checkSelfPermission(Objects.requireNonNull(this), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+                                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 10);
+                            else
+                                fragmentClass = QRScan.class;
                             break;
+                        case R.id.nav_report_issue:
+                            Intent reportIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sites.google.com/view/hcr-points/home"));
+                            reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
                         default:
                             fragmentClass = SubmitPoints.class;
                             break;
@@ -108,7 +133,7 @@ public class NavigationDrawer extends AppCompatActivity {
                         try {
                             fragment = (Fragment) fragmentClass.newInstance();
                         } catch (Exception e) {
-                            Toast.makeText(this, "An error occured, please screenshot the Logs screen and send it to your RHP", Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "Failed to load Fragment while changing views", Toast.LENGTH_LONG).show();
                             Log.e("NavigationDrawer", "Failed to load initial fragment", e);
                         }
                         assert fragment != null;
@@ -136,5 +161,20 @@ public class NavigationDrawer extends AppCompatActivity {
         Intent intent = new Intent(this, Authentication.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        if (requestCode == 10) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                try {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, QRScan.class.newInstance()).commit();
+                } catch (Exception e) {
+                    Log.e("Navigation", "Failed to launch QR fragment", e);
+                }
+            } else {((NavigationView)findViewById(R.id.nav_view)).getMenu().findItem(R.id.nav_scanner).setChecked(false);
+                Toast.makeText(this, "Camera permissions denied, please allow camera permissions to scan QR codes", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

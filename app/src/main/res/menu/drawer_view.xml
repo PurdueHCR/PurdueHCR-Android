@@ -12,16 +12,20 @@
             android:title="Approve Points"
             android:visible="false" />
         <item
-            android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_person"
-            android:title="Profile (Under Construction)" />
+            android:id="@+id/nav_statistics"
+            android:icon="@drawable/ic_chart"
+            android:title="Statistics" />
+        <item
+            android:id="@+id/nav_scanner"
+            android:icon="@drawable/ic_camera_enhance"
+            android:title="QR Scanner" />
         <item
             android:id="@+id/nav_signout"
             android:icon="@android:drawable/ic_lock_power_off"
             android:title="Sign Out" />
         <item
-            android:id="@+id/nav_logs"
-            android:icon="@drawable/ic_build"
-            android:title="Logs" />
+            android:id="@+id/nav_report_issue"
+            android:icon="@drawable/ic_error"
+            android:title="Report an Issue" />
     </group>
 </menu>

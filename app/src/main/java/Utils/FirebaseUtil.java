@@ -1,12 +1,10 @@
 package Utils;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
@@ -24,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import Models.House;
 import Models.Link;
 import Models.PointLog;
 import Models.PointType;
@@ -115,7 +114,7 @@ public class FirebaseUtil {
                                     })
                                     .addOnFailureListener(e -> fui.onError(e, context));
                         } else {
-                            fui.onError(new Exception("Code was already submitted"), context);
+                            fui.onError(new IllegalStateException("Code was already submitted"), context);
                         }
                     })
                     .addOnFailureListener(e -> fui.onError(e, context));
@@ -154,8 +153,7 @@ public class FirebaseUtil {
                     //If the point log was successfully updated, update the points in house and user
                     if (approved) {
                         updateHouseAndUserPointsWithApprovedLog(log, house, fui);
-                    }
-                    else
+                    } else
                         fui.onSuccess();
                 })
                 //If failed, call the onError
@@ -285,28 +283,46 @@ public class FirebaseUtil {
         housePointRef.whereLessThan("PointTypeID", 0).get()
                 .addOnCompleteListener((Task<QuerySnapshot> task) -> {
                     if (task.isSuccessful()) {
-                        if(task.getResult().size() == 0)
-                        {
+                        if (task.getResult().size() == 0) {
                             Toast.makeText(context, "No unapproved points", Toast.LENGTH_SHORT).show();
                             fui.onGetUnconfirmedPointsSuccess(new ArrayList<>());
                         }
                         ArrayList<PointLog> logs = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String logFloorId = (String) document.get("FloorID");
-                            if (floorId.equals(logFloorId)) {
-                                String logId = document.getId();
-                                String description = (String) document.get("Description");
-                                int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
-                                String resident = (String) document.get("Resident");
-                                Object ref = document.get("ResidentRef");
-                                PointType pointType = Singleton.getInstance().getTypeWithPointId(Math.abs(pointTypeId));
-                                PointLog log = new PointLog(description, resident, pointType, floorId);
-                                if (ref != null) {
-                                    log.setResidentRef((DocumentReference) ref);
+                            if (!floorId.equals("6N") && !floorId.equals("6S")) {
+                                if (floorId.equals(logFloorId)) {
+                                    String logId = document.getId();
+                                    String description = (String) document.get("Description");
+                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
+                                    String resident = (String) document.get("Resident");
+                                    Object ref = document.get("ResidentRef");
+                                    PointType pointType = Singleton.getInstance().getTypeWithPointId(Math.abs(pointTypeId));
+                                    PointLog log = new PointLog(description, resident, pointType, floorId);
+                                    if (ref != null) {
+                                        log.setResidentRef((DocumentReference) ref);
+                                    }
+                                    log.setLogID(logId);
+                                    logs.add(log);
                                 }
-                                log.setLogID(logId);
-                                logs.add(log);
+                            } else {
+                                if (floorId.equals(logFloorId) || "SH".equals(logFloorId)) {
+                                    String logId = document.getId();
+                                    String description = (String) document.get("Description");
+                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
+                                    String resident = (String) document.get("Resident");
+                                    Object ref = document.get("ResidentRef");
+                                    PointType pointType = Singleton.getInstance().getTypeWithPointId(Math.abs(pointTypeId));
+                                    PointLog log = new PointLog(description, resident, pointType, floorId);
+                                    if (ref != null) {
+                                        log.setResidentRef((DocumentReference) ref);
+                                    }
+                                    log.setLogID(logId);
+                                    logs.add(log);
+                                }
                             }
+                            if (logs.isEmpty())
+                                Toast.makeText(context, "No unapproved points", Toast.LENGTH_SHORT).show();
                             fui.onGetUnconfirmedPointsSuccess(logs);
                         }
                     } else {
@@ -323,34 +339,80 @@ public class FirebaseUtil {
      * @param fui firebaseutilInterface, implement onError, and onGetLinkWithIdSuccess
      */
     public void getLinkWithId(String id, final FirebaseUtilInterface fui) {
-        System.out.println("YO: Get link id");
         DocumentReference linkRef = this.db.collection("Links").document(id);
         linkRef.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot doc = task.getResult();
-                        if (doc.exists()) {
-                            String descr = doc.getString("Description");
+                        Map<String, Object> data = doc.getData();
+                        if (doc.exists() && data != null) {
+                            String descr = (String) data.get("Description");
                             int pointId = Objects.requireNonNull(doc.getLong("PointID")).intValue();
-                            boolean single = doc.getBoolean("SingleUse");
-                            boolean enabled = doc.getBoolean("Enabled");
-                            boolean archived = doc.getBoolean("Archived");
+                            boolean single = (boolean) data.get("SingleUse");
+                            boolean enabled = (boolean) data.get("Enabled");
+                            boolean archived = (boolean) data.get("Archived");
                             Link link = new Link(id, descr, single, pointId, enabled, archived);
                             fui.onGetLinkWithIdSuccess(link);
                         } else {
-                            fui.onError(new Exception("No Link"), context);
+                            fui.onError(new IllegalStateException("No Link"), context);
                         }
                     } else {
                         fui.onError(task.getException(), context);
                     }
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        fui.onError(e, context);
-                    }
-                });
+                .addOnFailureListener(e -> fui.onError(e, context));
     }
 
+    public void getPointStatistics(String userID, FirebaseUtilInterface fui) {
+        List<House> houseList = new ArrayList<>();
+        DocumentReference userRef = db.collection("Users").document(userID);
+        userRef.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Map<String, Object> data = task.getResult().getData();
+                        if (data != null) {
+                            fui.onGetUserPointSuccess(((Long) data.get("TotalPoints")).intValue());
+                            db.collection("House").get()
+                                    .addOnCompleteListener(houseTask -> {
+                                        if (houseTask.isSuccessful()) {
+                                            for (QueryDocumentSnapshot doc : houseTask.getResult()) {
+                                                Map<String, Object> houseData = doc.getData();
+                                                Integer housePoints = ((Long) houseData.get("TotalPoints")).intValue();
+                                                Integer numRes = ((Long) houseData.get("NumberOfResidents")).intValue();
+                                                House house = new House(doc.getId(), numRes, housePoints);
+                                                houseList.add(house);
+                                            }
+                                            fui.onGetPointStatisticsSuccess(houseList);
+                                        } else {
+                                            fui.onError(houseTask.getException(), context);
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> fui.onError(e, context));
+                        } else {
+                            fui.onError(new IllegalStateException("houseData is null"), context);
+                        }
+                    } else {
+                        fui.onError(task.getException(), context);
+                    }
+                })
+                .addOnFailureListener(e -> fui.onError(e, context));
+    }
 
+    public void getFloorCodes(FirebaseUtilInterface fui) {
+        db.collection("House").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                HashMap<String, Pair<String, String>> floorCodes = new HashMap<>();
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    Map<String, Object> data = document.getData();
+                    for (Map.Entry<String, Object> entry : data.entrySet()) {
+                        if (entry.getKey().contains(":Code") && entry.getValue().getClass() == String.class) {
+                            floorCodes.put((String) entry.getValue(), new Pair<>(entry.getKey().replace(":Code", ""), document.getId()));
+                        }
+                    }
+                }
+                fui.onGetFloorCodesSuccess(floorCodes);
+            } else
+                fui.onError(task.getException(), context);
+        });
+    }
 }
