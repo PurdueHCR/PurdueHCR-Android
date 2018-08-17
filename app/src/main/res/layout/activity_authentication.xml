@@ -146,7 +146,7 @@
             android:layout_weight="1"
             android:ems="10"
             android:hint="@string/nameInputHint"
-            android:inputType="textPersonName"
+            android:inputType="textCapWords|textPersonName"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/confirmPasswordInput" />

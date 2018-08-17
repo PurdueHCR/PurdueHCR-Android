@@ -1,7 +1,6 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,8 +13,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -32,13 +31,14 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import Models.Link;
 import Utils.Singleton;
 import Utils.SingletonInterface;
 
 public class QRScan extends Fragment {
-    Activity activity;
+    AppCompatActivity activity;
     Context context;
     ProgressBar progressBar;
     
@@ -46,7 +46,7 @@ public class QRScan extends Fragment {
     public void onAttach(Context context){
         super.onAttach(context);
         this.context = context;
-        activity = getActivity();
+        activity = (AppCompatActivity) getActivity();
     }
     
     @Override
@@ -59,6 +59,7 @@ public class QRScan extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.qr_reader, container, false);
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("QR Scanner");
 
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, 10);
@@ -146,7 +147,7 @@ public class QRScan extends Fragment {
                                                 bundle.putBoolean("showSuccess", true);
                                                 Fragment fragment = SubmitPoints.class.newInstance();
                                                 fragment.setArguments(bundle);
-                                                ((FragmentActivity)activity).getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                                                activity.getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
                                             } catch (Exception e) {
                                                 handler.post(() -> Toast.makeText(context, "Point submitted successfully, please return to another page", Toast.LENGTH_SHORT).show());
                                             }

@@ -5,7 +5,6 @@ import android.util.Pair;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -169,11 +168,9 @@ public class Singleton {
     }
 
     public void getLinkWithLinkId(String linkId, SingletonInterface si) {
-        System.out.println("YO: getlink: " + linkId);
         fbutil.getLinkWithId(linkId, new FirebaseUtilInterface() {
             @Override
             public void onGetLinkWithIdSuccess(Link link) {
-                System.out.println("on get link success");
                 si.onGetLinkWithIdSuccess(link);
             }
         });
@@ -209,13 +206,5 @@ public class Singleton {
                 si.onGetFloorCodesSuccess(data);
             }
         });
-    }
-
-    public List<House> getHouseList(){
-        return houseList;
-    }
-
-    public int getTotalPoints() {
-        return totalPoints;
     }
 }

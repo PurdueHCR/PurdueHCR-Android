@@ -232,7 +232,6 @@ public class Authentication extends AppCompatActivity {
             if (host.equals("addpoints")) {
                 String[] parts = path.split("/");
                 if (parts.length == 2) {
-                    System.out.println("YO: inside");
                     String linkId = parts[1].replace("/", "");
                     Singleton.getInstance().getLinkWithLinkId(linkId, new SingletonInterface() {
                         @Override
@@ -243,7 +242,6 @@ public class Authentication extends AppCompatActivity {
 
                         @Override
                         public void onGetLinkWithIdSuccess(Link link) {
-                            System.out.println("YO:Ongetlinksuckess");
                             Singleton.getInstance().submitPointWithLink(link, new SingletonInterface() {
                                 @Override
                                 public void onSuccess() {

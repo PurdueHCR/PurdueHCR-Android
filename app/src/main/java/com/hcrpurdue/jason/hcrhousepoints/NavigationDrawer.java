@@ -94,10 +94,9 @@ public class NavigationDrawer extends AppCompatActivity {
                     MenuItem checkedItem = navigationView.getCheckedItem();
                     int currentItem = checkedItem == null ? 0 : checkedItem.getItemId();
 
+                    menuItem.setChecked(true);
                     drawerLayout.closeDrawers();
                     int selectedItem = menuItem.getItemId();
-                    if(selectedItem != R.id.nav_report_issue)
-                        menuItem.setChecked(true);
 
                     Class fragmentClass = null;
                     switch (selectedItem) {
@@ -120,9 +119,12 @@ public class NavigationDrawer extends AppCompatActivity {
                                 fragmentClass = QRScan.class;
                             break;
                         case R.id.nav_report_issue:
+                            if(checkedItem != null)
+                                checkedItem.setChecked(true);
                             Intent reportIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sites.google.com/view/hcr-points/home"));
                             reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(reportIntent);
+                            break;
                         default:
                             fragmentClass = SubmitPoints.class;
                             break;

@@ -1,22 +1,18 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import Models.PointLog;
@@ -26,14 +22,14 @@ import Utils.SingletonInterface;
 
 public class ApprovePoints extends Fragment {
     private Singleton singleton;
-    private Activity activity;
+    private AppCompatActivity activity;
     private ProgressBar spinner;
     private ListView approveList;
 
     @Override
     public void onAttach(Context context){
         super.onAttach(context);
-        activity = getActivity();
+        activity = (AppCompatActivity) getActivity();
     }
 
     @Override
@@ -47,6 +43,7 @@ public class ApprovePoints extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Approve Points");
         View view = inflater.inflate(R.layout.approve_points, container, false);
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.approve_list_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> getUnconfirmedPoints(swipeRefresh));

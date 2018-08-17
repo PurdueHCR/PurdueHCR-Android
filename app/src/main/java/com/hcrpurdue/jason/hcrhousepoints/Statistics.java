@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,7 @@ public class Statistics extends Fragment {
     private Resources resources;
     private String packageName;
     private ProgressBar progressBar;
+    private AppCompatActivity activity;
 
     @Override
     public void onAttach(Context context) {
@@ -49,6 +51,7 @@ public class Statistics extends Fragment {
         super.onCreate(savedInstanceState);
         singleton = Singleton.getInstance();
         resources = getResources();
+        activity = (AppCompatActivity) getActivity();
         progressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.navigationProgressBar);
         progressBar.setVisibility(View.VISIBLE);
     }
@@ -57,6 +60,7 @@ public class Statistics extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.statistics, container, false);
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Statistics");
 
         String house = singleton.getHouse();
         String floorText = house + " - " + singleton.getFloorName();

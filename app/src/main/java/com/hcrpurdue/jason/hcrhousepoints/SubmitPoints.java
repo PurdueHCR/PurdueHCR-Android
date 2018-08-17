@@ -1,10 +1,10 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
-import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import Models.PointType;
 import Utils.Singleton;
@@ -33,14 +34,14 @@ import Utils.SingletonInterface;
 public class SubmitPoints extends Fragment {
     private Singleton singleton;
     private Context context;
-    private Activity activity;
+    private AppCompatActivity activity;
     private ProgressBar progressBar;
 
     @Override
     public void onAttach(Context context){
         super.onAttach(context);
         this.context = context;
-        activity = getActivity();
+        activity = (AppCompatActivity) getActivity();
     }
 
     @Override
@@ -54,6 +55,7 @@ public class SubmitPoints extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.submit_points, container, false);
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
         // Sets the house picture
         try {
             int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", activity.getPackageName());

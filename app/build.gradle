@@ -6,8 +6,8 @@ android {
         applicationId "com.hcrpurdue.jason.hcrhousepoints"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 14
-        versionName "1.2.0"
+        versionCode 15
+        versionName "1.2.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

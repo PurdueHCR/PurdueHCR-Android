@@ -50,7 +50,6 @@ public class FirebaseUtil {
      * @param fui         FirebaseUtilInterface: Implement the CompleteWithErrors(Exception e). Exception will be null if no Exception is recieved
      */
     public void submitPointLog(PointLog log, String documentID, String house, String userID, boolean preapproved, final FirebaseUtilInterface fui) {
-        System.out.println("YO: submit point log");
         log.setResidentRef(db.collection("Users").document(userID));
         int multiplier = (preapproved) ? 1 : -1;
 
@@ -66,7 +65,6 @@ public class FirebaseUtil {
         // If the pointLog does not care about its id, add value to the database with random ID
         if (TextUtils.isEmpty(documentID)) {
             //Add a value to the Points collection in a house
-            System.out.println("YO: Submit point for no doc id");
             db.collection("House").document(house).collection("Points")
                     .add(data)
                     // add an action listener to handle the event when it goes Async
