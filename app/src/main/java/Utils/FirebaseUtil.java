@@ -266,7 +266,7 @@ public class FirebaseUtil {
                             if (task.isSuccessful()) {
                                 Map<String, Object> data = task.getResult().getData();
                                 if (data != null)
-                                    fui.onUserGetSuccess((String) data.get("FloorID"), (String) data.get("House"), (String) data.get("Name"), ((Long) data.get("Permission Level")).intValue(), ((Long) data.get("TotalPoints")).intValue());
+                                    fui.onUserGetSuccess((String) data.get("FloorID"), (String) data.get("House"), (String) data.get("Name"), ((Long) data.get("Permission Level")).intValue());
                                 else
                                     fui.onError(new IllegalStateException("Data is null"), context);
                             } else {
@@ -278,7 +278,7 @@ public class FirebaseUtil {
                 );
     }
 
-    public void getUnconfirmedPoints(String house, String floorId, final FirebaseUtilInterface fui) {
+    public void getUnconfirmedPoints(String house, String floorId, List<PointType> pointTypes, final FirebaseUtilInterface fui) {
         CollectionReference housePointRef = db.collection("House").document(house).collection("Points");
         housePointRef.whereLessThan("PointTypeID", 0).get()
                 .addOnCompleteListener((Task<QuerySnapshot> task) -> {
@@ -297,7 +297,12 @@ public class FirebaseUtil {
                                     int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
                                     String resident = (String) document.get("Resident");
                                     Object ref = document.get("ResidentRef");
-                                    PointType pointType = Singleton.getInstance().getTypeWithPointId(Math.abs(pointTypeId));
+                                    PointType pointType = null;
+                                    for (PointType type : pointTypes) {
+                                        if (type.getPointID() == Math.abs(pointTypeId)) {
+                                            pointType = type;
+                                        }
+                                    }
                                     PointLog log = new PointLog(description, resident, pointType, floorId);
                                     if (ref != null) {
                                         log.setResidentRef((DocumentReference) ref);
@@ -312,7 +317,12 @@ public class FirebaseUtil {
                                     int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
                                     String resident = (String) document.get("Resident");
                                     Object ref = document.get("ResidentRef");
-                                    PointType pointType = Singleton.getInstance().getTypeWithPointId(Math.abs(pointTypeId));
+                                    PointType pointType = null;
+                                    for (PointType type : pointTypes) {
+                                        if (type.getPointID() == Math.abs(pointTypeId)) {
+                                            pointType = type;
+                                        }
+                                    }
                                     PointLog log = new PointLog(description, resident, pointType, floorId);
                                     if (ref != null) {
                                         log.setResidentRef((DocumentReference) ref);

@@ -35,7 +35,7 @@ public class ApprovePoints extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        singleton = Singleton.getInstance();
+        singleton = Singleton.getInstance(getContext());
         spinner = activity.findViewById(R.id.navigationProgressBar);
         spinner.setVisibility(View.VISIBLE);
     }
@@ -43,12 +43,13 @@ public class ApprovePoints extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Approve Points");
         View view = inflater.inflate(R.layout.approve_points, container, false);
+        singleton.getCachedData();
+        getUnconfirmedPoints(null);
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Approve Points");
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.approve_list_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> getUnconfirmedPoints(swipeRefresh));
         approveList = view.findViewById(R.id.approve_list);
-        getUnconfirmedPoints(null);
         return view;
     }
 

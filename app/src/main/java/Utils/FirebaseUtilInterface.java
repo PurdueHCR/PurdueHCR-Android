@@ -20,7 +20,7 @@ public interface FirebaseUtilInterface {
     default void onPointTypeComplete(List<PointType> data) {
     }
 
-    default void onUserGetSuccess(String floor, String house, String name, int permission, int points) {
+    default void onUserGetSuccess(String floor, String house, String name, int permission) {
     }
 
     default void onSuccess() {

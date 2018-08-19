@@ -38,7 +38,7 @@ public class SubmitPoints extends Fragment {
     private ProgressBar progressBar;
 
     @Override
-    public void onAttach(Context context){
+    public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
         activity = (AppCompatActivity) getActivity();
@@ -47,15 +47,16 @@ public class SubmitPoints extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        singleton = Singleton.getInstance();
+        singleton = Singleton.getInstance(getContext());
         progressBar = activity.findViewById(R.id.navigationProgressBar);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+        progressBar.setVisibility(View.VISIBLE);
         View view = inflater.inflate(R.layout.submit_points, container, false);
-        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
+        singleton.getCachedData();
         // Sets the house picture
         try {
             int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", activity.getPackageName());
@@ -64,11 +65,15 @@ public class SubmitPoints extends Fragment {
             Toast.makeText(context, "Failed to load house image", Toast.LENGTH_LONG).show();
             Log.e("SubmitPoints", "Error loading house image", e);
         }
-        view.findViewById(R.id.submitPointButton).setOnClickListener(v -> submitPoint());
+        if (singleton.getPointTypeList() != null)
+            progressBar.setVisibility(View.GONE);
+
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
+        view.findViewById(R.id.submitPointButton).setOnClickListener(v -> submitPoint(view));
+
         Bundle bundle = this.getArguments();
-        if(bundle != null)
-        {
-            if(bundle.getBoolean("showSuccess")){
+        if (bundle != null) {
+            if (bundle.getBoolean("showSuccess")) {
                 animateSuccess(view);
             }
         }
@@ -94,6 +99,8 @@ public class SubmitPoints extends Fragment {
                     SimpleAdapter adapter = new SimpleAdapter(context, formattedPointTypes, android.R.layout.simple_list_item_2, new String[]{"text", "subText"}, new int[]{android.R.id.text1, android.R.id.text2});
                     adapter.setDropDownViewResource(android.R.layout.simple_list_item_2);
                     ((Spinner) view.findViewById(R.id.pointTypeSpinner)).setAdapter(adapter);
+                    if (singleton.getHouse() != null)
+                        progressBar.setVisibility(View.GONE);
                 }
             }, context);
         } catch (Exception e) {
@@ -102,14 +109,12 @@ public class SubmitPoints extends Fragment {
         }
     }
 
-    public void submitPoint() {
+    public void submitPoint(View view) {
         TextView descriptionInput = activity.findViewById(R.id.descriptionInput);
         if (TextUtils.isEmpty(descriptionInput.getText().toString()))
             Toast.makeText(context, "Description is Required", Toast.LENGTH_SHORT).show();
         else {
-            View view = getView();
             progressBar.setVisibility(View.VISIBLE);
-            assert view != null;
             singleton.submitPoints(((EditText) view.findViewById(R.id.descriptionInput)).getText().toString(),
                     singleton.getPointTypeList().get(((Spinner) view.findViewById(R.id.pointTypeSpinner)).getSelectedItemPosition()),
                     new SingletonInterface() {
@@ -123,7 +128,7 @@ public class SubmitPoints extends Fragment {
         }
     }
 
-    private void animateSuccess(View view){
+    private void animateSuccess(View view) {
         LinearLayout successLayout = view.findViewById(R.id.success_layout);
         AlphaAnimation showAnim = new AlphaAnimation(0.0f, 1.0f);
         showAnim.setDuration(1000);
@@ -142,11 +147,6 @@ public class SubmitPoints extends Fragment {
 
             @Override
             public void onAnimationRepeat(Animation animation) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
             }
         });
         successLayout.startAnimation(showAnim);

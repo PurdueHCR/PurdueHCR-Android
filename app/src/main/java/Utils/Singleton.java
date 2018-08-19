@@ -20,6 +20,7 @@ import Models.Reward;
 public class Singleton {
     private static Singleton instance = null;
     private FirebaseUtil fbutil = new FirebaseUtil();
+    private CacheUtil cacheUtil = new CacheUtil();
     private List<PointType> pointTypeList = null;
     private ArrayList<PointLog> unconfirmedPointList = null;
     private String userID = null;
@@ -29,23 +30,26 @@ public class Singleton {
     private int permissionLevel = 0;
     private int totalPoints = 0;
     private List<House> houseList = null;
-    public List<Reward> rewardList = null;
+    private List<Reward> rewardList = null;
 
     private Singleton() {
         // Exists only to defeat instantiation. Get rekt, instantiation
     }
 
-    public void setApplicationContext(Context c) {
+    private void setApplicationContext(Context c) {
         fbutil.setApplicationContext(c);
+        cacheUtil.setApplicationContext(c);
     }
 
-    public static Singleton getInstance() {
+    public static Singleton getInstance(Context context) {
         if (instance == null) {
-            FirebaseAuth auth = FirebaseAuth.getInstance();
-            instance = new Singleton();
-            if (auth.getCurrentUser() != null)
-                instance.getUserData(auth.getUid(), new SingletonInterface() {
-                });
+            synchronized (Singleton.class) {
+                if (instance == null) {
+                    instance = new Singleton();
+                    instance.setApplicationContext(context);
+                    return instance;
+                }
+            }
         }
         return instance;
     }
@@ -70,7 +74,7 @@ public class Singleton {
     }
 
     public void getUnconfirmedPoints(final SingletonInterface si) {
-        fbutil.getUnconfirmedPoints(houseName, floorName, new FirebaseUtilInterface() {
+        fbutil.getUnconfirmedPoints(houseName, floorName, pointTypeList, new FirebaseUtilInterface() {
             @Override
             public void onGetUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
                 unconfirmedPointList = logs;
@@ -79,39 +83,56 @@ public class Singleton {
         });
     }
 
-    public PointType getTypeWithPointId(int pointId) {
-        for (int i = 0; i < this.pointTypeList.size(); i++) {
-            if (this.pointTypeList.get(i).getPointID() == pointId) {
-                return this.pointTypeList.get(i);
-            }
-        }
-        return null;
-    }
-
     public List<PointType> getPointTypeList() {
         return pointTypeList;
     }
 
-    public void setUserData(String floor, String house, String n, int permission, int points, String id) {
+    public void setUserData(String floor, String house, String n, int permission, String id) {
         floorName = floor;
         houseName = house;
         name = n;
         permissionLevel = permission;
-        totalPoints = points;
         userID = id;
+        cacheUtil.writeToCache(id, floor, house, name, permission);
     }
 
-    public void getUserData(String id, SingletonInterface si) {
-        if (houseName == null)
+    public boolean cacheFileExists() {
+        return cacheUtil.cacheFileExists();
+    }
+
+    public void getUserDataNoCache(SingletonInterface si) {
+        String id = FirebaseAuth.getInstance().getUid();
+        if (houseName == null) {
             fbutil.getUserData(id, new FirebaseUtilInterface() {
                 @Override
-                public void onUserGetSuccess(String floor, String house, String name, int permission, int points) {
-                    setUserData(floor, house, name, permission, points, id);
+                public void onUserGetSuccess(String floor, String house, String name, int permission) {
+                    setUserData(floor, house, name, permission, id);
                     si.onSuccess();
                 }
             });
-        else
+        } else
             si.onSuccess();
+    }
+
+    public void getUserData(SingletonInterface si) {
+        String id = FirebaseAuth.getInstance().getUid();
+        if (houseName == null) {
+            cacheUtil.getCacheData(this);
+            fbutil.getUserData(id, new FirebaseUtilInterface() {
+                @Override
+                public void onUserGetSuccess(String floor, String house, String name, int permission) {
+                    setUserData(floor, house, name, permission, id);
+                    si.onSuccess();
+                }
+            });
+        } else
+            si.onSuccess();
+    }
+
+    public void getCachedData() {
+        if (houseName == null) {
+            cacheUtil.getCacheData(this);
+        }
     }
 
     public String getName() {
@@ -139,7 +160,12 @@ public class Singleton {
 
     public void submitPointWithLink(Link link, SingletonInterface si) {
         if (link.isEnabled()) {
-            PointType type = getTypeWithPointId(link.getPointTypeId());
+            PointType type = null;
+            for (PointType pointType : pointTypeList) {
+                if (pointType.getPointID() == link.getPointTypeId()) {
+                    type = pointType;
+                }
+            }
             PointLog log = new PointLog(link.getDescription(), name, type, floorName);
             fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, true, new FirebaseUtilInterface() {
                 @Override
@@ -183,7 +209,7 @@ public class Singleton {
             public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
                 houseList = houses;
                 totalPoints = userPoints;
-                if(getRewards)
+                if (getRewards)
                     rewardList = rewards;
                 si.onGetPointStatisticsSuccess(houseList, totalPoints, rewardList);
             }
@@ -195,11 +221,12 @@ public class Singleton {
         houseName = null;
         name = null;
         permissionLevel = 0;
-        totalPoints = 0;
         userID = null;
+
+        cacheUtil.deleteCache();
     }
 
-    public void getFloorCodes(SingletonInterface si){
+    public void getFloorCodes(SingletonInterface si) {
         fbutil.getFloorCodes(new FirebaseUtilInterface() {
             @Override
             public void onGetFloorCodesSuccess(Map<String, Pair<String, String>> data) {

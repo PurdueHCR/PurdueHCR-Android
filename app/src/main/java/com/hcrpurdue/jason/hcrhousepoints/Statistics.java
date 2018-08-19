@@ -49,7 +49,7 @@ public class Statistics extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        singleton = Singleton.getInstance();
+        singleton = Singleton.getInstance(getContext());
         resources = getResources();
         activity = (AppCompatActivity) getActivity();
         progressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.navigationProgressBar);
@@ -60,23 +60,24 @@ public class Statistics extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.statistics, container, false);
-        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Statistics");
-
-        String house = singleton.getHouse();
-        String floorText = house + " - " + singleton.getFloorName();
+        BarChart chart = view.findViewById(R.id.statistics_point_chart);
         packageName = context.getPackageName();
 
+        singleton.getCachedData();
+        updatePointData(view, chart, null);
+        String house = singleton.getHouse();
+        String floorText = house + " - " + singleton.getFloorName();
         int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", packageName);
         ((ImageView) view.findViewById(R.id.statistics_house_icon)).setImageResource(drawableID);
         ((ImageView) view.findViewById(R.id.statistics_house_icon_small)).setImageResource(drawableID);
         ((TextView) view.findViewById(R.id.statistics_user_name)).setText(singleton.getName());
         ((TextView) view.findViewById(R.id.statistics_floor_name)).setText(floorText);
 
-        BarChart chart = view.findViewById(R.id.statistics_point_chart);
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Statistics");
+
 
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.statistics_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> updatePointData(view, chart, swipeRefresh));
-
 
         chart.getAxisLeft().setAxisMinimum(0);
         chart.getAxisLeft().setEnabled(false);
@@ -90,8 +91,6 @@ public class Statistics extends Fragment {
         chart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
         chart.setAutoScaleMinMaxEnabled(true);
         chart.invalidate();
-
-        updatePointData(view, chart, null);
 
         return view;
     }
@@ -140,8 +139,8 @@ public class Statistics extends Fragment {
                     if (housePoints < requiredPoints) {
                         String nextRewardText = "Next Reward: " + reward.getName();
                         String progressText = housePoints + "/" + requiredPoints;
-                        ((TextView)view.findViewById(R.id.statistics_next_reward)).setText(nextRewardText);
-                        ((TextView)view.findViewById(R.id.statistics_reward_progress)).setText(progressText);
+                        ((TextView) view.findViewById(R.id.statistics_next_reward)).setText(nextRewardText);
+                        ((TextView) view.findViewById(R.id.statistics_reward_progress)).setText(progressText);
                         ((ImageView) view.findViewById(R.id.statistics_reward_icon)).setImageResource(reward.getImageResource());
                         ProgressBar progressBar = view.findViewById(R.id.statistics_progress_bar);
                         progressBar.setMax(requiredPoints);
@@ -149,11 +148,11 @@ public class Statistics extends Fragment {
                         break;
                     }
                 }
-                if(housePoints >= requiredPoints){
+                if (housePoints >= requiredPoints) {
                     progressBar.setProgress(100);
                     ((ImageView) view.findViewById(R.id.statistics_reward_icon)).setImageResource(R.drawable.ic_check);
-                    ((TextView)view.findViewById(R.id.statistics_next_reward)).setText("No rewards left to get!");
-                    ((TextView)view.findViewById(R.id.statistics_reward_progress)).setText("");
+                    ((TextView) view.findViewById(R.id.statistics_next_reward)).setText("No rewards left to get!");
+                    ((TextView) view.findViewById(R.id.statistics_reward_progress)).setText("");
                 }
 
                 progressBar.setVisibility(View.GONE);

@@ -41,18 +41,19 @@ public class QRScan extends Fragment {
     AppCompatActivity activity;
     Context context;
     ProgressBar progressBar;
-    
+
     @Override
-    public void onAttach(Context context){
+    public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
         activity = (AppCompatActivity) getActivity();
     }
-    
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         progressBar = activity.findViewById(R.id.navigationProgressBar);
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -94,6 +95,8 @@ public class QRScan extends Fragment {
             }
         });
 
+        Singleton singleton = Singleton.getInstance(getContext());
+        singleton.getCachedData();
         detector.setProcessor(new Detector.Processor<Barcode>() {
             @Override
             public void release() {
@@ -111,7 +114,6 @@ public class QRScan extends Fragment {
                         String path = barcode.displayValue.substring(11);
                         String[] parts = path.split("/");
                         if (parts.length == 2) {
-                            Singleton singleton = Singleton.getInstance();
                             String linkId = parts[1].replace("/", "");
                             singleton.getLinkWithLinkId(linkId, new SingletonInterface() {
                                 @Override
@@ -141,13 +143,13 @@ public class QRScan extends Fragment {
                                         public void onSuccess() {
                                             // onFullSuccess for Ctrl+F
                                             try {
-                                                ((NavigationView)activity.findViewById(R.id.nav_view)).getMenu().getItem(0).setChecked(true);
+                                                ((NavigationView) activity.findViewById(R.id.nav_view)).getMenu().getItem(0).setChecked(true);
                                                 handler.post(() -> progressBar.setVisibility(View.GONE));
                                                 Bundle bundle = new Bundle();
                                                 bundle.putBoolean("showSuccess", true);
                                                 Fragment fragment = SubmitPoints.class.newInstance();
                                                 fragment.setArguments(bundle);
-                                                activity.getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).commit();
+                                                activity.getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(Integer.toString(R.id.nav_scanner)).commit();
                                             } catch (Exception e) {
                                                 handler.post(() -> Toast.makeText(context, "Point submitted successfully, please return to another page", Toast.LENGTH_SHORT).show());
                                             }
@@ -206,8 +208,8 @@ public class QRScan extends Fragment {
                                 try {
                                     cameraSource.start(cameraView.getHolder());
                                 } catch (IOException ex) {
-                                        handler.post(() -> Toast.makeText(context, "Error in starting camera", Toast.LENGTH_SHORT).show());
-                                        Log.e("QRScanner", "Error in starting camera", ex);
+                                    handler.post(() -> Toast.makeText(context, "Error in starting camera", Toast.LENGTH_SHORT).show());
+                                    Log.e("QRScanner", "Error in starting camera", ex);
                                 }
                             });
                         } catch (SecurityException ex) {
@@ -218,6 +220,8 @@ public class QRScan extends Fragment {
                 }
             }
         });
+        progressBar.setVisibility(View.GONE);
+
         return view;
     }
 }
