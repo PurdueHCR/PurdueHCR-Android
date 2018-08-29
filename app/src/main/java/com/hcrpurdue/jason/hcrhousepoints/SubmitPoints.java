@@ -7,11 +7,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -32,7 +35,7 @@ import Utils.Singleton;
 import Utils.SingletonInterface;
 
 public class SubmitPoints extends Fragment {
-    private Singleton singleton;
+    static private Singleton singleton;
     private Context context;
     private AppCompatActivity activity;
     private ProgressBar progressBar;
@@ -41,44 +44,54 @@ public class SubmitPoints extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
-        activity = (AppCompatActivity) getActivity();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         singleton = Singleton.getInstance(getContext());
-        progressBar = activity.findViewById(R.id.navigationProgressBar);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        progressBar.setVisibility(View.VISIBLE);
         View view = inflater.inflate(R.layout.submit_points, container, false);
         singleton.getCachedData();
         // Sets the house picture
         try {
-            int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", activity.getPackageName());
+            int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", context.getPackageName());
             ((ImageView) view.findViewById(R.id.houseLogoImageView)).setImageResource(drawableID);
         } catch (Exception e) {
             Toast.makeText(context, "Failed to load house image", Toast.LENGTH_LONG).show();
             Log.e("SubmitPoints", "Error loading house image", e);
         }
-        if (singleton.getPointTypeList() != null)
-            progressBar.setVisibility(View.GONE);
 
-        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
-        view.findViewById(R.id.submitPointButton).setOnClickListener(v -> submitPoint(view));
-
-        Bundle bundle = this.getArguments();
-        if (bundle != null) {
-            if (bundle.getBoolean("showSuccess")) {
-                animateSuccess(view);
-            }
-        }
-        getPointTypes(view);
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        activity = (AppCompatActivity) getActivity();
+        progressBar = Objects.requireNonNull(activity).findViewById(R.id.navigationProgressBar);
+        progressBar.setVisibility(View.VISIBLE);
+        View view = getView();
+
+        getPointTypes(view);
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
+        Objects.requireNonNull(view).findViewById(R.id.submitPointButton).setOnClickListener(v -> submitPoint(view));
+
+        ((EditText) view.findViewById(R.id.descriptionInput)).setOnEditorActionListener((textView, i, keyEvent) -> {
+            if (i == EditorInfo.IME_ACTION_DONE || (i == EditorInfo.IME_NULL && keyEvent.getAction() == KeyEvent.ACTION_DOWN)) {
+                submitPoint(view);
+                View currentFocus = activity.getCurrentFocus();
+                if (currentFocus != null) {
+                    InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    Objects.requireNonNull(imm).hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+                }
+            }
+            return true;
+        });
     }
 
 
@@ -99,10 +112,9 @@ public class SubmitPoints extends Fragment {
                     SimpleAdapter adapter = new SimpleAdapter(context, formattedPointTypes, android.R.layout.simple_list_item_2, new String[]{"text", "subText"}, new int[]{android.R.id.text1, android.R.id.text2});
                     adapter.setDropDownViewResource(android.R.layout.simple_list_item_2);
                     ((Spinner) view.findViewById(R.id.pointTypeSpinner)).setAdapter(adapter);
-                    if (singleton.getHouse() != null)
-                        progressBar.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
                 }
-            }, context);
+            });
         } catch (Exception e) {
             Toast.makeText(context, "Failed to load point types", Toast.LENGTH_LONG).show();
             Log.e("SubmitPoints", "Error loading point types", e);
@@ -122,33 +134,9 @@ public class SubmitPoints extends Fragment {
                         public void onSuccess() {
                             descriptionInput.setText("");
                             progressBar.setVisibility(View.GONE);
-                            animateSuccess(view);
+                            ((NavigationDrawer) activity).animateSuccess();
                         }
                     });
         }
-    }
-
-    private void animateSuccess(View view) {
-        LinearLayout successLayout = view.findViewById(R.id.success_layout);
-        AlphaAnimation showAnim = new AlphaAnimation(0.0f, 1.0f);
-        showAnim.setDuration(1000);
-        showAnim.setRepeatCount(2);
-        showAnim.setRepeatMode(Animation.REVERSE);
-        showAnim.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                successLayout.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                successLayout.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-            }
-        });
-        successLayout.startAnimation(showAnim);
     }
 }

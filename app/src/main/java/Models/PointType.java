@@ -34,8 +34,11 @@ public class PointType implements Comparable<PointType> {
 
     @Override
     public int compareTo(@NonNull PointType other) {
-        if(residentsCanSubmit == other.residentsCanSubmit)
-            return pointID - other.pointID;
+        if (residentsCanSubmit == other.residentsCanSubmit) {
+            if(pointValue == other.pointValue)
+                return pointID - other.pointID;
+            return pointValue - other.pointValue;
+        }
         return Boolean.compare(other.residentsCanSubmit, residentsCanSubmit);
     }
 }

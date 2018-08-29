@@ -33,6 +33,6 @@ public class House implements Comparable<House> {
 
     @Override
     public int compareTo(@NonNull House house) {
-        return house.totalPoints - totalPoints;
+        return Float.compare(house.pointsPerResident, pointsPerResident);
     }
 }

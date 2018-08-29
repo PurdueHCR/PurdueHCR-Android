@@ -33,12 +33,11 @@ import Utils.Singleton;
 import Utils.SingletonInterface;
 
 public class Statistics extends Fragment {
-    private Singleton singleton;
+    static private Singleton singleton;
     private Context context;
     private Resources resources;
     private String packageName;
     private ProgressBar progressBar;
-    private AppCompatActivity activity;
 
     @Override
     public void onAttach(Context context) {
@@ -51,9 +50,6 @@ public class Statistics extends Fragment {
         super.onCreate(savedInstanceState);
         singleton = Singleton.getInstance(getContext());
         resources = getResources();
-        activity = (AppCompatActivity) getActivity();
-        progressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.navigationProgressBar);
-        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -64,7 +60,6 @@ public class Statistics extends Fragment {
         packageName = context.getPackageName();
 
         singleton.getCachedData();
-        updatePointData(view, chart, null);
         String house = singleton.getHouse();
         String floorText = house + " - " + singleton.getFloorName();
         int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", packageName);
@@ -72,9 +67,6 @@ public class Statistics extends Fragment {
         ((ImageView) view.findViewById(R.id.statistics_house_icon_small)).setImageResource(drawableID);
         ((TextView) view.findViewById(R.id.statistics_user_name)).setText(singleton.getName());
         ((TextView) view.findViewById(R.id.statistics_floor_name)).setText(floorText);
-
-        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Statistics");
-
 
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.statistics_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> updatePointData(view, chart, swipeRefresh));
@@ -93,6 +85,20 @@ public class Statistics extends Fragment {
         chart.invalidate();
 
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        progressBar = Objects.requireNonNull(activity).findViewById(R.id.navigationProgressBar);
+        progressBar.setVisibility(View.VISIBLE);
+
+        View view = Objects.requireNonNull(getView());
+        updatePointData(view, view.findViewById(R.id.statistics_point_chart), null);
+        progressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.navigationProgressBar);
+        progressBar.setVisibility(View.VISIBLE);
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Statistics");
     }
 
     private void updatePointData(View view, BarChart chart, SwipeRefreshLayout swipeRefreshLayout) {
@@ -149,7 +155,7 @@ public class Statistics extends Fragment {
                     }
                 }
                 if (housePoints >= requiredPoints) {
-                    progressBar.setProgress(100);
+                    ((ProgressBar) view.findViewById(R.id.statistics_progress_bar)).setProgress(100);
                     ((ImageView) view.findViewById(R.id.statistics_reward_icon)).setImageResource(R.drawable.ic_check);
                     ((TextView) view.findViewById(R.id.statistics_next_reward)).setText("No rewards left to get!");
                     ((TextView) view.findViewById(R.id.statistics_reward_progress)).setText("");

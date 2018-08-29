@@ -21,23 +21,21 @@ import Utils.Singleton;
 import Utils.SingletonInterface;
 
 public class ApprovePoints extends Fragment {
-    private Singleton singleton;
-    private AppCompatActivity activity;
-    private ProgressBar spinner;
+    static private Singleton singleton;
+    private Context context;
+    private ProgressBar progressBar;
     private ListView approveList;
 
     @Override
-    public void onAttach(Context context){
+    public void onAttach(Context context) {
         super.onAttach(context);
-        activity = (AppCompatActivity) getActivity();
+        this.context = context;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        singleton = Singleton.getInstance(getContext());
-        spinner = activity.findViewById(R.id.navigationProgressBar);
-        spinner.setVisibility(View.VISIBLE);
+        singleton = Singleton.getInstance(context);
     }
 
     @Override
@@ -45,22 +43,30 @@ public class ApprovePoints extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.approve_points, container, false);
         singleton.getCachedData();
-        getUnconfirmedPoints(null);
-        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Approve Points");
+        approveList = view.findViewById(R.id.approve_list);
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.approve_list_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> getUnconfirmedPoints(swipeRefresh));
-        approveList = view.findViewById(R.id.approve_list);
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        AppCompatActivity activity = (AppCompatActivity) Objects.requireNonNull(getActivity());
+        progressBar = activity.findViewById(R.id.navigationProgressBar);
+        getUnconfirmedPoints(null);
+        progressBar.setVisibility(View.VISIBLE);
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Approve Points");
     }
 
     private void getUnconfirmedPoints(SwipeRefreshLayout swipeRefresh) {
         singleton.getUnconfirmedPoints(new SingletonInterface() {
             @Override
             public void onUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
-                ApprovePointListAdapter adapter = new ApprovePointListAdapter(logs, getContext(), singleton.getHouse(), singleton.getName(), spinner);
+                ApprovePointListAdapter adapter = new ApprovePointListAdapter(logs, context, singleton.getHouse(), singleton.getName(), progressBar);
                 approveList.setAdapter(adapter);
-                spinner.setVisibility(View.GONE);
-                if(swipeRefresh != null)
+                progressBar.setVisibility(View.GONE);
+                if (swipeRefresh != null)
                     swipeRefresh.setRefreshing(false);
             }
         });

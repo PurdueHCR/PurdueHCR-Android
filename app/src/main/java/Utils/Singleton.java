@@ -55,7 +55,7 @@ public class Singleton {
     }
 
 
-    public void getPointTypes(final SingletonInterface si, Context context) {
+    public void getPointTypes(SingletonInterface si) {
         if (pointTypeList == null)
             fbutil.getPointTypes(new FirebaseUtilInterface() {
                 @Override
@@ -64,7 +64,7 @@ public class Singleton {
                         pointTypeList = data;
                         si.onPointTypeComplete(data);
                     } else {
-                        si.onError(new IllegalStateException("Point Type list is empty"), context);
+                        si.onError(new IllegalStateException("Point Type list is empty"), fbutil.getContext());
                     }
                 }
             });
@@ -73,12 +73,17 @@ public class Singleton {
         }
     }
 
-    public void getUnconfirmedPoints(final SingletonInterface si) {
-        fbutil.getUnconfirmedPoints(houseName, floorName, pointTypeList, new FirebaseUtilInterface() {
+    public void getUnconfirmedPoints(SingletonInterface si) {
+        getPointTypes(new SingletonInterface() {
             @Override
-            public void onGetUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
-                unconfirmedPointList = logs;
-                si.onUnconfirmedPointsSuccess(logs);
+            public void onPointTypeComplete(List<PointType> data) {
+                fbutil.getUnconfirmedPoints(houseName, floorName, pointTypeList, new FirebaseUtilInterface() {
+                    @Override
+                    public void onGetUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
+                        unconfirmedPointList = logs;
+                        si.onUnconfirmedPointsSuccess(logs);
+                    }
+                });
             }
         });
     }
@@ -160,33 +165,38 @@ public class Singleton {
 
     public void submitPointWithLink(Link link, SingletonInterface si) {
         if (link.isEnabled()) {
-            PointType type = null;
-            for (PointType pointType : pointTypeList) {
-                if (pointType.getPointID() == link.getPointTypeId()) {
-                    type = pointType;
-                }
-            }
-            PointLog log = new PointLog(link.getDescription(), name, type, floorName);
-            fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, true, new FirebaseUtilInterface() {
-                @Override
-                public void onSuccess() {
-                    si.onSuccess();
-                }
+            getPointTypes(new SingletonInterface() {
+                              @Override
+                              public void onPointTypeComplete(List<PointType> data) {
+                                  PointType type = null;
+                                  for (PointType pointType : pointTypeList) {
+                                      if (pointType.getPointID() == link.getPointTypeId()) {
+                                          type = pointType;
+                                      }
+                                  }
+                                  PointLog log = new PointLog(link.getDescription(), name, type, floorName);
+                                  fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, true, new FirebaseUtilInterface() {
+                                      @Override
+                                      public void onSuccess() {
+                                          si.onSuccess();
+                                      }
 
-                @Override
-                public void onError(Exception e, Context c) {
-                    if (e.getLocalizedMessage().equals("Code was already submitted")) {
-                        Toast.makeText(c, "You have already submitted this code.",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        si.onError(e, c);
-                    }
-                }
-            });
+                                      @Override
+                                      public void onError(Exception e, Context c) {
+                                          if (e.getLocalizedMessage().equals("Code was already submitted")) {
+                                              Toast.makeText(c, "You have already submitted this code.",
+                                                      Toast.LENGTH_SHORT).show();
+                                          } else {
+                                              si.onError(e, c);
+                                          }
+                                      }
+                                  });
+                              }
+                          }
+            );
         } else {
             si.onError(new Exception("Link is not enabled."), fbutil.getContext());
         }
-
     }
 
     public String getFloorName() {
@@ -233,5 +243,9 @@ public class Singleton {
                 si.onGetFloorCodesSuccess(data);
             }
         });
+    }
+
+    public boolean showDialog(){
+        return cacheUtil.showDialog();
     }
 }

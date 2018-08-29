@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -14,13 +15,20 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +40,7 @@ import Utils.Singleton;
 
 public class NavigationDrawer extends AppCompatActivity {
     private DrawerLayout drawerLayout;
-    private Singleton singleton;
+    static private Singleton singleton;
     private FragmentManager fragmentManager;
     private Menu menu;
 
@@ -76,35 +84,55 @@ public class NavigationDrawer extends AppCompatActivity {
 
         fragmentManager = getSupportFragmentManager();
 
-        try {
-            fragmentManager.beginTransaction().replace(R.id.content_frame, SubmitPoints.class.newInstance()).commit();
-        } catch (Exception e) {
-            Toast.makeText(this, "Error loading SubmitPoints Frament", Toast.LENGTH_LONG).show();
-            Log.e("NavigationDrawer", "Failed to load initial fragment", e);
+        if (fragmentManager.getFragments().isEmpty()) {
+            try {
+                fragmentManager.beginTransaction().replace(R.id.content_frame, SubmitPoints.class.newInstance(), Integer.toString(R.id.nav_submit)).commit();
+            } catch (Exception e) {
+                Toast.makeText(this, "Error loading SubmitPoints Frament", Toast.LENGTH_LONG).show();
+                Log.e("NavigationDrawer", "Failed to load initial fragment", e);
+            }
         }
 
+        Bundle extras = getIntent().getExtras();
+        if (extras != null && extras.containsKey("PointSubmitted") && extras.getBoolean("PointSubmitted"))
+            animateSuccess();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        assert actionBar != null;
+        Objects.requireNonNull(actionBar);
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         drawerLayout = findViewById(R.id.drawer_layout);
+
+        if(singleton.showDialog()){
+            new AlertDialog.Builder(this)
+                    .setTitle("Development Committee")
+                    .setMessage("Are you interested in helping development for the Purdue HCR app? If so, click \"I'm In\" below to join the Discord where we'll be coordinating everything!")
+                    .setPositiveButton("I'm in!", (dialog, whichButton) -> {
+                        Intent reportIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://discordapp.com/invite/jptXrYG"));
+                        reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(reportIntent);
+                    })
+                    .setNegativeButton("No thanks", null).show();
+        }
 
         navigationView.setNavigationItemSelectedListener(
                 menuItem -> {
                     MenuItem checkedItem = navigationView.getCheckedItem();
                     int currentItem = checkedItem == null ? 0 : checkedItem.getItemId();
 
-                    menuItem.setChecked(true);
                     drawerLayout.closeDrawers();
                     int selectedItem = menuItem.getItemId();
 
                     Class fragmentClass = null;
                     switch (selectedItem) {
                         case R.id.nav_signout:
-                            signOut();
+                            new AlertDialog.Builder(this)
+                                    .setTitle("Sign Out")
+                                    .setMessage("Are you sure you want to sign out?")
+                                    .setPositiveButton(android.R.string.yes, (dialog, whichButton) -> signOut())
+                                    .setNegativeButton(android.R.string.no, null).show();
                             break;
                         case R.id.nav_submit:
                             fragmentClass = SubmitPoints.class;
@@ -122,8 +150,6 @@ public class NavigationDrawer extends AppCompatActivity {
                                 fragmentClass = QRScan.class;
                             break;
                         case R.id.nav_report_issue:
-                            if (checkedItem != null)
-                                checkedItem.setChecked(true);
                             Intent reportIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sites.google.com/view/hcr-points/home"));
                             reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(reportIntent);
@@ -134,17 +160,21 @@ public class NavigationDrawer extends AppCompatActivity {
                     }
 
                     if (fragmentClass != null && currentItem != selectedItem) {
-                        Fragment fragment = null;
-                        try {
-                            fragment = (Fragment) fragmentClass.newInstance();
-                        } catch (Exception e) {
-                            Toast.makeText(this, "Failed to load Fragment while changing views", Toast.LENGTH_LONG).show();
-                            Log.e("NavigationDrawer", "Failed to load initial fragment", e);
+                        Fragment fragment = fragmentManager.findFragmentByTag(Integer.toString(selectedItem));
+                        if (fragment == null) {
+                            try {
+                                fragment = (Fragment) fragmentClass.newInstance();
+                            } catch (Exception e) {
+                                Toast.makeText(this, "Failed to load Fragment while changing views", Toast.LENGTH_LONG).show();
+                                Log.e("NavigationDrawer", "Failed to load fragment on menu select", e);
+                            }
                         }
-                        assert fragment != null;
-                        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(Integer.toString(currentItem)).commit();
+
+                        Objects.requireNonNull(fragment);
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(selectedItem)).addToBackStack(Integer.toString(currentItem)).commit();
+                        return true;
                     }
-                    return true;
+                    return false;
                 });
     }
 
@@ -159,8 +189,9 @@ public class NavigationDrawer extends AppCompatActivity {
     }
 
     private void signOut() {
+        findViewById(R.id.navigationProgressBar).setVisibility(View.VISIBLE);
+        AsyncTask.execute(() -> singleton.clearUserData());
         FirebaseAuth.getInstance().signOut();
-        singleton.clearUserData();
         Intent intent = new Intent(this, Authentication.class);
         startActivity(intent);
         finish();
@@ -171,7 +202,7 @@ public class NavigationDrawer extends AppCompatActivity {
         if (requestCode == 10) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 try {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, QRScan.class.newInstance()).addToBackStack(null).commit();
+                    getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, QRScan.class.newInstance(), Integer.toString(R.id.nav_scanner)).addToBackStack(null).commit();
                 } catch (Exception e) {
                     Log.e("Navigation", "Failed to launch QR fragment", e);
                 }
@@ -195,5 +226,53 @@ public class NavigationDrawer extends AppCompatActivity {
             }
         }
         super.onBackPressed();
+    }
+
+    // This exists here and not in the SubmitPoints fragment to show properly when you scan QR codes.
+    public void animateSuccess() {
+        LinearLayout successLayout = findViewById(R.id.success_layout);
+        Animation showAnim = new AlphaAnimation(0.0f, 1.0f);
+        showAnim.setDuration(1000);
+        showAnim.setInterpolator(new DecelerateInterpolator());
+        showAnim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                successLayout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+
+        AlphaAnimation hideAnim = new AlphaAnimation(1.0f, 0.0f);
+        hideAnim.setDuration(1000);
+        hideAnim.setStartOffset(1000);
+        hideAnim.setInterpolator(new AccelerateInterpolator());
+        hideAnim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                successLayout.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+
+        AnimationSet animation = new AnimationSet(false);
+        animation.addAnimation(showAnim);
+        animation.addAnimation(hideAnim);
+
+        successLayout.startAnimation(animation);
     }
 }

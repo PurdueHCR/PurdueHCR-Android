@@ -283,10 +283,6 @@ public class FirebaseUtil {
         housePointRef.whereLessThan("PointTypeID", 0).get()
                 .addOnCompleteListener((Task<QuerySnapshot> task) -> {
                     if (task.isSuccessful()) {
-                        if (task.getResult().size() == 0) {
-                            Toast.makeText(context, "No unapproved points", Toast.LENGTH_SHORT).show();
-                            fui.onGetUnconfirmedPointsSuccess(new ArrayList<>());
-                        }
                         ArrayList<PointLog> logs = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String logFloorId = (String) document.get("FloorID");
@@ -311,7 +307,7 @@ public class FirebaseUtil {
                                     logs.add(log);
                                 }
                             } else {
-                                if (floorId.equals(logFloorId) || "SH".equals(logFloorId)) {
+                                if (floorId.equals(logFloorId) || "Shreve".equals(logFloorId)) {
                                     String logId = document.getId();
                                     String description = (String) document.get("Description");
                                     int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
@@ -331,10 +327,10 @@ public class FirebaseUtil {
                                     logs.add(log);
                                 }
                             }
-                            if (logs.isEmpty())
-                                Toast.makeText(context, "No unapproved points", Toast.LENGTH_SHORT).show();
-                            fui.onGetUnconfirmedPointsSuccess(logs);
                         }
+                        if (logs.isEmpty())
+                            Toast.makeText(context, "No unapproved points", Toast.LENGTH_SHORT).show();
+                        fui.onGetUnconfirmedPointsSuccess(logs);
                     } else {
                         fui.onError(task.getException(), context);
                     }

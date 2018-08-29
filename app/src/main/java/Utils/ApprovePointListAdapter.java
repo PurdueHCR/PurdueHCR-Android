@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import Models.PointLog;
 
@@ -53,7 +54,7 @@ public class ApprovePointListAdapter extends BaseAdapter implements ListAdapter 
         View view = convertView;
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            assert inflater != null;
+            Objects.requireNonNull(inflater);
             view = inflater.inflate(R.layout.approve_list_item, parent, false);
         }
 

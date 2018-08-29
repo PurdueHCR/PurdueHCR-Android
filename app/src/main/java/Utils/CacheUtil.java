@@ -15,6 +15,23 @@ import java.io.IOException;
 class CacheUtil {
     private Context context;
     private final String FILE_NAME = "user_data";
+    private final String DIALOG_FILE_NAME = "dialog_shown";
+
+    public boolean showDialog() {
+        try {
+            File file = new File(context.getCacheDir(), DIALOG_FILE_NAME);
+            if (file.exists())
+                return false;
+            FileWriter fileWriter = new FileWriter(file, false);
+            fileWriter.write("shown");
+            fileWriter.close();
+            return true;
+        } catch (IOException e) {
+            Toast.makeText(context, "Error with cache", Toast.LENGTH_SHORT).show();
+            Log.e("CacheUtil", "Error getting dialog cache", e);
+            return false;
+        }
+    }
 
     public void setApplicationContext(Context c) {
         context = c;
@@ -37,7 +54,7 @@ class CacheUtil {
         }
     }
 
-    public boolean cacheFileExists(){
+    public boolean cacheFileExists() {
         return new File(context.getCacheDir(), FILE_NAME).exists();
     }
 
@@ -51,13 +68,12 @@ class CacheUtil {
             String line;
             BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(context.getCacheDir(), FILE_NAME)));
 
-            while((line = bufferedReader.readLine()) != null){
-                String[] parts =  line.split(":");
-                if(parts.length == 2){
+            while ((line = bufferedReader.readLine()) != null) {
+                String[] parts = line.split(":");
+                if (parts.length == 2) {
                     String key = parts[0];
                     String value = parts[1];
-                    switch(key)
-                    {
+                    switch (key) {
                         case "userID":
                             userID = value;
                             break;
@@ -78,7 +94,7 @@ class CacheUtil {
             }
             bufferedReader.close();
             singleton.setUserData(floorName, houseName, name, permissionLevel, userID);
-        }catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             Toast.makeText(context, "Could not find cache file", Toast.LENGTH_SHORT).show();
             Log.e("CacheUtil", "Could not find cache file", e);
         } catch (IOException e) {
@@ -87,8 +103,8 @@ class CacheUtil {
         }
     }
 
-    public void deleteCache(){
-        if(!new File(context.getCacheDir(), FILE_NAME).delete()){
+    public void deleteCache() {
+        if (!new File(context.getCacheDir(), FILE_NAME).delete()) {
             Toast.makeText(context, "Could not delete cache file", Toast.LENGTH_SHORT).show();
             Log.e("CacheUtil", "Could not delete cache file");
         }

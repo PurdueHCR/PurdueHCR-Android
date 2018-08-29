@@ -16,7 +16,7 @@
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
         android:textAppearance="?attr/textAppearanceListItem"
-        app:layout_constraintEnd_toStartOf="@+id/approveButton"
+        app:layout_constraintEnd_toStartOf="@+id/denyButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

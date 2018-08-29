@@ -30,7 +30,7 @@ public class Authentication extends AppCompatActivity {
     private FirebaseAuth auth;
     private Map<String, Pair<String, String>> floorCodes;
     private FirebaseFirestore db;
-    private Singleton singleton;
+    static private Singleton singleton;
 
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,13 +88,17 @@ public class Authentication extends AppCompatActivity {
         auth.signInWithEmailAndPassword(emailText, passwordText)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        singleton.getUserData(new SingletonInterface() {
-
-                            public void onSuccess() {
-                                launchNextActivity();
-                            }
-
-                        });
+                        if (singleton.cacheFileExists()) {
+                            singleton.getUserData(new SingletonInterface() {
+                            });
+                            launchNextActivity();
+                        } else {
+                            singleton.getUserDataNoCache(new SingletonInterface() {
+                                public void onSuccess() {
+                                    launchNextActivity();
+                                }
+                            });
+                        }
                     } else {
                         Toast.makeText(this, "Authentication failed. Please verify your email and password and try again.",
                                 Toast.LENGTH_LONG).show();
@@ -222,6 +226,7 @@ public class Authentication extends AppCompatActivity {
 
     private void launchNextActivity() {
         Intent intent = new Intent(this, NavigationDrawer.class);
+        intent.putExtra("PointSubmitted", false);
         startActivity(intent);
         finish();
     }
@@ -231,10 +236,12 @@ public class Authentication extends AppCompatActivity {
         //Toast.LENGTH_SHORT).show();
         Intent intent = getIntent();
         if (intent != null && intent.getData() != null && intent.getData().getHost() != null) {
+            findViewById(R.id.authenticationProgressBar).setVisibility(View.VISIBLE);
             //Toast.makeText(getApplicationContext(), intent.getData().toString(),
             //Toast.LENGTH_SHORT).show();
             String host = intent.getData().getHost();
             String path = intent.getData().getPath();
+            singleton.getCachedData();
 
             //Toast.makeText(getApplicationContext(), "Host: "+host,
             //Toast.LENGTH_SHORT).show();
@@ -257,8 +264,10 @@ public class Authentication extends AppCompatActivity {
                                 singleton.submitPointWithLink(link, new SingletonInterface() {
                                     @Override
                                     public void onSuccess() {
-                                        Toast.makeText(Authentication.this, "Points submitted",
-                                                Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(Authentication.this, NavigationDrawer.class);
+                                        intent.putExtra("PointSubmitted", true);
+                                        startActivity(intent);
+                                        finish();
                                     }
 
                                     @Override

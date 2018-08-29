@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -46,20 +47,26 @@ public class QRScan extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         this.context = context;
-        activity = (AppCompatActivity) getActivity();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        progressBar = activity.findViewById(R.id.navigationProgressBar);
-        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        View view = inflater.inflate(R.layout.qr_reader, container, false);
+        return inflater.inflate(R.layout.qr_reader, container, false);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        activity = (AppCompatActivity) getActivity();
+        progressBar = Objects.requireNonNull(activity).findViewById(R.id.navigationProgressBar);
+        progressBar.setVisibility(View.VISIBLE);
+        View view = Objects.requireNonNull(getView());
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("QR Scanner");
 
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
@@ -145,11 +152,13 @@ public class QRScan extends Fragment {
                                             try {
                                                 ((NavigationView) activity.findViewById(R.id.nav_view)).getMenu().getItem(0).setChecked(true);
                                                 handler.post(() -> progressBar.setVisibility(View.GONE));
-                                                Bundle bundle = new Bundle();
-                                                bundle.putBoolean("showSuccess", true);
-                                                Fragment fragment = SubmitPoints.class.newInstance();
-                                                fragment.setArguments(bundle);
-                                                activity.getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(Integer.toString(R.id.nav_scanner)).commit();
+                                                FragmentManager fragmentManager = activity.getSupportFragmentManager();
+                                                Fragment fragment = fragmentManager.findFragmentByTag(Integer.toString(R.id.nav_submit));
+                                                if (fragment == null)
+                                                    fragment = SubmitPoints.class.newInstance();
+                                                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_submit)).addToBackStack(Integer.toString(R.id.nav_scanner)).commit();
+                                                fragmentManager.executePendingTransactions();
+                                                ((NavigationDrawer) activity).animateSuccess();
                                             } catch (Exception e) {
                                                 handler.post(() -> Toast.makeText(context, "Point submitted successfully, please return to another page", Toast.LENGTH_SHORT).show());
                                             }
@@ -221,7 +230,5 @@ public class QRScan extends Fragment {
             }
         });
         progressBar.setVisibility(View.GONE);
-
-        return view;
     }
 }
