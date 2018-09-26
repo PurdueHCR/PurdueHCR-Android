@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -62,7 +63,7 @@ public class Statistics extends Fragment {
         singleton.getCachedData();
         String house = singleton.getHouse();
         String floorText = house + " - " + singleton.getFloorName();
-        int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", packageName);
+        int drawableID = resources.getIdentifier(singleton.getHouse().toLowerCase(), "drawable", packageName);
         ((ImageView) view.findViewById(R.id.statistics_house_icon)).setImageResource(drawableID);
         ((ImageView) view.findViewById(R.id.statistics_house_icon_small)).setImageResource(drawableID);
         ((TextView) view.findViewById(R.id.statistics_user_name)).setText(singleton.getName());
@@ -127,7 +128,7 @@ public class Statistics extends Fragment {
                     ArrayList<BarEntry> barEntryList = new ArrayList<>();
                     barEntryList.add(barEntry);
                     BarDataSet dataSet = new BarDataSet(barEntryList, houseName);
-                    int colorID = resources.getColor(resources.getIdentifier(houseName.toLowerCase(), "color", packageName));
+                    int colorID = ContextCompat.getColor(context, resources.getIdentifier(houseName.toLowerCase(), "color", packageName));
                     dataSet.setColor(colorID);
                     dataSet.setValueTextSize(12);
                     dataSetList.add(dataSet);
