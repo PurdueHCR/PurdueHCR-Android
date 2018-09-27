@@ -3,11 +3,11 @@ package com.hcrpurdue.jason.hcrhousepoints;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -124,7 +124,7 @@ public class Statistics extends Fragment {
                                 "%d House Points | %d Individual Points", housePoints, userPoints));
                     }
 
-                    BarEntry barEntry = new BarEntry(i++, house.getPointsPerResident());
+                    BarEntry barEntry = new BarEntry(i++, house.getTotalPoints());
                     ArrayList<BarEntry> barEntryList = new ArrayList<>();
                     barEntryList.add(barEntry);
                     BarDataSet dataSet = new BarDataSet(barEntryList, houseName);

@@ -1,6 +1,6 @@
 package Models;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public class PointType implements Comparable<PointType> {
 

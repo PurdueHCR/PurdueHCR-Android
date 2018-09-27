@@ -1,23 +1,20 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SimpleAdapter;
 import android.widget.Spinner;
@@ -125,6 +122,10 @@ public class SubmitPoints extends Fragment {
         TextView descriptionInput = activity.findViewById(R.id.descriptionInput);
         if (TextUtils.isEmpty(descriptionInput.getText().toString()))
             Toast.makeText(context, "Description is Required", Toast.LENGTH_SHORT).show();
+        else if(descriptionInput.length() > 250)
+        {
+            Toast.makeText(context, "Description cannot be more than 250 characters", Toast.LENGTH_SHORT).show();
+        }
         else {
             progressBar.setVisibility(View.VISIBLE);
             singleton.submitPoints(((EditText) view.findViewById(R.id.descriptionInput)).getText().toString(),

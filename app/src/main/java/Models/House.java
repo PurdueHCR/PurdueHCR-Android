@@ -1,18 +1,16 @@
 package Models;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public class House implements Comparable<House> {
     private int numResidents;
     private int totalPoints;
-    private float pointsPerResident;
     private String name;
 
     public House(String n, int residents, int points) {
         name = n;
         numResidents = residents;
         totalPoints = points;
-        pointsPerResident = (float) points / residents;
     }
 
     public String getName() {
@@ -27,12 +25,8 @@ public class House implements Comparable<House> {
         return totalPoints;
     }
 
-    public float getPointsPerResident() {
-        return pointsPerResident;
-    }
-
     @Override
     public int compareTo(@NonNull House house) {
-        return Float.compare(house.pointsPerResident, pointsPerResident);
+        return Float.compare(house.totalPoints, totalPoints);
     }
 }

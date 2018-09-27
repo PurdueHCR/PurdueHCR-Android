@@ -1,6 +1,6 @@
 package Models;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public class Reward implements Comparable<Reward>{
     private String name;
