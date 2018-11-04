@@ -1,0 +1,5 @@
+1. Polish up login and signin/signup pages. 
+2. Implement code creation for RHPs
+3. Implement checks for disabled point types
+  - Modify PointType model by adding permissionLevel variable (represents who can turn point type into QR code)
+  - Add boolean variable isEnabled() to check if PointType is allowed to be submitted
