@@ -1,3 +1,9 @@
+/**
+ * This creates an interface that callers can use to define callback/handler methods
+ * To respond when Firebase responds Asynchronously
+ *
+ */
+
 package Utils;
 
 import android.content.Context;
@@ -43,5 +49,10 @@ public interface FirebaseUtilInterface {
     default void onGetFloorCodesSuccess(Map<String, Pair<String, String>> data) {
 
     }
+
+    default void onGetQRCodesForUserSuccess(List<Link> qrCodes){
+
+    }
+
 
 }

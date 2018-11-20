@@ -39,4 +39,8 @@ public interface SingletonInterface {
     default void onGetFloorCodesSuccess(Map<String, Pair<String, String>> data) {
 
     }
+
+    default void onGetQRCodesForUserSuccess(List<Link> qrCodes){
+
+    }
 }
