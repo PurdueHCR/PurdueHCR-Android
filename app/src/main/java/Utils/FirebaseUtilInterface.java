@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +22,7 @@ import Models.Link;
 import Models.PointLog;
 import Models.PointType;
 import Models.Reward;
+import Models.SystemPreferences;
 
 public interface FirebaseUtilInterface {
     default void onPointTypeComplete(List<PointType> data) {
@@ -33,7 +35,7 @@ public interface FirebaseUtilInterface {
     }
 
     default void onError(Exception e, Context context) {
-        Toast.makeText(context, "Firebase Util Error", Toast.LENGTH_LONG).show();
+        Toast.makeText(context, "House system is disabled", Toast.LENGTH_LONG).show(); //TODO: Text changed to House system is disabled from Firebase Util error
         Log.e("FirebaseUtil", e.getMessage(), e);
     }
 
@@ -51,6 +53,11 @@ public interface FirebaseUtilInterface {
     }
 
     default void onGetQRCodesForUserSuccess(List<Link> qrCodes){
+
+    }
+
+    default void onGetSystemPreferencesSuccess(SystemPreferences systemPreferences) {
+
 
     }
 

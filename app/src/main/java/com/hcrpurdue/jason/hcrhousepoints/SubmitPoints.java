@@ -2,6 +2,7 @@ package com.hcrpurdue.jason.hcrhousepoints;
 
 import android.content.Context;
 
+import Models.SystemPreferences;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
@@ -43,6 +44,7 @@ public class SubmitPoints extends Fragment {
     private ProgressBar progressBar;
     private ArrayList<PointType> enabledTypes = new ArrayList<PointType>();
     private boolean isFinished;
+    private TextView statUpdateTextView;
 
     @Override
     public void onAttach(Context context) {
@@ -61,7 +63,7 @@ public class SubmitPoints extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.submit_points, container, false);
         singleton.getCachedData();
-
+        statUpdateTextView = view.findViewById(R.id.statusUpdateTextView);
 
 //        try {
         getPointTypes(view);
@@ -100,16 +102,23 @@ public class SubmitPoints extends Fragment {
 
 
         try {
+
+            statUpdateTextView.setVisibility(View.GONE);
+            view.findViewById(R.id.pointTypeSpinner).setVisibility(View.GONE);
+            view.findViewById(R.id.descriptionInput).setVisibility(View.GONE);
+
             getPointTypes(view);
             Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
             Objects.requireNonNull(view).findViewById(R.id.submitPointButton).setOnClickListener(v -> submitPoint(view));
 
-            view.findViewById(R.id.noPTypesTxtView).setVisibility(View.GONE);
-            if (enabledTypes.size() == 0) {
-                view.findViewById(R.id.pointTypeSpinner).setVisibility(View.GONE);
-                view.findViewById(R.id.descriptionInput).setVisibility(View.GONE);
-                view.findViewById(R.id.noPTypesTxtView).setVisibility(View.VISIBLE);
-            }
+
+
+//            statUpdateTextView.setVisibility(View.GONE);
+//            if (enabledTypes.size() == 0 && !progressBar.isShown()) {       //TODO: Check
+//                view.findViewById(R.id.pointTypeSpinner).setVisibility(View.GONE);
+//                view.findViewById(R.id.descriptionInput).setVisibility(View.GONE);
+//                statUpdateTextView.setVisibility(View.VISIBLE);
+//            }
 
         } catch (Exception e) {
             Toast.makeText(context, "Issue in onActivityCreated", Toast.LENGTH_LONG).show();
@@ -147,30 +156,55 @@ public class SubmitPoints extends Fragment {
                         }
                     }
 
+             singleton.getSystemPreferences(new SingletonInterface() {
+//                 @Override
+//                 public void onError(Exception e, Context context) {
+//
+//                 }
 
-                    SimpleAdapter adapter = new SimpleAdapter(context, formattedPointTypes, android.R.layout.simple_list_item_2, new String[]{"text", "subText"}, new int[]{android.R.id.text1, android.R.id.text2});
-                    adapter.setDropDownViewResource(android.R.layout.simple_list_item_2);
-                    ((Spinner) view.findViewById(R.id.pointTypeSpinner)).setAdapter(adapter);
+                 @Override
+                 public void onGetSystemPreferencesSuccess(SystemPreferences systemPreferences) {
 
-
-
-                   // Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
-
-                    Objects.requireNonNull(view).findViewById(R.id.submitPointButton).setOnClickListener(v -> submitPoint(view));
-
-                    view.findViewById(R.id.noPTypesTxtView).setVisibility(View.GONE);
-                    if (enabledTypes.size() == 0) {
-                        view.findViewById(R.id.pointTypeSpinner).setVisibility(View.GONE);
-                        view.findViewById(R.id.descriptionInput).setVisibility(View.GONE);
-                        view.findViewById(R.id.noPTypesTxtView).setVisibility(View.VISIBLE);
-                    } else {
-                        view.findViewById(R.id.pointTypeSpinner).setVisibility(View.VISIBLE);
-                        view.findViewById(R.id.descriptionInput).setVisibility(View.VISIBLE);
-                        view.findViewById(R.id.noPTypesTxtView).setVisibility(View.GONE);
-                    }
+                     SimpleAdapter adapter = new SimpleAdapter(context, formattedPointTypes, android.R.layout.simple_list_item_2, new String[]{"text", "subText"}, new int[]{android.R.id.text1, android.R.id.text2});
+                     adapter.setDropDownViewResource(android.R.layout.simple_list_item_2);
+                     ((Spinner) view.findViewById(R.id.pointTypeSpinner)).setAdapter(adapter);
 
 
-                    progressBar.setVisibility(View.GONE);
+
+                     // Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
+
+                     Objects.requireNonNull(view).findViewById(R.id.submitPointButton).setOnClickListener(v -> submitPoint(view));
+
+                     view.findViewById(R.id.statusUpdateTextView).setVisibility(View.GONE);
+
+
+
+
+                      if(!systemPreferences.isHouseEnabled()) {
+                         view.findViewById(R.id.pointTypeSpinner).setVisibility(View.GONE);
+                         view.findViewById(R.id.descriptionInput).setVisibility(View.GONE);
+                         statUpdateTextView.setText(systemPreferences.getHouseIsEnabledMsg());
+                         statUpdateTextView.setVisibility(View.VISIBLE);
+                     }
+
+                     else if (enabledTypes.size() == 0) {
+                         view.findViewById(R.id.pointTypeSpinner).setVisibility(View.GONE);
+                         view.findViewById(R.id.descriptionInput).setVisibility(View.GONE);
+                         statUpdateTextView.setText(R.string.no_point_types_enabled);
+                         statUpdateTextView.setVisibility(View.VISIBLE);
+                     }
+                     else {
+                         view.findViewById(R.id.pointTypeSpinner).setVisibility(View.VISIBLE);
+                         view.findViewById(R.id.descriptionInput).setVisibility(View.VISIBLE);
+                         statUpdateTextView.setVisibility(View.GONE);
+                     }
+
+
+                     progressBar.setVisibility(View.GONE);
+                 }
+             });
+
+
                 }
             });
 

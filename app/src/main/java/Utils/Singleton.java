@@ -15,6 +15,7 @@ import Models.Link;
 import Models.PointLog;
 import Models.PointType;
 import Models.Reward;
+import Models.SystemPreferences;
 
 // Because non-global variables are for people who care about technical debt
 public class Singleton {
@@ -32,6 +33,7 @@ public class Singleton {
     private List<House> houseList = null;
     private List<Reward> rewardList = null;
     private List<Link> userCreatedQRCodes = null;
+    private SystemPreferences sysPrefs = null;
 
     private Singleton() {
         // Exists only to defeat instantiation. Get rekt, instantiation
@@ -76,6 +78,41 @@ public class Singleton {
         else {
             si.onPointTypeComplete(pointTypeList);
         }
+    }
+
+    /**
+     *
+     * @param si
+     *
+     * Gets system preferences for House
+     */
+    public void getSystemPreferences(SingletonInterface si) {
+        fbutil.getSystemPreferences(new FirebaseUtilInterface() {
+            @Override
+            public void onGetSystemPreferencesSuccess(SystemPreferences systemPreferences) {
+                if(systemPreferences != null) {
+                    sysPrefs = systemPreferences;
+                    si.onGetSystemPreferencesSuccess(sysPrefs);
+                }
+                else {
+                    si.onError(new IllegalStateException("System preferences is null"), fbutil.getContext());
+                }
+            }
+
+            @Override
+            public void onError(Exception e, Context context) {
+                si.onError(e, context);
+            }
+        });
+    }
+
+    /**
+     *
+     * Returns cached system preferences
+     * @return
+     */
+    public SystemPreferences getCachedSystemPreferences() {
+        return sysPrefs;
     }
 
     public void getUnconfirmedPoints(SingletonInterface si) {

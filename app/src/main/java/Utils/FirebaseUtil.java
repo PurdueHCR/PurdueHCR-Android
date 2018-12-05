@@ -29,6 +29,7 @@ import Models.Link;
 import Models.PointLog;
 import Models.PointType;
 import Models.Reward;
+import Models.SystemPreferences;
 
 public class FirebaseUtil {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -358,6 +359,10 @@ public class FirebaseUtil {
      * @param fui firebaseutilInterface, implement onError, and onGetLinkWithIdSuccess
      */
     public void getLinkWithId(String id, final FirebaseUtilInterface fui) {
+        if(!Singleton.getInstance(context).getCachedSystemPreferences().isHouseEnabled()){
+            fui.onError(new Exception(),context);
+            return;
+        }
         DocumentReference linkRef = this.db.collection("Links").document(id);
         linkRef.get()
                 .addOnCompleteListener(task -> {
@@ -581,6 +586,29 @@ public class FirebaseUtil {
                 fui.onError(task.getException(),context);
             }
         });
+    }
+
+    public void getSystemPreferences(FirebaseUtilInterface fui) {
+        DocumentReference preference = db.collection("SystemPreferences").document("Preferences");
+
+        preference.get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+
+
+
+               boolean isHouseEnabled = ((boolean) task.getResult().get("isHouseEnabled"));
+               String houseEnabledMessage = ((String) task.getResult().get("houseEnabledMessage"));
+
+               SystemPreferences sysPrefs = new SystemPreferences(isHouseEnabled, houseEnabledMessage);
+               fui.onGetSystemPreferencesSuccess(sysPrefs);
+            }
+            else {
+                fui.onError(task.getException(), context);
+            }
+
+        });
+
+
     }
 
 
