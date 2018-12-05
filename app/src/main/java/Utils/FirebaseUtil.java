@@ -2,6 +2,7 @@ package Utils;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.service.autofill.UserData;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.widget.Toast;
@@ -53,71 +54,81 @@ public class FirebaseUtil {
         log.setResidentRef(db.collection("Users").document(userID));
         int multiplier = (preapproved) ? 1 : -1;
 
-        //Create the data to be put into the object in the database
-        Map<String, Object> data = new HashMap<>();
-        data.put("Description", log.getPointDescription());
-        data.put("PointTypeID", (log.getType().getPointID() * multiplier));
-        data.put("Resident", log.getResident());
-        data.put("ResidentRef", log.getResidentRef());
-        data.put("FloorID", log.getFloorID());
-        data.put("ResidentReportTime", Timestamp.now());
 
-        // If the pointLog does not care about its id, add value to the database with random ID
-        if (TextUtils.isEmpty(documentID)) {
-            //Add a value to the Points collection in a house
-            db.collection("House").document(house).collection("Points")
-                    .add(data)
-                    // add an action listener to handle the event when it goes Async
-                    .addOnSuccessListener(documentReference -> {
-                        //Now that it is written to the house, we must write it to the user
-                        Map<String, Object> userPointData = new HashMap<>();
-                        userPointData.put("Point", documentReference);
 
-                        log.getResidentRef().collection("Points").document(documentReference.getId())
-                                .set(userPointData)
-                                .addOnSuccessListener(aVoid -> {
-                                    //if the point is preapproved, update the house and user points
-                                    if (preapproved) {
-                                        updateHouseAndUserPointsWithApprovedLog(log, house, fui);
-                                    } else {
-                                        fui.onSuccess();
-                                    }
-                                })
-                                .addOnFailureListener(e -> fui.onError(e, context));
-                    })
-                    .addOnFailureListener(e -> fui.onError(e, context));
-        } else {
-            //Add a value ot the Points collection in the house with the id: documentID
-            DocumentReference ref = db.collection("House").document(house).collection("Points").document(log.getResidentRef().getId() + documentID);
-            ref.get()
-                    .addOnSuccessListener(task -> {
-                        if (!task.exists()) {
-                            ref.set(data)
-                                    // add an action listener to handle the event when it goes Async
+        //TODO: Step 2
+
+        if(log.getPointType() != null && log.getPointType().isEnabled()) {
+            //Create the data to be put into the object in the database
+            Map<String, Object> data = new HashMap<>();
+            data.put("Description", log.getPointDescription());
+            data.put("PointTypeID", (log.getType().getPointID() * multiplier));
+            data.put("Resident", log.getResident());
+            data.put("ResidentRef", log.getResidentRef());
+            data.put("FloorID", log.getFloorID());
+            data.put("ResidentReportTime", Timestamp.now());
+
+            // If the pointLog does not care about its id, add value to the database with random ID
+            if (TextUtils.isEmpty(documentID)) {
+                //Add a value to the Points collection in a house
+                db.collection("House").document(house).collection("Points")
+                        .add(data)
+                        // add an action listener to handle the event when it goes Async
+                        .addOnSuccessListener(documentReference -> {
+                            //Now that it is written to the house, we must write it to the user
+                            Map<String, Object> userPointData = new HashMap<>();
+                            userPointData.put("Point", documentReference);
+
+                            log.getResidentRef().collection("Points").document(documentReference.getId())
+                                    .set(userPointData)
                                     .addOnSuccessListener(aVoid -> {
-                                        //Now that it is written to the house, we must write it to the user
-                                        Map<String, Object> userPointData = new HashMap<>();
-                                        userPointData.put("Point", ref);
-
-                                        // add the value to the Points table in a user
-                                        log.getResidentRef().collection("Points").document(documentID)
-                                                .set(userPointData)
-                                                .addOnSuccessListener(aVoid1 -> {
-                                                    //if the point is preapproved, update the house and user points
-                                                    if (preapproved) {
-                                                        updateHouseAndUserPointsWithApprovedLog(log, house, fui);
-                                                    } else {
-                                                        fui.onSuccess();
-                                                    }
-                                                })
-                                                .addOnFailureListener(e -> fui.onError(e, context));
+                                        //if the point is preapproved, update the house and user points
+                                        if (preapproved) {
+                                            updateHouseAndUserPointsWithApprovedLog(log, house, fui);
+                                        } else {
+                                            fui.onSuccess();
+                                        }
                                     })
                                     .addOnFailureListener(e -> fui.onError(e, context));
-                        } else {
-                            fui.onError(new IllegalStateException("Code was already submitted"), context);
-                        }
-                    })
-                    .addOnFailureListener(e -> fui.onError(e, context));
+                        })
+                        .addOnFailureListener(e -> fui.onError(e, context));
+            } else {
+                //Add a value ot the Points collection in the house with the id: documentID
+                DocumentReference ref = db.collection("House").document(house).collection("Points").document(log.getResidentRef().getId() + documentID);
+                ref.get()
+                        .addOnSuccessListener(task -> {
+                            if (!task.exists()) {
+                                ref.set(data)
+                                        // add an action listener to handle the event when it goes Async
+                                        .addOnSuccessListener(aVoid -> {
+                                            //Now that it is written to the house, we must write it to the user
+                                            Map<String, Object> userPointData = new HashMap<>();
+                                            userPointData.put("Point", ref);
+
+                                            // add the value to the Points table in a user
+                                            log.getResidentRef().collection("Points").document(documentID)
+                                                    .set(userPointData)
+                                                    .addOnSuccessListener(aVoid1 -> {
+                                                        //if the point is preapproved, update the house and user points
+                                                        if (preapproved) {
+                                                            updateHouseAndUserPointsWithApprovedLog(log, house, fui);
+                                                        } else {
+                                                            fui.onSuccess();
+                                                        }
+                                                    })
+                                                    .addOnFailureListener(e -> fui.onError(e, context));
+                                        })
+                                        .addOnFailureListener(e -> fui.onError(e, context));
+                            } else {
+                                fui.onError(new IllegalStateException("Code was already submitted"), context);
+                            }
+                        })
+                        .addOnFailureListener(e -> fui.onError(e, context));
+            }
+        }
+
+        else {
+            Toast.makeText(context, "Point not enabled", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -125,7 +136,7 @@ public class FirebaseUtil {
      * Handles the updating the database for approving or denying points. It will update the point in the house and the TotalPoints for both user and house
      *
      * @param log                    PointLog:   The PointLog that is to be either approved or denied
-     * @param approved               boolean:    Was the log approved?
+     * @paramad approved               boolean:    Was the log approved?
      * @param approvingOrDenyingUser String:     Username of the account who is approving or denying point log
      * @param house                  String:     The house that the pointlog belongs to
      * @param fui                    FirebaseUtilInterface: Implement the OnError and onSuccess methods
@@ -249,7 +260,9 @@ public class FirebaseUtil {
                 List<PointType> pointTypeList = new ArrayList<>();
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     Map<String, Object> data = document.getData();
-                    pointTypeList.add(new PointType(((Long) data.get("Value")).intValue(), (String) data.get("Description"), (boolean) data.get("ResidentsCanSubmit"), Integer.parseInt(document.getId())));
+                    pointTypeList.add(new PointType(((Long) data.get("Value")).intValue(),
+                        (String) data.get("Description"), (boolean) data.get("ResidentsCanSubmit"), Integer.parseInt(document.getId()),
+                        (boolean) data.get("Enabled"), ((Long)data.get("PermissionLevel")).intValue()));
                 }
                 Collections.sort(pointTypeList);
                 fui.onPointTypeComplete(pointTypeList);
@@ -446,4 +459,129 @@ public class FirebaseUtil {
                 fui.onError(task.getException(), context);
         });
     }
+
+
+    /**
+     * Get the list of QRCodes that were created by the User with userId.
+     *
+     * @param userId    String that represents the Firebase ID of the User who is getting QR codes.
+     * @param fui       Firebase Util Interface that has the methods onError and onGetQRCodesForUserSuccess implemented.
+     */
+    public void getQRCodesForUser(String userId, FirebaseUtilInterface fui){
+        //Run Firebase call to retrieve all Links where the CreatorID is equal to the userID
+        db.collection("Links").whereEqualTo("CreatorID",    userId).get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                ArrayList<Link> qrCodes = new ArrayList<>();
+                //If task is successful, FB returns an array of QueryDocumentSnapshot that matches the request
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    // Pull values from document and save them into an object
+                    String id = document.getId();
+                    String description = ((String) document.get("Description"));
+                    boolean singleUse = ((boolean) document.get("SingleUse"));
+                    int pointTypeId = ((int) document.get("PointID"));
+                    boolean isEnabled = ((boolean) document.get("Enabled"));
+                    boolean isArchived = ((boolean) document.get("Archived"));
+                    Link newCode = new Link(id, description, singleUse, pointTypeId, isEnabled,isArchived);
+                    //Add code to the list
+                    qrCodes.add(newCode);
+                }
+                // Call the Success handler that the caller defines
+                fui.onGetQRCodesForUserSuccess(qrCodes);
+            }
+            else{
+                //If there was an issue, print this problem
+                System.out.println("GET QRCODE ERROR: Firebase was unsucessful");
+                //Call the Error handler
+                fui.onError(task.getException(),context);
+            }
+        });
+    }
+
+
+    /**
+     * Create a new QRCode in the database. If the call is succesful, the new LinkId will be saved into the Link object
+     *
+     * @param link  Link object to be created in the database and the object that will be updated on success
+     * @param fui   Firebase Util Interface with methods onError and onSuccess.
+     */
+    public void createQRCode(Link link, FirebaseUtilInterface fui){
+        //turn the Link object into a Map with the Keys being the Firebase Keys
+        Map<String, Object> data = new HashMap<>();
+        data.put("Description", link.getDescription());
+        data.put("PointID", link.getPointTypeId());
+        data.put("SingleUse", link.isSingleUse());
+        data.put("CreatorID", Singleton.getInstance(context).getUserId());
+        data.put("Enabled", link.isEnabled());
+        data.put("Archived", link.isArchived());
+
+        //Call Firebase to add the data
+        db.collection("Links").add(data).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                System.out.println("Added Document to: "+task.getResult().getId());
+                //If successful, save the document ID as the LinkID so that the caller has a reference to it.
+                link.setLinkId(task.getResult().getId());
+                // Call the on success
+                fui.onSuccess();
+            }
+            else {
+                System.out.println("Failed to add QR Code");
+                //Error Handler
+                fui.onError(task.getException(),context);
+            }
+        });
+    }
+
+    /**
+     * Update a Link object in the database with a new Enabled Status
+     *
+     * @param link  Link object to be updated
+     * @param fui   FirebaseUtilInterface with method OnError and onSuccess implemented
+     */
+    public void setQRCodeEnabledStatus(Link link, boolean isEnabled, FirebaseUtilInterface fui){
+        //Create a map with all the keys that are going to be updated
+        Map<String, Object> data = new HashMap<>();
+        data.put("Enabled", isEnabled);
+
+        //Tell the document with path Links/<LinkID> to update the values stored in the map
+        db.collection("Links").document(link.getLinkId()).update(data).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                System.out.println("Link Update Success");
+                //Make sure local copy is updated
+                link.setEnabled(isEnabled);
+                fui.onSuccess();
+            }
+            else{
+                //Handle Errors
+                fui.onError(task.getException(),context);
+            }
+        });
+    }
+
+    /**
+     * Update a Link object in the database with a new Archived Status
+     *
+     * @param link  Link object to be updated
+     * @param fui   FirebaseUtilInterface with method OnError and onSuccess implemented
+     */
+    public void setQRCodeActivatedStatus(Link link, boolean isArchived, FirebaseUtilInterface fui){
+        //Create a map with all the keys that are going to be updated
+        Map<String, Object> data = new HashMap<>();
+        data.put("Archived", isArchived);
+
+        //Tell the document with path Links/<LinkID> to update the values stored in the map
+        db.collection("Links").document(link.getLinkId()).update(data).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                System.out.println("Link Update Success");
+                //Make sure local copy is updated
+                link.setArchived(isArchived);
+                fui.onSuccess();
+            }
+            else{
+                //Handle Errors
+                fui.onError(task.getException(),context);
+            }
+        });
+    }
+
+
 }

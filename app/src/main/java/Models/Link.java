@@ -74,4 +74,12 @@ public class Link {
     public boolean isArchived() {
         return isArchived;
     }
+
+    /**
+     *
+     * @return the address that should be represented with this QR code
+     */
+    public String getAddress(){
+        return "hcrpoint://addpoints/"+this.linkId;
+    }
 }

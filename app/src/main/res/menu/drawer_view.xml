@@ -27,5 +27,11 @@
             android:id="@+id/nav_report_issue"
             android:icon="@drawable/ic_error"
             android:title="Report an Issue" />
+
+        <item
+            android:id="@+id/qrCreation"
+            android:title="Create a QR Code"
+
+            />
     </group>
 </menu>

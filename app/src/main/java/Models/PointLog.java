@@ -1,5 +1,8 @@
 package Models;
 
+import android.graphics.Point;
+import android.view.animation.PathInterpolator;
+
 import com.google.firebase.firestore.DocumentReference;
 
 public class PointLog {
@@ -17,6 +20,12 @@ public class PointLog {
         this.floorID = floorID;
         this.residentRef = null;
     }
+
+
+    public PointType getPointType() {
+        return this.type;
+    }
+
 
     public void setLogID(String id){
         this.logID = id;

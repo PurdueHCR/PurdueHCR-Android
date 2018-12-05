@@ -1,10 +1,15 @@
 package com.hcrpurdue.jason.hcrhousepoints;
 
 import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
+import android.graphics.Point;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -36,6 +41,8 @@ public class SubmitPoints extends Fragment {
     private Context context;
     private AppCompatActivity activity;
     private ProgressBar progressBar;
+    private ArrayList<PointType> enabledTypes = new ArrayList<PointType>();
+    private boolean isFinished;
 
     @Override
     public void onAttach(Context context) {
@@ -54,6 +61,23 @@ public class SubmitPoints extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.submit_points, container, false);
         singleton.getCachedData();
+
+
+//        try {
+        getPointTypes(view);
+
+//            view.findViewById(R.id.noPTypesTxtView).setVisibility(View.GONE);
+//            if (enabledTypes.size() == 0) {
+//                view.findViewById(R.id.pointTypeSpinner).setVisibility(View.GONE);
+//                view.findViewById(R.id.descriptionInput).setVisibility(View.GONE);
+//                view.findViewById(R.id.noPTypesTxtView).setVisibility(View.VISIBLE);
+//            }
+
+//        catch(Exception e) {
+//            Toast.makeText(context, "Issue in onCreateView", Toast.LENGTH_LONG).show();
+//        }
+
+
         // Sets the house picture
         try {
             int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", context.getPackageName());
@@ -74,9 +98,23 @@ public class SubmitPoints extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
         View view = getView();
 
-        getPointTypes(view);
-        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
-        Objects.requireNonNull(view).findViewById(R.id.submitPointButton).setOnClickListener(v -> submitPoint(view));
+
+        try {
+            getPointTypes(view);
+            Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
+            Objects.requireNonNull(view).findViewById(R.id.submitPointButton).setOnClickListener(v -> submitPoint(view));
+
+            view.findViewById(R.id.noPTypesTxtView).setVisibility(View.GONE);
+            if (enabledTypes.size() == 0) {
+                view.findViewById(R.id.pointTypeSpinner).setVisibility(View.GONE);
+                view.findViewById(R.id.descriptionInput).setVisibility(View.GONE);
+                view.findViewById(R.id.noPTypesTxtView).setVisibility(View.VISIBLE);
+            }
+
+        } catch (Exception e) {
+            Toast.makeText(context, "Issue in onActivityCreated", Toast.LENGTH_LONG).show();
+        }
+
 
         ((EditText) view.findViewById(R.id.descriptionInput)).setOnEditorActionListener((textView, i, keyEvent) -> {
             if (i == EditorInfo.IME_ACTION_DONE || (i == EditorInfo.IME_NULL && keyEvent.getAction() == KeyEvent.ACTION_DOWN)) {
@@ -87,31 +125,55 @@ public class SubmitPoints extends Fragment {
                     Objects.requireNonNull(imm).hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
                 }
             }
+
             return true;
         });
     }
 
 
     private void getPointTypes(View view) {
+
         try {
             singleton.getPointTypes(new SingletonInterface() {
                 public void onPointTypeComplete(List<PointType> data) {
                     List<Map<String, String>> formattedPointTypes = new ArrayList<>();
                     for (PointType type : data) {
-                        if (type.getResidentsCanSubmit()) {
+                        if (type.getResidentsCanSubmit() && type.isEnabled()) {
+                            enabledTypes.add(type);
                             Map<String, String> map = new HashMap<>();
                             map.put("text", type.getPointDescription());
                             map.put("subText", String.valueOf(type.getPointValue()) + " points");
                             formattedPointTypes.add(map);
-                        } else
-                            break;
+                        }
                     }
+
+
                     SimpleAdapter adapter = new SimpleAdapter(context, formattedPointTypes, android.R.layout.simple_list_item_2, new String[]{"text", "subText"}, new int[]{android.R.id.text1, android.R.id.text2});
                     adapter.setDropDownViewResource(android.R.layout.simple_list_item_2);
                     ((Spinner) view.findViewById(R.id.pointTypeSpinner)).setAdapter(adapter);
+
+
+
+                   // Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Submit Points");
+
+                    Objects.requireNonNull(view).findViewById(R.id.submitPointButton).setOnClickListener(v -> submitPoint(view));
+
+                    view.findViewById(R.id.noPTypesTxtView).setVisibility(View.GONE);
+                    if (enabledTypes.size() == 0) {
+                        view.findViewById(R.id.pointTypeSpinner).setVisibility(View.GONE);
+                        view.findViewById(R.id.descriptionInput).setVisibility(View.GONE);
+                        view.findViewById(R.id.noPTypesTxtView).setVisibility(View.VISIBLE);
+                    } else {
+                        view.findViewById(R.id.pointTypeSpinner).setVisibility(View.VISIBLE);
+                        view.findViewById(R.id.descriptionInput).setVisibility(View.VISIBLE);
+                        view.findViewById(R.id.noPTypesTxtView).setVisibility(View.GONE);
+                    }
+
+
                     progressBar.setVisibility(View.GONE);
                 }
             });
+
         } catch (Exception e) {
             Toast.makeText(context, "Failed to load point types", Toast.LENGTH_LONG).show();
             Log.e("SubmitPoints", "Error loading point types", e);
@@ -120,16 +182,18 @@ public class SubmitPoints extends Fragment {
 
     public void submitPoint(View view) {
         TextView descriptionInput = activity.findViewById(R.id.descriptionInput);
-        if (TextUtils.isEmpty(descriptionInput.getText().toString()))
+        if (TextUtils.isEmpty(descriptionInput.getText().toString().trim()))
             Toast.makeText(context, "Description is Required", Toast.LENGTH_SHORT).show();
-        else if(descriptionInput.length() > 250)
-        {
+        else if (descriptionInput.length() > 250) {
             Toast.makeText(context, "Description cannot be more than 250 characters", Toast.LENGTH_SHORT).show();
-        }
-        else {
+        } else {
             progressBar.setVisibility(View.VISIBLE);
+
+
+            PointType type = enabledTypes.get(((Spinner) view.findViewById(R.id.pointTypeSpinner)).getSelectedItemPosition());
+
             singleton.submitPoints(((EditText) view.findViewById(R.id.descriptionInput)).getText().toString(),
-                    singleton.getPointTypeList().get(((Spinner) view.findViewById(R.id.pointTypeSpinner)).getSelectedItemPosition()),
+                    type,
                     new SingletonInterface() {
                         @Override
                         public void onSuccess() {
@@ -139,5 +203,9 @@ public class SubmitPoints extends Fragment {
                         }
                     });
         }
+
     }
 }
+
+
+//TODO: Create variable of all PointTypes in picker,

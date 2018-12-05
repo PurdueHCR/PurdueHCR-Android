@@ -8,13 +8,20 @@ public class PointType implements Comparable<PointType> {
     private String pointDescription;
     private boolean residentsCanSubmit;
     private int pointID;
+    private boolean isEnabled;
+    private int permissionLevel;
 
-    public PointType(int pointValue, String pointDescription, boolean residentsCanSubmit, int pointID) {
+    public PointType(int pointValue, String pointDescription, boolean residentsCanSubmit, int pointID, boolean isEnabled, int permissionLevel) {
         this.pointValue = pointValue;
         this.pointDescription = pointDescription;
         this.residentsCanSubmit = residentsCanSubmit;
         this.pointID = pointID;
+        this.isEnabled = isEnabled;
+        this.permissionLevel = permissionLevel;
     }
+
+    //TODO: add getter for permLev
+
 
     public int getPointValue() {
         return pointValue;
@@ -30,6 +37,14 @@ public class PointType implements Comparable<PointType> {
 
     public int getPointID() {
         return pointID;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public int getPermissionLevel() {
+        return permissionLevel;
     }
 
     @Override
