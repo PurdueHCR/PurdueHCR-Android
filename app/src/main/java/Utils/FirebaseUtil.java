@@ -51,7 +51,7 @@ public class FirebaseUtil {
      * @param preapproved boolean:    true if it does not require RHP approval, false otherwise
      * @param fui         FirebaseUtilInterface: Implement the CompleteWithErrors(Exception e). Exception will be null if no Exception is recieved
      */
-    public void submitPointLog(PointLog log, String documentID, String house, String userID, boolean preapproved, final FirebaseUtilInterface fui) {
+    public void submitPointLog(PointLog log, String documentID, String house, String userID, boolean preapproved, SystemPreferences sysPrefs, final FirebaseUtilInterface fui) {
         log.setResidentRef(db.collection("Users").document(userID));
         int multiplier = (preapproved) ? 1 : -1;
 
@@ -59,7 +59,7 @@ public class FirebaseUtil {
 
         //TODO: Step 2
 
-        if(log.getPointType() != null && log.getPointType().isEnabled()) {
+        if(sysPrefs.isHouseEnabled() && log.getPointType() != null && log.getPointType().isEnabled()) {
             //Create the data to be put into the object in the database
             Map<String, Object> data = new HashMap<>();
             data.put("Description", log.getPointDescription());
@@ -127,9 +127,12 @@ public class FirebaseUtil {
                         .addOnFailureListener(e -> fui.onError(e, context));
             }
         }
-
-        else {
+        else if(sysPrefs.isHouseEnabled()) {
             Toast.makeText(context, "Point not enabled", Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            Toast.makeText(context, sysPrefs.getHouseIsEnabledMsg(), Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -31,7 +31,7 @@
         <item
             android:id="@+id/qrCreation"
             android:title="Create a QR Code"
-
+            android:visible="false"
             />
     </group>
 </menu>
