@@ -117,7 +117,7 @@ public class QRScan extends Fragment {
                     Handler handler = new Handler(Looper.getMainLooper());
                     handler.post(() -> progressBar.setVisibility(View.VISIBLE));
                     Barcode barcode = barcodes.valueAt(0);
-                    if (barcode.displayValue.length() > 11 && barcode.displayValue.substring(0, 11).equals("hcrpoint://")) {
+                     if(barcode.displayValue.length() > 11 && barcode.displayValue.substring(0, 11).equals("hcrpoint://")) {
                         String path = barcode.displayValue.substring(11);
                         String[] parts = path.split("/");
                         if (parts.length == 2) {
