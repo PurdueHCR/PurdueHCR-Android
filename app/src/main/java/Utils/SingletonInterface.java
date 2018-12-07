@@ -49,5 +49,4 @@ public interface SingletonInterface {
 
 
     }
-
 }
