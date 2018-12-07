@@ -14,6 +14,7 @@ import Models.Link;
 import Models.PointLog;
 import Models.PointType;
 import Models.Reward;
+import Models.SystemPreferences;
 
 public interface SingletonInterface {
     default void onPointTypeComplete(List<PointType> data) {
@@ -41,6 +42,11 @@ public interface SingletonInterface {
     }
 
     default void onGetQRCodesForUserSuccess(List<Link> qrCodes){
+
+    }
+
+    default void onGetSystemPreferencesSuccess(SystemPreferences systemPreferences) {
+
 
     }
 }

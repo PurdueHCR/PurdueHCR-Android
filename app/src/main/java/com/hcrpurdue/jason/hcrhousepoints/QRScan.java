@@ -122,70 +122,76 @@ public class QRScan extends Fragment {
                         String[] parts = path.split("/");
                         if (parts.length == 2) {
                             String linkId = parts[1].replace("/", "");
-                            singleton.getLinkWithLinkId(linkId, new SingletonInterface() {
-                                @Override
-                                public void onError(Exception e, Context context) {
-                                    handler.post(() -> progressBar.setVisibility(View.GONE));
-                                    handler.post(() -> Toast.makeText(context, "Failed to count link with issue: " + e.getLocalizedMessage(),
-                                            Toast.LENGTH_SHORT).show());
-                                    try {
-                                        handler.post(() -> {
-                                            try {
-                                                cameraSource.start(cameraView.getHolder());
-                                            } catch (IOException ex) {
-                                                handler.post(() -> Toast.makeText(context, "Error in starting camera", Toast.LENGTH_SHORT).show());
-                                                Log.e("QRScanner", "Error in starting camera", ex);
+                            if(singleton.getCachedSystemPreferences().isHouseEnabled()) {
+                                singleton.getLinkWithLinkId(linkId, new SingletonInterface() {
+                                    @Override
+                                    public void onError(Exception e, Context context) {
+                                        handler.post(() -> progressBar.setVisibility(View.GONE));
+                                        handler.post(() -> Toast.makeText(context, "Failed to count link with issue: " + e.getLocalizedMessage(),
+                                                Toast.LENGTH_SHORT).show());
+                                        try {
+                                            handler.post(() -> {
+                                                try {
+                                                    cameraSource.start(cameraView.getHolder());
+                                                } catch (IOException ex) {
+                                                    handler.post(() -> Toast.makeText(context, "Error in starting camera", Toast.LENGTH_SHORT).show());
+                                                    Log.e("QRScanner", "Error in starting camera", ex);
+                                                }
+                                            });
+                                        } catch (SecurityException ex) {
+                                            handler.post(() -> Toast.makeText(context, "Camera permissions denied, please accept them", Toast.LENGTH_SHORT).show());
+                                            Log.e("QRScanner", "Camera access not granted", ex);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onGetLinkWithIdSuccess(Link link) {
+                                        singleton.submitPointWithLink(link, new SingletonInterface() {
+                                            @Override
+                                            public void onSuccess() {
+                                                // onFullSuccess for Ctrl+F
+                                                try {
+                                                    ((NavigationView) activity.findViewById(R.id.nav_view)).getMenu().getItem(0).setChecked(true);
+                                                    handler.post(() -> progressBar.setVisibility(View.GONE));
+                                                    FragmentManager fragmentManager = activity.getSupportFragmentManager();
+                                                    Fragment fragment = fragmentManager.findFragmentByTag(Integer.toString(R.id.nav_submit));
+                                                    if (fragment == null)
+                                                        fragment = SubmitPoints.class.newInstance();
+                                                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_submit)).addToBackStack(Integer.toString(R.id.nav_scanner)).commit();
+                                                    fragmentManager.executePendingTransactions();
+                                                    ((NavigationDrawer) activity).animateSuccess();
+                                                } catch (Exception e) {
+                                                    handler.post(() -> Toast.makeText(context, "Point submitted successfully, please return to another page", Toast.LENGTH_SHORT).show());
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onError(Exception e, Context context) {
+                                                handler.post(() -> progressBar.setVisibility(View.GONE));
+                                                handler.post(() -> Toast.makeText(context, "Failed to count link with issue: " + e.getLocalizedMessage(),
+                                                        Toast.LENGTH_SHORT).show());
+                                                try {
+                                                    handler.post(() -> {
+                                                        try {
+                                                            cameraSource.start(cameraView.getHolder());
+                                                        } catch (IOException ex) {
+                                                            handler.post(() -> Toast.makeText(context, "Error in starting camera", Toast.LENGTH_SHORT).show());
+                                                            Log.e("QRScanner", "Error in starting camera", ex);
+                                                        }
+                                                    });
+                                                } catch (SecurityException ex) {
+                                                    handler.post(() -> Toast.makeText(context, "Camera permissions denied, please accept them", Toast.LENGTH_SHORT).show());
+                                                    Log.e("QRScanner", "Camera access not granted", ex);
+                                                }
                                             }
                                         });
-                                    } catch (SecurityException ex) {
-                                        handler.post(() -> Toast.makeText(context, "Camera permissions denied, please accept them", Toast.LENGTH_SHORT).show());
-                                        Log.e("QRScanner", "Camera access not granted", ex);
                                     }
-                                }
+                                });
+                            }///
+                            else {
+                                Toast.makeText(context, "House System is not enabled", Toast.LENGTH_LONG).show();
 
-                                @Override
-                                public void onGetLinkWithIdSuccess(Link link) {
-                                    singleton.submitPointWithLink(link, new SingletonInterface() {
-                                        @Override
-                                        public void onSuccess() {
-                                            // onFullSuccess for Ctrl+F
-                                            try {
-                                                ((NavigationView) activity.findViewById(R.id.nav_view)).getMenu().getItem(0).setChecked(true);
-                                                handler.post(() -> progressBar.setVisibility(View.GONE));
-                                                FragmentManager fragmentManager = activity.getSupportFragmentManager();
-                                                Fragment fragment = fragmentManager.findFragmentByTag(Integer.toString(R.id.nav_submit));
-                                                if (fragment == null)
-                                                    fragment = SubmitPoints.class.newInstance();
-                                                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_submit)).addToBackStack(Integer.toString(R.id.nav_scanner)).commit();
-                                                fragmentManager.executePendingTransactions();
-                                                ((NavigationDrawer) activity).animateSuccess();
-                                            } catch (Exception e) {
-                                                handler.post(() -> Toast.makeText(context, "Point submitted successfully, please return to another page", Toast.LENGTH_SHORT).show());
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onError(Exception e, Context context) {
-                                            handler.post(() -> progressBar.setVisibility(View.GONE));
-                                            handler.post(() -> Toast.makeText(context, "Failed to count link with issue: " + e.getLocalizedMessage(),
-                                                    Toast.LENGTH_SHORT).show());
-                                            try {
-                                                handler.post(() -> {
-                                                    try {
-                                                        cameraSource.start(cameraView.getHolder());
-                                                    } catch (IOException ex) {
-                                                        handler.post(() -> Toast.makeText(context, "Error in starting camera", Toast.LENGTH_SHORT).show());
-                                                        Log.e("QRScanner", "Error in starting camera", ex);
-                                                    }
-                                                });
-                                            } catch (SecurityException ex) {
-                                                handler.post(() -> Toast.makeText(context, "Camera permissions denied, please accept them", Toast.LENGTH_SHORT).show());
-                                                Log.e("QRScanner", "Camera access not granted", ex);
-                                            }
-                                        }
-                                    });
-                                }
-                            });
+                            }
                         } else {
                             handler.post(() -> progressBar.setVisibility(View.GONE));
                             handler.post(() -> Toast.makeText(context, "Invalid QR Code",

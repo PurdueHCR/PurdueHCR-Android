@@ -29,6 +29,7 @@ import Models.Link;
 import Models.PointLog;
 import Models.PointType;
 import Models.Reward;
+import Models.SystemPreferences;
 
 public class FirebaseUtil {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -50,7 +51,7 @@ public class FirebaseUtil {
      * @param preapproved boolean:    true if it does not require RHP approval, false otherwise
      * @param fui         FirebaseUtilInterface: Implement the CompleteWithErrors(Exception e). Exception will be null if no Exception is recieved
      */
-    public void submitPointLog(PointLog log, String documentID, String house, String userID, boolean preapproved, final FirebaseUtilInterface fui) {
+    public void submitPointLog(PointLog log, String documentID, String house, String userID, boolean preapproved, SystemPreferences sysPrefs, final FirebaseUtilInterface fui) {
         log.setResidentRef(db.collection("Users").document(userID));
         int multiplier = (preapproved) ? 1 : -1;
 
@@ -58,7 +59,7 @@ public class FirebaseUtil {
 
         //TODO: Step 2
 
-        if(log.getPointType() != null && log.getPointType().isEnabled()) {
+        if(sysPrefs.isHouseEnabled() && log.getPointType() != null && log.getPointType().isEnabled()) {
             //Create the data to be put into the object in the database
             Map<String, Object> data = new HashMap<>();
             data.put("Description", log.getPointDescription());
@@ -126,9 +127,12 @@ public class FirebaseUtil {
                         .addOnFailureListener(e -> fui.onError(e, context));
             }
         }
-
-        else {
+        else if(sysPrefs.isHouseEnabled()) {
             Toast.makeText(context, "Point not enabled", Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            Toast.makeText(context, sysPrefs.getHouseIsEnabledMsg(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -358,6 +362,10 @@ public class FirebaseUtil {
      * @param fui firebaseutilInterface, implement onError, and onGetLinkWithIdSuccess
      */
     public void getLinkWithId(String id, final FirebaseUtilInterface fui) {
+        if(!Singleton.getInstance(context).getCachedSystemPreferences().isHouseEnabled()){
+            fui.onError(new Exception(),context);
+            return;
+        }
         DocumentReference linkRef = this.db.collection("Links").document(id);
         linkRef.get()
                 .addOnCompleteListener(task -> {
@@ -583,5 +591,27 @@ public class FirebaseUtil {
         });
     }
 
+    public void getSystemPreferences(FirebaseUtilInterface fui) {
+        DocumentReference preference = db.collection("SystemPreferences").document("Preferences");
+
+        preference.get().addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+
+
+
+               boolean isHouseEnabled = ((boolean) task.getResult().get("isHouseEnabled"));
+               String houseEnabledMessage = ((String) task.getResult().get("houseEnabledMessage"));
+
+               SystemPreferences sysPrefs = new SystemPreferences(isHouseEnabled, houseEnabledMessage);
+               fui.onGetSystemPreferencesSuccess(sysPrefs);
+            }
+            else {
+                fui.onError(task.getException(), context);
+            }
+
+        });
+
+
+    }
 
 }

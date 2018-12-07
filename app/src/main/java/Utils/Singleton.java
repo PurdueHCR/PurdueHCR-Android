@@ -15,6 +15,7 @@ import Models.Link;
 import Models.PointLog;
 import Models.PointType;
 import Models.Reward;
+import Models.SystemPreferences;
 
 // Because non-global variables are for people who care about technical debt
 public class Singleton {
@@ -32,6 +33,7 @@ public class Singleton {
     private List<House> houseList = null;
     private List<Reward> rewardList = null;
     private List<Link> userCreatedQRCodes = null;
+    private SystemPreferences sysPrefs = null;
 
     private Singleton() {
         // Exists only to defeat instantiation. Get rekt, instantiation
@@ -75,7 +77,50 @@ public class Singleton {
             });
         else {
             si.onPointTypeComplete(pointTypeList);
+            fbutil.getPointTypes(new FirebaseUtilInterface() {
+                @Override
+                public void onPointTypeComplete(List<PointType> data) {
+                if (data != null && !data.isEmpty()) {
+                    pointTypeList = data;
+                }
+                }
+            });
         }
+    }
+
+    /**
+     *
+     * @param si
+     *
+     * Gets system preferences for House
+     */
+    public void getSystemPreferences(SingletonInterface si) {
+        fbutil.getSystemPreferences(new FirebaseUtilInterface() {
+            @Override
+            public void onGetSystemPreferencesSuccess(SystemPreferences systemPreferences) {
+                if(systemPreferences != null) {
+                    sysPrefs = systemPreferences;
+                    si.onGetSystemPreferencesSuccess(sysPrefs);
+                }
+                else {
+                    si.onError(new IllegalStateException("System preferences is null"), fbutil.getContext());
+                }
+            }
+
+            @Override
+            public void onError(Exception e, Context context) {
+                si.onError(e, context);
+            }
+        });
+    }
+
+    /**
+     *
+     * Returns cached system preferences
+     * @return
+     */
+    public SystemPreferences getCachedSystemPreferences() {
+        return sysPrefs;
     }
 
     public void getUnconfirmedPoints(SingletonInterface si) {
@@ -160,7 +205,7 @@ public class Singleton {
     public void submitPoints(String description, PointType type, SingletonInterface si) {
         PointLog log = new PointLog(description, name, type, floorName);
         boolean preApproved = permissionLevel > 0;
-        fbutil.submitPointLog(log, null, houseName, userID, preApproved, new FirebaseUtilInterface() {
+        fbutil.submitPointLog(log, null, houseName, userID, preApproved, sysPrefs, new FirebaseUtilInterface() {
             @Override
             public void onSuccess() {
                 si.onSuccess();
@@ -180,7 +225,7 @@ public class Singleton {
                                       }
                                   }
                                   PointLog log = new PointLog(link.getDescription(), name, type, floorName);
-                                  fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, link.isSingleUse(), new FirebaseUtilInterface() {
+                                  fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, link.isSingleUse(), sysPrefs, new FirebaseUtilInterface() {
 
                                     //TODO: Step 3
                                       @Override
@@ -202,7 +247,7 @@ public class Singleton {
                           }
             );
         } else {
-            si.onError(new Exception("Link is not enabled."), fbutil.getContext());
+            si.onError(new Exception("QR is not enabled."), fbutil.getContext());
         }
     }
 

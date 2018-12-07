@@ -2,6 +2,8 @@ package com.hcrpurdue.jason.hcrhousepoints;
 
 import android.content.Context;
 import android.os.Bundle;
+
+import Models.SystemPreferences;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -25,6 +28,7 @@ public class ApprovePoints extends Fragment {
     private Context context;
     private ProgressBar progressBar;
     private ListView approveList;
+    private TextView houseDisabledTextView;
 
     @Override
     public void onAttach(Context context) {
@@ -44,6 +48,7 @@ public class ApprovePoints extends Fragment {
         View view = inflater.inflate(R.layout.approve_points, container, false);
         singleton.getCachedData();
         approveList = view.findViewById(R.id.approve_list);
+        houseDisabledTextView = view.findViewById(R.id.houseDisabledTextView);
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.approve_list_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> getUnconfirmedPoints(swipeRefresh));
         return view;
@@ -54,9 +59,26 @@ public class ApprovePoints extends Fragment {
         super.onActivityCreated(savedInstanceState);
         AppCompatActivity activity = (AppCompatActivity) Objects.requireNonNull(getActivity());
         progressBar = activity.findViewById(R.id.navigationProgressBar);
+
+        boolean isHouseEnabled = singleton.getCachedSystemPreferences().isHouseEnabled();
+
+        if(!isHouseEnabled) {
+            approveList.setVisibility(View.GONE);
+            houseDisabledTextView.setText(singleton.getCachedSystemPreferences().getHouseIsEnabledMsg());
+            houseDisabledTextView.setVisibility(View.VISIBLE);
+
+        }
+
+        else {
+            approveList.setVisibility(View.VISIBLE);
+            houseDisabledTextView.setVisibility(View.GONE);
+        }
+
         getUnconfirmedPoints(null);
         progressBar.setVisibility(View.VISIBLE);
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Approve Points");
+
+
     }
 
     private void getUnconfirmedPoints(SwipeRefreshLayout swipeRefresh) {
@@ -68,6 +90,10 @@ public class ApprovePoints extends Fragment {
                 progressBar.setVisibility(View.GONE);
                 if (swipeRefresh != null)
                     swipeRefresh.setRefreshing(false);
+
+
+
+
             }
         });
     }
