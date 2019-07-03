@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".Fragments.QRCreationFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/Message1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="8sp"
+                android:text="Select the point category you would like to make a QR code for."
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                android:textColor="@color/common_google_signin_btn_text_dark_focused" />
+
+            <Spinner
+                android:id="@+id/point_type_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:dropDownWidth="wrap_content"
+                android:spinnerMode="dropdown"
+                tools:layout_editor_absoluteX="8dp"
+                tools:layout_editor_absoluteY="16dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:background="@drawable/border_bottom"
+                android:paddingBottom="5dp"/>
+
+            <Switch
+                android:id="@+id/multi_use_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:switchPadding="8dp"
+                android:text="Can scan multiple times"
+                android:textAlignment="viewStart"
+                android:background="@drawable/border_bottom"
+                android:paddingBottom="5dp"/>
+
+            <EditText
+                android:id="@+id/generate_qrcode_description"
+                android:layout_width="match_parent"
+                android:layout_height="99dp"
+                android:ems="10"
+                android:hint="Enter description for your QR Code"
+                android:inputType="textMultiLine"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:background="@drawable/border_bottom"
+                android:paddingBottom="5dp"/>
+
+            <Button
+                android:id="@+id/generate_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Generate QR Code" />
+        </LinearLayout>
+    </ScrollView>
+
+</FrameLayout>
