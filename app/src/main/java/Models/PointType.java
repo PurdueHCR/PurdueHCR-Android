@@ -47,6 +47,10 @@ public class PointType implements Comparable<PointType> {
         return permissionLevel;
     }
 
+    public boolean getRHPsCanGenerateQRCodes(){
+        return permissionLevel > 2;
+    }
+
     @Override
     public int compareTo(@NonNull PointType other) {
         if (residentsCanSubmit == other.residentsCanSubmit) {

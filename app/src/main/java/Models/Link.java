@@ -1,6 +1,13 @@
 package Models;
 
-public class Link {
+import android.content.Context;
+import android.graphics.Point;
+
+import java.io.Serializable;
+
+import Utils.Singleton;
+
+public class Link implements Serializable {
     private String linkId;
     private String description;
     private boolean singleUse;
@@ -21,6 +28,8 @@ public class Link {
         this.description = description;
         this.singleUse = singleUse;
         this.pointTypeId = pointTypeId;
+        this.isEnabled = false;
+        this.isArchived = false;
     }
 
     @Override
@@ -82,4 +91,13 @@ public class Link {
     public String getAddress(){
         return "hcrpoint://addpoints/"+this.linkId;
     }
+
+    public String getAndroidDeepLinkAddress(){
+        return "intent://addpoints/"+this.linkId+"#Intent;scheme=hcrpoint;package=com.hcrpurdue.jason.hcrhousepoints;end";
+    }
+
+    public PointType getPointType(Context context){
+        return Singleton.getInstance(context).getPointTypeList().get(pointTypeId);
+    }
+
 }

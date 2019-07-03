@@ -627,7 +627,7 @@ public class FirebaseUtil {
                     String id = document.getId();
                     String description = ((String) document.get("Description"));
                     boolean singleUse = ((boolean) document.get("SingleUse"));
-                    int pointTypeId = ((int) document.get("PointID"));
+                    int pointTypeId = ((Long)document.get("PointID")).intValue();
                     boolean isEnabled = ((boolean) document.get("Enabled"));
                     boolean isArchived = ((boolean) document.get("Archived"));
                     Link newCode = new Link(id, description, singleUse, pointTypeId, isEnabled,isArchived);
@@ -712,7 +712,7 @@ public class FirebaseUtil {
      * @param link  Link object to be updated
      * @param fui   FirebaseUtilInterface with method OnError and onSuccess implemented
      */
-    public void setQRCodeActivatedStatus(Link link, boolean isArchived, FirebaseUtilInterface fui){
+    public void setQRCodeArchivedStatus(Link link, boolean isArchived, FirebaseUtilInterface fui){
         //Create a map with all the keys that are going to be updated
         Map<String, Object> data = new HashMap<>();
         data.put("Archived", isArchived);

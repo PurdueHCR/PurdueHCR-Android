@@ -36,7 +36,6 @@ public class ApprovePointListAdapter extends BaseAdapter implements ListAdapter 
     public ApprovePointListAdapter(ArrayList<PointLog> logs, Context c, String h, String n, ProgressBar s){
         list = logs;
         context = c;
-        house = h;
         name = n;
         spinner = s;
     }

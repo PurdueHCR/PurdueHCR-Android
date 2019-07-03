@@ -43,7 +43,10 @@ dependencies {
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 
     implementation 'com.google.android.gms:play-services-vision:15.0.2'
+
+    implementation 'androidmads.library.qrgenearator:QRGenearator:1.0.3'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
+
 }
 
 apply plugin: 'com.google.gms.google-services'

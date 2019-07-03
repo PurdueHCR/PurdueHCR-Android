@@ -13,4 +13,7 @@
     <string name="submit_point">Submit Point</string>
     <string name="description_required">Description (Required)</string>
     <string name="point_type_label">Point Type</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

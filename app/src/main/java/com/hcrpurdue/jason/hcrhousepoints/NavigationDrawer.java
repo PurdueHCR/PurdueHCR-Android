@@ -53,6 +53,7 @@ public class NavigationDrawer extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         singleton = Singleton.getInstance(getApplicationContext());
         singleton.getCachedData();
+
         try {
             int themeID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "style", this.getPackageName());
             setTheme(themeID);
@@ -60,8 +61,11 @@ public class NavigationDrawer extends AppCompatActivity {
             Toast.makeText(NavigationDrawer.this, "Error loading house theme", Toast.LENGTH_LONG).show();
             Log.e("NavigationDrawer", "Failed to load house color", e);
         }
+
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.drawer_layout);
+
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         View headerView = navigationView.getHeaderView(0);
@@ -75,22 +79,24 @@ public class NavigationDrawer extends AppCompatActivity {
         ((TextView) headerView.findViewById(R.id.header_resident_name)).setText(singleton.getName());
         String floorName = singleton.getHouse() + " - " + singleton.getFloorName();
         ((TextView) headerView.findViewById(R.id.header_floor_name)).setText(floorName);
-
         menu = navigationView.getMenu();
+
 
         //Use the permission levels to set the appropriate navigation menu options
         try {
             if (singleton.getPermissionLevel() > 0) {
                 menu.findItem(R.id.nav_approve).setVisible(true);
                 menu.findItem(R.id.point_history).setVisible(true);
+                menu.findItem(R.id.nav_qr_code_list).setVisible(true);
             }
         } catch (Exception e) {
             Toast.makeText(NavigationDrawer.this, "Error loading permission level", Toast.LENGTH_LONG).show();
             Log.e("NavigationDrawer", "Failed to load Permission Level", e);
         }
 
-        fragmentManager = getSupportFragmentManager();
 
+
+        fragmentManager = getSupportFragmentManager();
         if (fragmentManager.getFragments().isEmpty()) {
             try {
                 fragmentManager.beginTransaction().replace(R.id.content_frame, SubmitPoints.class.newInstance(), Integer.toString(R.id.nav_submit)).commit();
@@ -99,6 +105,7 @@ public class NavigationDrawer extends AppCompatActivity {
                 Log.e("NavigationDrawer", "Failed to load initial fragment", e);
             }
         }
+
 
         Bundle extras = getIntent().getExtras();
         if (extras != null && extras.containsKey("PointSubmitted") && extras.getBoolean("PointSubmitted"))
@@ -112,6 +119,7 @@ public class NavigationDrawer extends AppCompatActivity {
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         drawerLayout = findViewById(R.id.drawer_layout);
 
+
 //        if (singleton.showDialog()) {
 ////            new AlertDialog.Builder(this)
 ////                    .setTitle("Development Committee")
@@ -123,6 +131,7 @@ public class NavigationDrawer extends AppCompatActivity {
 ////                    })
 ////                    .setNegativeButton("No thanks", null).show();
 ////        }
+
 
         navigationView.setNavigationItemSelectedListener(
                 menuItem -> {
@@ -155,6 +164,12 @@ public class NavigationDrawer extends AppCompatActivity {
                                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 10);
                             else
                                 fragmentClass = QRScan.class;
+                            break;
+                        case R.id.nav_qr_code_list:
+                            fragmentClass = QRCodeListController.class;
+                            break;
+                        case R.id.generateQRCode:
+                            fragmentClass = QRCreation.class;
                             break;
                         case R.id.nav_report_issue:
                             Intent reportIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://sites.google.com/view/hcr-points/home"));
