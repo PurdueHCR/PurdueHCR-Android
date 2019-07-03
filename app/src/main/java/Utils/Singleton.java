@@ -1,6 +1,7 @@
 package Utils;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.util.Pair;
 import android.widget.Toast;
 
@@ -13,6 +14,7 @@ import java.util.Map;
 import Models.House;
 import Models.Link;
 import Models.PointLog;
+import Models.PointLogMessage;
 import Models.PointType;
 import Models.Reward;
 import Models.SystemPreferences;
@@ -24,6 +26,7 @@ public class Singleton {
     private CacheUtil cacheUtil = new CacheUtil();
     private List<PointType> pointTypeList = null;
     private ArrayList<PointLog> unconfirmedPointList = null;
+    private ArrayList<PointLog> confirmedPointList = null;
     private String userID = null;
     private String floorName = null;
     private String houseName = null;
@@ -61,6 +64,16 @@ public class Singleton {
         return this.userID;
     }
 
+
+    public PointType getPointTypeWithID(int pointID) {
+
+        for (int i = 0; i < pointTypeList.size(); i++) {
+            if(pointTypeList.get(i).getPointID() == pointID) {
+                return pointTypeList.get(i);
+            }
+        }
+        return null;
+    }
 
     public void getPointTypes(SingletonInterface si) {
         if (pointTypeList == null)
@@ -127,7 +140,7 @@ public class Singleton {
         getPointTypes(new SingletonInterface() {
             @Override
             public void onPointTypeComplete(List<PointType> data) {
-                fbutil.getUnconfirmedPoints(houseName, floorName, pointTypeList, new FirebaseUtilInterface() {
+                fbutil.getUnconfirmedPoints(houseName, floorName, new FirebaseUtilInterface() {
                     @Override
                     public void onGetUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
                         unconfirmedPointList = logs;
@@ -203,7 +216,7 @@ public class Singleton {
     }
 
     public void submitPoints(String description, PointType type, SingletonInterface si) {
-        PointLog log = new PointLog(description, name, type, floorName);
+        PointLog log = new PointLog(description, name, type, floorName, fbutil.getUserReference(userID));
         boolean preApproved = permissionLevel > 0;
         fbutil.submitPointLog(log, null, houseName, userID, preApproved, sysPrefs, new FirebaseUtilInterface() {
             @Override
@@ -224,7 +237,7 @@ public class Singleton {
                                           type = pointType;
                                       }
                                   }
-                                  PointLog log = new PointLog(link.getDescription(), name, type, floorName);
+                                  PointLog log = new PointLog(link.getDescription(), name, type, floorName, fbutil.getUserReference(userID));
                                   fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, link.isSingleUse(), sysPrefs, new FirebaseUtilInterface() {
 
                                     //TODO: Step 3
@@ -400,5 +413,100 @@ public class Singleton {
         });
     }
 
+    public void getAllHousePoints(SingletonInterface si) {
+        fbutil.getAllHousePoints(houseName, floorName, new FirebaseUtilInterface() {
 
+            @Override
+            public void onGetAllHousePointsSuccess(List<PointLog> houseLogs) {
+                si.onGetAllHousePointsSuccess(houseLogs);
+            }
+        });
+    }
+
+    /**
+     * Handles the updating the database for approving or denying points. It will update the point in the house and the TotalPoints for both user and house
+     *
+     * @param log                    PointLog:   The PointLog that is to be either approved or denied
+     * @paramad approved               boolean:    Was the log approved?
+     * @param sui                    FirebaseUtilInterface: Implement the OnError and onSuccess methods
+     */
+    public void handlePointLog(PointLog log, boolean approved, boolean updating, SingletonInterface sui){
+        fbutil.updatePointLogStatus(log, approved, getHouse(),updating,false, new FirebaseUtilInterface() {
+            @Override
+            public void onSuccess() {
+                String msg = getName()+" rejected the point request.";
+                if(approved){
+                    msg = getName()+" approved the point request.";
+                }
+                PointLogMessage plm = new PointLogMessage(msg, getName().split(" ")[0], getName().split(" ")[1],getPermissionLevel());
+                fbutil.postMessageToPointLog(log, getHouse(), plm, new FirebaseUtilInterface() {
+                    @Override
+                    public void onSuccess() {
+
+                        sui.onSuccess();
+                    }
+
+                    @Override
+                    public void onError(Exception e, Context context) {
+                        sui.onError(e,context);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Exception e, Context context) {
+                sui.onError(e,context);
+            }
+        });
+    }
+
+    /**
+     * Retrieve the updates to a point log object as they occur. Used to update pointlog details page
+     * @param log
+     * @param sui
+     */
+    public void handlePointLogUpdates(PointLog log, final SingletonInterface sui){
+        fbutil.handlePointLogUpdates(log, houseName, new FirebaseUtilInterface() {
+            @Override
+            public void onError(Exception e, Context context) {
+                sui.onError(e,context);
+            }
+
+            @Override
+            public void onGetPointLogMessageUpdates(List<PointLogMessage> messages) {
+                sui.onGetPointLogMessageUpdates(messages);
+            }
+        });
+    }
+
+    /**
+     * Add a message to the point log
+     * @param log   Log to which the message should be posted
+     * @param plm   PointLogMessage to post
+     * @param sui   SingletonInterface with onSuccess and onError
+     */
+    public void postMessageToPointLog(PointLog log, PointLogMessage plm, SingletonInterface sui){
+        fbutil.postMessageToPointLog(log, getHouse(), plm, new FirebaseUtilInterface() {
+            @Override
+            public void onSuccess() {
+                sui.onSuccess();
+            }
+
+            @Override
+            public void onError(Exception e, Context context) {
+                sui.onError(e,context);
+            }
+        });
+    }
+
+    /**
+     * Add a message to the point log
+     * @param log   Log to which the message should be posted
+     * @param message   message to post
+     * @param sui   SingletonInterface with onSuccess and onError
+     */
+    public void postMessageToPointLog(PointLog log, String message, SingletonInterface sui){
+        PointLogMessage plm = new PointLogMessage(message, getName().split(" ")[0], getName().split(" ")[1], getPermissionLevel());
+        postMessageToPointLog(log,plm,sui);
+    }
 }

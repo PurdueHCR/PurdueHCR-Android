@@ -20,6 +20,7 @@ import java.util.Map;
 import Models.House;
 import Models.Link;
 import Models.PointLog;
+import Models.PointLogMessage;
 import Models.PointType;
 import Models.Reward;
 import Models.SystemPreferences;
@@ -42,6 +43,9 @@ public interface FirebaseUtilInterface {
     default void onGetUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
     }
 
+    default void onGetConfirmedPointsSuccess(ArrayList<PointLog> logs) {
+    }
+
     default void onGetLinkWithIdSuccess(Link link) {
     }
 
@@ -57,8 +61,11 @@ public interface FirebaseUtilInterface {
     }
 
     default void onGetSystemPreferencesSuccess(SystemPreferences systemPreferences) {
+    }
 
+    default void onGetAllHousePointsSuccess(List<PointLog> houseLogs){
 
     }
 
+    default void onGetPointLogMessageUpdates(List<PointLogMessage> messages){}
 }

@@ -6,8 +6,11 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
+
 import com.google.android.material.navigation.NavigationView;
+
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -18,6 +21,8 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.ListFragment;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -73,9 +78,11 @@ public class NavigationDrawer extends AppCompatActivity {
 
         menu = navigationView.getMenu();
 
+        //Use the permission levels to set the appropriate navigation menu options
         try {
             if (singleton.getPermissionLevel() > 0) {
                 menu.findItem(R.id.nav_approve).setVisible(true);
+                menu.findItem(R.id.point_history).setVisible(true);
             }
         } catch (Exception e) {
             Toast.makeText(NavigationDrawer.this, "Error loading permission level", Toast.LENGTH_LONG).show();
@@ -105,17 +112,17 @@ public class NavigationDrawer extends AppCompatActivity {
         actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         drawerLayout = findViewById(R.id.drawer_layout);
 
-        if(singleton.showDialog()){
-            new AlertDialog.Builder(this)
-                    .setTitle("Development Committee")
-                    .setMessage("Are you interested in helping development for the Purdue HCR app? If so, click \"I'm In\" below to join the Discord where we'll be coordinating everything!")
-                    .setPositiveButton("I'm in!", (dialog, whichButton) -> {
-                        Intent reportIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://discordapp.com/invite/jptXrYG"));
-                        reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(reportIntent);
-                    })
-                    .setNegativeButton("No thanks", null).show();
-        }
+//        if (singleton.showDialog()) {
+////            new AlertDialog.Builder(this)
+////                    .setTitle("Development Committee")
+////                    .setMessage("Are you interested in helping development for the Purdue HCR app? If so, click \"I'm In\" below to join the Discord where we'll be coordinating everything!")
+////                    .setPositiveButton("I'm in!", (dialog, whichButton) -> {
+////                        Intent reportIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://discordapp.com/invite/jptXrYG"));
+////                        reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+////                        startActivity(reportIntent);
+////                    })
+////                    .setNegativeButton("No thanks", null).show();
+////        }
 
         navigationView.setNavigationItemSelectedListener(
                 menuItem -> {
@@ -154,12 +161,29 @@ public class NavigationDrawer extends AppCompatActivity {
                             reportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(reportIntent);
                             break;
+                        case R.id.point_history:
+                            fragmentClass = UpdatePoints.class;
+                            break;
                         default:
                             fragmentClass = SubmitPoints.class;
                             break;
                     }
+                    if(fragmentClass == UpdatePoints.class) {
+                        ListFragment listFragment = (ListFragment) fragmentManager.findFragmentByTag(Integer.toString(selectedItem));
+                        if (listFragment == null) {
+                            try {
+                                listFragment = (ListFragment) fragmentClass.newInstance();
+                            } catch (Exception e) {
+                                Toast.makeText(this, "Failed to load Fragment while changing views", Toast.LENGTH_LONG).show();
+                                Log.e("NavigationDrawer", "Failed to load fragment on menu select", e);
+                            }
+                        }
 
-                    if (fragmentClass != null && currentItem != selectedItem) {
+                        Objects.requireNonNull(listFragment);
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, listFragment, Integer.toString(selectedItem)).addToBackStack(Integer.toString(currentItem)).commit();
+                        return true;
+                    }
+                    else if (fragmentClass != null && currentItem != selectedItem ) {
                         Fragment fragment = fragmentManager.findFragmentByTag(Integer.toString(selectedItem));
                         if (fragment == null) {
                             try {
@@ -174,7 +198,9 @@ public class NavigationDrawer extends AppCompatActivity {
                         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(selectedItem)).addToBackStack(Integer.toString(currentItem)).commit();
                         return true;
                     }
-                    return false;
+                    else {
+                        return false;
+                    }
                 });
     }
 

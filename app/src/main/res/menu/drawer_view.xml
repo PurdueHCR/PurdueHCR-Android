@@ -20,6 +20,12 @@
             android:icon="@drawable/ic_camera_enhance"
             android:title="QR Scanner" />
         <item
+            android:id="@+id/point_history"
+            android:title="House Point History"
+            android:icon="@drawable/history_white_icon"
+            android:visible="false"
+            />
+        <item
             android:id="@+id/nav_signout"
             android:icon="@android:drawable/ic_lock_power_off"
             android:title="Sign Out" />
@@ -31,6 +37,10 @@
         <item
             android:id="@+id/qrCreation"
             android:title="Create a QR Code"
+            android:visible="false"
+            />
+        <item
+            android:id="@+id/nav_point_log_details"
             android:visible="false"
             />
     </group>

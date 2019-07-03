@@ -2,17 +2,22 @@ package Utils;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.service.autofill.UserData;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
@@ -24,9 +29,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.annotation.Nullable;
+
 import Models.House;
 import Models.Link;
 import Models.PointLog;
+import Models.PointLogMessage;
 import Models.PointType;
 import Models.Reward;
 import Models.SystemPreferences;
@@ -52,22 +60,17 @@ public class FirebaseUtil {
      * @param fui         FirebaseUtilInterface: Implement the CompleteWithErrors(Exception e). Exception will be null if no Exception is recieved
      */
     public void submitPointLog(PointLog log, String documentID, String house, String userID, boolean preapproved, SystemPreferences sysPrefs, final FirebaseUtilInterface fui) {
-        log.setResidentRef(db.collection("Users").document(userID));
-        int multiplier = (preapproved) ? 1 : -1;
 
-
+        if(preapproved) {
+            log.updateApprovalStatus(preapproved, context);
+        }
 
         //TODO: Step 2
 
         if(sysPrefs.isHouseEnabled() && log.getPointType() != null && log.getPointType().isEnabled()) {
             //Create the data to be put into the object in the database
-            Map<String, Object> data = new HashMap<>();
-            data.put("Description", log.getPointDescription());
-            data.put("PointTypeID", (log.getType().getPointID() * multiplier));
-            data.put("Resident", log.getResident());
-            data.put("ResidentRef", log.getResidentRef());
-            data.put("FloorID", log.getFloorID());
-            data.put("ResidentReportTime", Timestamp.now());
+            Map<String, Object> data = log.convertToDict();
+
 
             // If the pointLog does not care about its id, add value to the database with random ID
             if (TextUtils.isEmpty(documentID)) {
@@ -85,7 +88,7 @@ public class FirebaseUtil {
                                     .addOnSuccessListener(aVoid -> {
                                         //if the point is preapproved, update the house and user points
                                         if (preapproved) {
-                                            updateHouseAndUserPointsWithApprovedLog(log, house, fui);
+                                            updateHouseAndUserPoints(log, house,false,false, fui);
                                         } else {
                                             fui.onSuccess();
                                         }
@@ -112,7 +115,7 @@ public class FirebaseUtil {
                                                     .addOnSuccessListener(aVoid1 -> {
                                                         //if the point is preapproved, update the house and user points
                                                         if (preapproved) {
-                                                            updateHouseAndUserPointsWithApprovedLog(log, house, fui);
+                                                            updateHouseAndUserPoints(log, house,false,false, fui);
                                                         } else {
                                                             fui.onSuccess();
                                                         }
@@ -136,44 +139,80 @@ public class FirebaseUtil {
         }
     }
 
+    public DocumentReference getUserReference(String userID) {
+
+        return db.collection("Users").document(userID);
+    }
+
     /**
      * Handles the updating the database for approving or denying points. It will update the point in the house and the TotalPoints for both user and house
      *
      * @param log                    PointLog:   The PointLog that is to be either approved or denied
      * @paramad approved               boolean:    Was the log approved?
-     * @param approvingOrDenyingUser String:     Username of the account who is approving or denying point log
      * @param house                  String:     The house that the pointlog belongs to
      * @param fui                    FirebaseUtilInterface: Implement the OnError and onSuccess methods
      */
-    public void handlePointLog(PointLog log, boolean approved, String house, String approvingOrDenyingUser, FirebaseUtilInterface fui) {
+    public void handlePointLog(PointLog log, boolean approved, String house, FirebaseUtilInterface fui) {
+        updatePointLogStatus(log,approved,house,false,false,fui);
+    }
+
+    /**
+     * Update the status of the point log if it has been approved, rejected, or updated.
+     * This method handles both initial approve/reject and Updating
+     *
+     * @param log   - PointLog to be updated. (Do not set updateApprovalStatus on the log.)
+     * @param approved  - Boolean if the point is approved
+     * @param house     - String for the house that the point belongs to
+     * @param updating              - Boolean for if this point is being updated or set for the first time
+     * @param fui   - FirebaseUtilInterface that implements on Success and On Error
+     */
+    public void updatePointLogStatus(PointLog log, boolean approved, String house, boolean updating, boolean isRECGrantingAward, FirebaseUtilInterface fui) {
         DocumentReference housePointRef = db.collection("House").document(house).collection("Points").document(log.getLogID());
+        log.updateApprovalStatus(approved,context);
+        housePointRef.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Map<String, Object> data = task.getResult().getData();
+                        if (data != null){
+                            PointLog oldLog = new PointLog(task.getResult().getId(),data,context);
+                            //If this is the first handling of this log, check to make sure it was not already approved
+                            if(!updating && oldLog.wasHandled()){
+                                fui.onError(new Exception("Point request has already been handled."),context);
+                            }
+                            else{
+                                //It has either not been approved yet, or is updating, so we are good
+                                // First, check if it is being updated and status are the same
+                                if(updating && (log.wasRejected() == oldLog.wasRejected())){
+                                    fui.onError(new Exception("Status has already been changed."),context);
+                                }
+                                else{
+                                    housePointRef.update(log.convertToDict()).addOnCompleteListener(task1 -> {
+                                        if(task1.isSuccessful()){
+                                            //TODO Update the House and User points based on approval and updating
+                                            if((approved || updating)){
+                                                updateHouseAndUserPoints(log,house,updating,isRECGrantingAward,fui);
+                                            }
+                                            else{
+                                                fui.onSuccess();
+                                            }
+                                        }
+                                        else{
+                                            fui.onError(task1.getException(), context);
+                                        }
+                                    });
+                                }
+                            }
+                        }
 
-
-        String descript = log.getPointDescription();
-        if (!approved) {
-            descript = "DENIED: " + descript;
-        }
-
-        //Create the map that will update the point log
-        Map<String, Object> data = new HashMap<>();
-        data.put("PointTypeID", log.getType().getPointID());
-        data.put("ApprovedBy", approvingOrDenyingUser);
-        data.put("ApprovedOn", Timestamp.now());
-        data.put("Description", descript);
-
-
-        //update the point log
-        housePointRef.update(data)
-                .addOnSuccessListener((Void aVoid) -> {
-                    //If the point log was successfully updated, update the points in house and user
-                    if (approved) {
-                        updateHouseAndUserPointsWithApprovedLog(log, house, fui);
-                    } else
-                        fui.onSuccess();
+                        else {
+                            fui.onError(new IllegalStateException("Data is null"), context);
+                        }
+                    } else {
+                        fui.onError(task.getException(), context);
+                    }
                 })
-                //If failed, call the onError
-                .addOnFailureListener(e -> fui.onError(e, context));
-
+                .addOnFailureListener(e -> fui.onError(e, context)
+                );
     }
 
     /**
@@ -183,20 +222,25 @@ public class FirebaseUtil {
      * @param house String:     The house that contains the PointLog
      * @param fui   FirebaseUtilInterface:  Implement the onError and the onSuccess
      */
-    private void updateHouseAndUserPointsWithApprovedLog(PointLog log, String house, FirebaseUtilInterface fui) {
+    private void updateHouseAndUserPoints(PointLog log, String house, boolean isUpdating, boolean isRECGrantingAward, FirebaseUtilInterface fui) {
         //Update the house points first. We want to update one at a time, so there is no concurrent calling of fui methods
-        updateHousePoints(log, house, new FirebaseUtilInterface() {
+        updateHousePoints(log, house, isUpdating, new FirebaseUtilInterface() {
             @Override
             public void onSuccess() {
                 //If house is updated sucessfully, update the user's points.
                 //The reason we update house points first is if one of the writes
                 // fails, we want either no one gets the points, or the house gets the points.
-                updateUserPoints(log, new FirebaseUtilInterface() {
-                    @Override
-                    public void onSuccess() {
-                        fui.onSuccess();
-                    }
-                });
+
+                //If the REC is granting points, don't update any user point
+                if(!isRECGrantingAward){
+                    updateUserPoints(log, isUpdating, new FirebaseUtilInterface() {
+                        @Override
+                        public void onSuccess() {
+                            fui.onSuccess();
+                        }
+                    });
+                }
+
             }
         });
     }
@@ -208,7 +252,7 @@ public class FirebaseUtil {
      * @param house String:     House to add the points to
      * @param fui   FirebaseUtilInterface:  Implement the onError and the onSuccess
      */
-    private void updateHousePoints(PointLog log, String house, FirebaseUtilInterface fui) {
+    private void updateHousePoints(PointLog log, String house, Boolean isUpdating, FirebaseUtilInterface fui) {
         //Create the reference for the house
         final DocumentReference houseRef = db.collection("House").document(house);
 
@@ -220,8 +264,23 @@ public class FirebaseUtil {
             if (oldCount == null) {
                 oldCount = 0L;
             }
-            long newCount = oldCount + log.getType().getPointValue();
-            transaction.update(houseRef, "TotalPoints", newCount);
+            Long newTotal = oldCount;
+            //Update a local value with the correct point value
+            if(isUpdating){
+                //If log was already approved or rejected, and the status has been changed perform logic.
+                if(log.wasRejected()){
+                    newTotal -= log.getType().getPointValue(); //Log was approved but is now rejected, so remove points
+                }
+                else{
+                    newTotal += log.getType().getPointValue(); // Log was rejected, but is now approved
+                }
+            }
+            else{
+                //This is the first time the point has been handled, so just add the point
+                newTotal += log.getType().getPointValue();
+            }
+
+            transaction.update(houseRef, "TotalPoints", newTotal);
 
             // Success, kill the transaction with a return null
             return null;
@@ -236,7 +295,7 @@ public class FirebaseUtil {
      * @param log PointLog:   Log that was approved and contains the point value and the ResidentReference
      * @param fui FirebaseUtilInterface:  Implement the onError and the onSuccess
      */
-    private void updateUserPoints(PointLog log, FirebaseUtilInterface fui) {
+    private void updateUserPoints(PointLog log, Boolean isUpdating, FirebaseUtilInterface fui) {
         //Create reference for resident
         final DocumentReference residentRef = log.getResidentRef();
 
@@ -248,8 +307,22 @@ public class FirebaseUtil {
             if (oldCount == null) {
                 oldCount = 0L;
             }
-            long newCount = oldCount + log.getType().getPointValue();
-            transaction.update(residentRef, "TotalPoints", newCount);
+            Long newTotal = oldCount;
+            //Update a local value with the correct point value
+            if(isUpdating){
+                //If log was already approved or rejected, and the status has been changed perform logic.
+                if(log.wasRejected()){
+                    newTotal -= log.getType().getPointValue(); //Log was approved but is now rejected, so remove points
+                }
+                else{
+                    newTotal += log.getType().getPointValue(); // Log was rejected, but is now approved
+                }
+            }
+            else{
+                //This is the first time the point has been handled, so just add the point
+                newTotal += log.getType().getPointValue();
+            }
+            transaction.update(residentRef, "TotalPoints", newTotal);
 
             // Success, kill the transaction with a return null
             return null;
@@ -295,7 +368,7 @@ public class FirebaseUtil {
                 );
     }
 
-    public void getUnconfirmedPoints(String house, String floorId, List<PointType> pointTypes, final FirebaseUtilInterface fui) {
+    public void getUnconfirmedPoints(String house, String floorId, final FirebaseUtilInterface fui) {
         CollectionReference housePointRef = db.collection("House").document(house).collection("Points");
         housePointRef.whereLessThan("PointTypeID", 0).get()
                 .addOnCompleteListener((Task<QuerySnapshot> task) -> {
@@ -306,41 +379,109 @@ public class FirebaseUtil {
                             if (!floorId.equals("6N") && !floorId.equals("6S")) {
                                 if (floorId.equals(logFloorId)) {
                                     String logId = document.getId();
-                                    String description = (String) document.get("Description");
-                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
-                                    String resident = (String) document.get("Resident");
-                                    Object ref = document.get("ResidentRef");
-                                    PointType pointType = null;
-                                    for (PointType type : pointTypes) {
-                                        if (type.getPointID() == Math.abs(pointTypeId)) {
-                                            pointType = type;
-                                        }
-                                    }
-                                    PointLog log = new PointLog(description, resident, pointType, floorId);
-                                    if (ref != null) {
-                                        log.setResidentRef((DocumentReference) ref);
-                                    }
-                                    log.setLogID(logId);
+//                                    String description = (String) document.get("Description");
+//                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
+//                                    String resident = (String) document.get("Resident");
+//                                    Object ref = document.get("ResidentRef");
+//                                    PointType pointType = null;
+//                                    for (PointType type : pointTypes) {
+//                                        if (type.getPointID() == Math.abs(pointTypeId)) {
+//                                            pointType = type;
+//                                        }
+//                                    }
+//                                    PointLog log = new PointLog(description, resident, pointType, floorId);
+//                                    if (ref != null) {
+//                                        log.setResidentRef((DocumentReference) ref);
+//                                    }
+//                                    log.setLogID(logId);
+
+                                    PointLog log = new PointLog(logId, document.getData(), context);
                                     logs.add(log);
                                 }
                             } else {
                                 if (floorId.equals(logFloorId) || "Shreve".equals(logFloorId)) {
                                     String logId = document.getId();
-                                    String description = (String) document.get("Description");
-                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
-                                    String resident = (String) document.get("Resident");
-                                    Object ref = document.get("ResidentRef");
-                                    PointType pointType = null;
-                                    for (PointType type : pointTypes) {
-                                        if (type.getPointID() == Math.abs(pointTypeId)) {
-                                            pointType = type;
-                                        }
-                                    }
-                                    PointLog log = new PointLog(description, resident, pointType, floorId);
-                                    if (ref != null) {
-                                        log.setResidentRef((DocumentReference) ref);
-                                    }
-                                    log.setLogID(logId);
+//                                    String description = (String) document.get("Description");
+//                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
+//                                    String resident = (String) document.get("Resident");
+//                                    Object ref = document.get("ResidentRef");
+//                                    PointType pointType = null;
+//                                    for (PointType type : pointTypes) {
+//                                        if (type.getPointID() == Math.abs(pointTypeId)) {
+//                                            pointType = type;
+//                                        }
+//                                    }
+//                                    PointLog log = new PointLog(description, resident, pointType, floorId);
+//                                    if (ref != null) {
+//                                        log.setResidentRef((DocumentReference) ref);
+//                                    }
+//                                    log.setLogID(logId);
+                                    PointLog log = new PointLog(logId, document.getData(), context);
+                                    logs.add(log);
+                                }
+                            }
+                        }
+                        if (logs.isEmpty())
+                            Toast.makeText(context, "No unapproved points", Toast.LENGTH_SHORT).show();
+                        fui.onGetUnconfirmedPointsSuccess(logs);
+                    } else {
+                        fui.onError(task.getException(), context);
+                    }
+                })
+                .addOnFailureListener(e -> fui.onError(e, context));
+    }
+
+    public void getConfirmedPoints(String house, String floorId, List<PointType> pointTypes, final FirebaseUtilInterface fui) {
+        CollectionReference housePointRef = db.collection("House").document(house).collection("Points");
+        housePointRef.whereGreaterThan("PointTypeID", 0).get()
+                .addOnCompleteListener((Task<QuerySnapshot> task) -> {
+                    if (task.isSuccessful()) {
+                        ArrayList<PointLog> logs = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String logFloorId = (String) document.get("FloorID");
+                            if (!floorId.equals("6N") && !floorId.equals("6S")) {
+                                if (floorId.equals(logFloorId)) {
+                                    String logId = document.getId();
+//                                    String description = (String) document.get("Description");
+//                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
+//                                    String resident = (String) document.get("Resident");
+//                                    Object ref = document.get("ResidentRef");
+//                                    PointType pointType = null;
+//                                    for (PointType type : pointTypes) {
+//                                        if (type.getPointID() == Math.abs(pointTypeId)) {
+//                                            pointType = type;
+//                                        }
+//                                    }
+//                                    PointLog log = new PointLog(description, resident, pointType, floorId);
+//                                    if (ref != null) {
+//                                        log.setResidentRef((DocumentReference) ref);
+//                                    }
+//                                    log.setLogID(logId);
+                                    PointLog log = new PointLog(logId, document.getData(), context);
+                                    logs.add(log);
+                                }
+                            } else {
+                                if (floorId.equals(logFloorId) || "Shreve".equals(logFloorId)) {
+                                    String logId = document.getId();
+//                                    String description = (String) document.get("Description");
+//                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
+//                                    String resident = (String) document.get("Resident");
+//                                    Object ref = document.get("ResidentRef");
+//                                    PointType pointType = null;
+
+
+//                                    for (PointType type : pointTypes) {
+//                                        if (type.getPointID() == Math.abs(pointTypeId)) {
+//                                            pointType = type;
+//                                        }
+//                                    }
+//                                    PointLog log = new PointLog(description, resident, pointType, floorId);
+//                                    if (ref != null) {
+//                                        log.setResidentRef((DocumentReference) ref);
+//                                    }
+//                                    log.setLogID(logId);
+
+                                    PointLog log = new PointLog(logId, document.getData(), context);
                                     logs.add(log);
                                 }
                             }
@@ -612,6 +753,72 @@ public class FirebaseUtil {
         });
 
 
+    }
+
+    public void getAllHousePoints(String house, String floorId, final FirebaseUtilInterface fui) {
+        CollectionReference housePointRef = db.collection("House").document(house).collection("Points");
+        housePointRef.orderBy("ResidentReportTime", Query.Direction.DESCENDING).get()
+                .addOnCompleteListener((Task<QuerySnapshot> task) -> {
+                    if (task.isSuccessful()) {
+                        ArrayList<PointLog> logs = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String logFloorId = (String) document.get("FloorID");
+                            if (!floorId.equals("6N") && !floorId.equals("6S")) {
+                                if (floorId.equals(logFloorId)) {
+                                    String logId = document.getId();
+                                    PointLog log = new PointLog(logId, document.getData(), context);
+                                    logs.add(log);
+                                }
+                            } else {
+                                if (floorId.equals(logFloorId) || "Shreve".equals(logFloorId)) {
+                                    String logId = document.getId();
+                                    PointLog log = new PointLog(logId, document.getData(), context);
+                                    logs.add(log);
+                                }
+                            }
+                        }
+                        if (logs.isEmpty())
+                            Toast.makeText(context, "No unapproved points", Toast.LENGTH_SHORT).show();
+                        fui.onGetAllHousePointsSuccess(logs);
+                    } else {
+                        fui.onError(task.getException(), context);
+                    }
+                })
+                .addOnFailureListener(e -> fui.onError(e, context));
+    }
+
+    public void handlePointLogUpdates(PointLog log, String house, final FirebaseUtilInterface fui){
+        CollectionReference housePointRef = db.collection("House").document(house)
+                .collection("Points").document(log.getLogID())
+                .collection("Messages");
+        housePointRef.orderBy(PointLogMessage.MESSAGE_CREATION_DATE_KEY, Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                if( e != null){
+                    fui.onError(e,context);
+                }
+                else{
+                    List<PointLogMessage> messages = new ArrayList<>();
+                    for(DocumentSnapshot doc : queryDocumentSnapshots){
+                        messages.add(new PointLogMessage(doc.getData()));
+                    }
+                    fui.onGetPointLogMessageUpdates(messages);
+                }
+            }
+        });
+    }
+
+    public void postMessageToPointLog(PointLog log, String house, PointLogMessage message, FirebaseUtilInterface fui){
+        CollectionReference pointMessageRef = db.collection("House").document(house)
+                .collection("Points").document(log.getLogID())
+                .collection("Messages");
+        pointMessageRef.add(message.generateFirebaseMap()).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                System.out.println("Finishjed");
+                fui.onSuccess();
+            }
+        });
     }
 
 }

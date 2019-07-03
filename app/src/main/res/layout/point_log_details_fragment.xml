@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:minHeight="?attr/listPreferredItemHeight"
+    android:background="#FFCCCCCC">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/log_detail_history_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/control_bar">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/control_bar"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/control_bar_border">
+
+        <LinearLayout
+            android:id="@+id/button_control_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/log_detail_reject_button"
+                android:layout_width="wrap_content"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:text="Reject"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/log_detail_approve_button"
+                android:layout_width="wrap_content"
+                android:layout_height="80dp"
+                android:layout_weight="1"
+                android:text="Approve"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/log_detail_change_status_button"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:text="Change Status"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/message_control_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="2dp"
+            >
+
+            <EditText
+                android:id="@+id/log_detail_message_edit_field"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Write a message ..."
+                android:padding="17dp"
+                android:layout_weight="4"/>
+
+            <Button
+                android:id="@+id/log_detail_send_button"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Send" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

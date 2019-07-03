@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_show_pt_history"
+        android:icon="@drawable/history_white_icon"
+        android:title="Show Point History"
+        app:showAsAction="always"
+        />
+
+</menu>
