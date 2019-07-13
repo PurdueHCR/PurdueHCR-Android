@@ -3,7 +3,6 @@ package com.hcrpurdue.jason.hcrhousepoints.Activities;
 import android.content.Context;
 import android.content.Intent;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -15,12 +14,8 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -29,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.PasswordResetDialogFragment;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
@@ -83,72 +77,6 @@ public class Authentication extends AppCompatActivity {
         }
     }
 
-
-    //TODO: FORGOT PASS
-
-    public void forgotPassword(View view) {
-        /* Code for Forgot Password Dialog */
-
-        TextView fgtPassView = findViewById(R.id.forgot_password);
-
-        fgtPassView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openResetPasswordDialog();
-            }
-        });
-
-
-        /* Code for Forgot Password Dialog */
-
-    }
-
-    //TODO: END FORGOT PASS
-
-
-    /* Opens the reset password dialog box invoked when user clicks Forgot Password TextView */
-    public void openResetPasswordDialog() {
-
-        PasswordResetDialogFragment resetDialog = new PasswordResetDialogFragment();
-
-        resetDialog.show(getSupportFragmentManager(), "Password Reset");
-
-
-        /* If the email verification in PasswordResetDialogFragment onCreateDialog() method checks out, it returns a boolean that allows the
-        * password reset process to continue in this function */
-
-        if (resetDialog.emailValid()) {
-            String email = resetDialog.getUserEmail();
-
-            auth.sendPasswordResetEmail(email)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()) {
-                                Toast.makeText(Authentication.this, "Password Reset Email has been sent!", Toast.LENGTH_SHORT).show();
-                            }
-                            else {
-                                Toast.makeText(Authentication.this,
-                                        "Email failed to send. Please verify your email is correct and try again.",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(Authentication.this, "Please verify your email", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-
-
-
-        }
-
-    }
 
     public void signIn(View view) {
         EditText email = findViewById(R.id.emailInput);

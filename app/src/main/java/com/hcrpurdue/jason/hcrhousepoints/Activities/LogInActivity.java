@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.Map;
 
 import com.hcrpurdue.jason.hcrhousepoints.R;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.ForgotPasswordDialog;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
 
 public class LogInActivity extends AppCompatActivity {
@@ -133,6 +134,12 @@ public class LogInActivity extends AppCompatActivity {
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in,R.anim.slide_out);
         createAccountButton.setEnabled(true);
+    }
+
+
+    public void openPasswordResetDialog(View view) {
+        ForgotPasswordDialog forgotPasswordDialog = new ForgotPasswordDialog(this);
+        forgotPasswordDialog.show();
     }
 
 }
