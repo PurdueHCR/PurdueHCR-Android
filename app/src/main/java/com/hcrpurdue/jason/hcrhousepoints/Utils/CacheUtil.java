@@ -36,14 +36,15 @@ class CacheUtil {
         context = c;
     }
 
-    public void writeToCache(String userID, String floorName, String houseName, String name, int permissionLevel) {
+    public void writeToCache(String userID, String floorName, String houseName, String first, String last, int permissionLevel) {
         try {
             File file = new File(context.getCacheDir(), FILE_NAME);
             FileWriter fileWriter = new FileWriter(file, false);
             String fileContent = "userID:" + userID +
                     "\nfloorName:" + floorName +
                     "\nhouseName:" + houseName +
-                    "\nname:" + name +
+                    "\nfirstName:" + first +
+                    "\nlastName:"  + last +
                     "\npermissionLevel:" + permissionLevel;
             fileWriter.write(fileContent);
             fileWriter.close();
@@ -62,7 +63,8 @@ class CacheUtil {
             String userID = null;
             String floorName = null;
             String houseName = null;
-            String name = null;
+            String first = null;
+            String last = null;
             int permissionLevel = 0;
             String line;
             BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(context.getCacheDir(), FILE_NAME)));
@@ -82,8 +84,11 @@ class CacheUtil {
                         case "houseName":
                             houseName = value;
                             break;
-                        case "name":
-                            name = value;
+                        case "firstName":
+                            first = value;
+                            break;
+                        case "lastName":
+                            last = value;
                             break;
                         case "permissionLevel":
                             permissionLevel = Integer.parseInt(value);
@@ -92,7 +97,7 @@ class CacheUtil {
                 }
             }
             bufferedReader.close();
-            singleton.setUserData(floorName, houseName, name, permissionLevel, userID);
+            singleton.setUserData(floorName, houseName, first, last, permissionLevel, userID);
         } catch (FileNotFoundException e) {
             Toast.makeText(context, "Could not find cache file", Toast.LENGTH_SHORT).show();
             Log.e("CacheUtil", "Could not find cache file", e);

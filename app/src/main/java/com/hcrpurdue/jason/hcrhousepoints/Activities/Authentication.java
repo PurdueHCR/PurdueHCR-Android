@@ -217,7 +217,7 @@ public class Authentication extends AppCompatActivity {
                             String id = user.getUid();
                             db.collection("Users").document(id).set(userData)
                                     .addOnSuccessListener(aVoid -> {
-                                        singleton.setUserData(floor, house, nameText, 0, id);
+                                        //singleton.setUserData(floor, house, nameText, 0, id);
                                         launchNextActivity();
                                     })
                                     .addOnFailureListener(e -> Toast.makeText(this, "User DB binds failed, please tell your RHP to tell Jason", Toast.LENGTH_LONG).show());

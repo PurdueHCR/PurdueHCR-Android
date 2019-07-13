@@ -353,10 +353,23 @@ public class FirebaseUtil {
                 .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 Map<String, Object> data = task.getResult().getData();
-                                if (data != null)
-                                    fui.onUserGetSuccess((String) data.get("FloorID"), (String) data.get("House"), (String) data.get("Name"), ((Long) data.get("Permission Level")).intValue());
-                                else
-                                    fui.onError(new IllegalStateException("Data is null"), context);
+                                if (data != null) {
+                                    String name = (String) data.get("Name");
+                                    String firstName;
+                                    String lastName;
+                                    if(name != null && !name.isEmpty()){
+                                        firstName = name.split(" ")[0];
+                                        lastName = name.split(" ")[1];
+                                    }
+                                    else{
+                                        firstName = (String) data.get("FirstName");
+                                        lastName = (String) data.get("LastName");
+                                    }
+                                    fui.onUserGetSuccess((String) data.get("FloorID"), (String) data.get("House"),firstName,lastName, ((Long) data.get("Permission Level")).intValue());
+                                }
+                                else {
+                                    fui.onError(new IllegalStateException("User does not exist."), context);
+                                }
                             } else {
                                 fui.onError(task.getException(), context);
                             }

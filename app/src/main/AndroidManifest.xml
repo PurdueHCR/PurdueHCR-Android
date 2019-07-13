@@ -13,8 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
-            android:name=".Activities.Authentication"
+            android:name=".Activities.AppInitializationActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -34,6 +35,31 @@
                 <!-- note that the leading "/" is required for pathPrefix -->
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".Activities.LogInActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
+
+        </activity>
+
+        <activity
+            android:name=".Activities.AccountCreationActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".Activities.LogInActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".Activities.LogInActivity" />
+        </activity>
+
+        <activity
+            android:name=".Activities.HouseSignUpActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="portrait">
+
+        </activity>
+
         <activity
             android:name=".Activities.NavigationDrawer"
             android:configChanges="orientation|keyboardHidden"

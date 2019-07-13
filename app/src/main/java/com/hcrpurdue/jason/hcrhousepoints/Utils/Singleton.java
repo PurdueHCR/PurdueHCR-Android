@@ -32,6 +32,8 @@ public class Singleton {
     private String floorName = null;
     private String houseName = null;
     private String name = null;
+    private String firstName = null;
+    private String lastName = null;
     private int permissionLevel = 0;
     private int totalPoints = 0;
     private List<House> houseList = null;
@@ -156,13 +158,14 @@ public class Singleton {
         return pointTypeList;
     }
 
-    public void setUserData(String floor, String house, String n, int permission, String id) {
+    public void setUserData(String floor, String house, String first, String last, int permission, String id) {
         floorName = floor;
         houseName = house;
-        name = n;
+        firstName = first;
+        lastName = last;
         permissionLevel = permission;
         userID = id;
-        cacheUtil.writeToCache(id, floor, house, name, permission);
+        cacheUtil.writeToCache(id, floor, house, first, last, permission);
     }
 
     public boolean cacheFileExists() {
@@ -174,9 +177,13 @@ public class Singleton {
         if (houseName == null) {
             fbutil.getUserData(id, new FirebaseUtilInterface() {
                 @Override
-                public void onUserGetSuccess(String floor, String house, String name, int permission) {
-                    setUserData(floor, house, name, permission, id);
+                public void onUserGetSuccess(String floor, String house, String firstName, String lastName, int permission) {
+                    setUserData(floor, house, firstName,lastName, permission, id);
                     si.onSuccess();
+                }
+                @Override
+                public void onError(Exception e, Context context) {
+                    si.onError(e,context);
                 }
             });
         } else
@@ -189,9 +196,14 @@ public class Singleton {
             cacheUtil.getCacheData(this);
             fbutil.getUserData(id, new FirebaseUtilInterface() {
                 @Override
-                public void onUserGetSuccess(String floor, String house, String name, int permission) {
-                    setUserData(floor, house, name, permission, id);
+                public void onUserGetSuccess(String floor, String house, String firstName, String lastName, int permission) {
+                    setUserData(floor, house, firstName,lastName, permission, id);
                     si.onSuccess();
+                }
+
+                @Override
+                public void onError(Exception e, Context context) {
+                    si.onError(e,context);
                 }
             });
         } else

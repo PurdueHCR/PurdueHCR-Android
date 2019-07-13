@@ -241,7 +241,7 @@ public class NavigationDrawer extends AppCompatActivity {
         findViewById(R.id.navigationProgressBar).setVisibility(View.VISIBLE);
         AsyncTask.execute(() -> singleton.clearUserData());
         FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(this, Authentication.class);
+        Intent intent = new Intent(this, LogInActivity.class);
         startActivity(intent);
         finish();
     }
