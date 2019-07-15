@@ -267,15 +267,15 @@ public class FirebaseUtil {
             if(isUpdating){
                 //If log was already approved or rejected, and the status has been changed perform logic.
                 if(log.wasRejected()){
-                    newTotal -= log.getType().getPointValue(); //Log was approved but is now rejected, so remove points
+                    newTotal -= log.getType().getValue(); //Log was approved but is now rejected, so remove points
                 }
                 else{
-                    newTotal += log.getType().getPointValue(); // Log was rejected, but is now approved
+                    newTotal += log.getType().getValue(); // Log was rejected, but is now approved
                 }
             }
             else{
                 //This is the first time the point has been handled, so just add the point
-                newTotal += log.getType().getPointValue();
+                newTotal += log.getType().getValue();
             }
 
             transaction.update(houseRef, "TotalPoints", newTotal);
@@ -310,15 +310,15 @@ public class FirebaseUtil {
             if(isUpdating){
                 //If log was already approved or rejected, and the status has been changed perform logic.
                 if(log.wasRejected()){
-                    newTotal -= log.getType().getPointValue(); //Log was approved but is now rejected, so remove points
+                    newTotal -= log.getType().getValue(); //Log was approved but is now rejected, so remove points
                 }
                 else{
-                    newTotal += log.getType().getPointValue(); // Log was rejected, but is now approved
+                    newTotal += log.getType().getValue(); // Log was rejected, but is now approved
                 }
             }
             else{
                 //This is the first time the point has been handled, so just add the point
-                newTotal += log.getType().getPointValue();
+                newTotal += log.getType().getValue();
             }
             transaction.update(residentRef, "TotalPoints", newTotal);
 
@@ -335,9 +335,7 @@ public class FirebaseUtil {
                 List<PointType> pointTypeList = new ArrayList<>();
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     Map<String, Object> data = document.getData();
-                    pointTypeList.add(new PointType(((Long) data.get("Value")).intValue(),
-                        (String) data.get("Description"), (boolean) data.get("ResidentsCanSubmit"), Integer.parseInt(document.getId()),
-                        (boolean) data.get("Enabled"), ((Long)data.get("PermissionLevel")).intValue()));
+                    pointTypeList.add(new PointType(Integer.parseInt(document.getId()),data));
                 }
                 Collections.sort(pointTypeList);
                 fui.onPointTypeComplete(pointTypeList);
@@ -354,17 +352,8 @@ public class FirebaseUtil {
                             if (task.isSuccessful()) {
                                 Map<String, Object> data = task.getResult().getData();
                                 if (data != null) {
-                                    String name = (String) data.get("Name");
-                                    String firstName;
-                                    String lastName;
-                                    if(name != null && !name.isEmpty()){
-                                        firstName = name.split(" ")[0];
-                                        lastName = name.split(" ")[1];
-                                    }
-                                    else{
-                                        firstName = (String) data.get("FirstName");
-                                        lastName = (String) data.get("LastName");
-                                    }
+                                    String firstName = (String) data.get("FirstName");
+                                    String lastName = (String) data.get("LastName");
                                     fui.onUserGetSuccess((String) data.get("FloorID"), (String) data.get("House"),firstName,lastName, ((Long) data.get("Permission Level")).intValue());
                                 }
                                 else {
@@ -390,43 +379,12 @@ public class FirebaseUtil {
                             if (!floorId.equals("6N") && !floorId.equals("6S")) {
                                 if (floorId.equals(logFloorId)) {
                                     String logId = document.getId();
-//                                    String description = (String) document.get("Description");
-//                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
-//                                    String resident = (String) document.get("Resident");
-//                                    Object ref = document.get("ResidentRef");
-//                                    PointType pointType = null;
-//                                    for (PointType type : pointTypes) {
-//                                        if (type.getPointID() == Math.abs(pointTypeId)) {
-//                                            pointType = type;
-//                                        }
-//                                    }
-//                                    PointLog log = new PointLog(description, resident, pointType, floorId);
-//                                    if (ref != null) {
-//                                        log.setResidentRef((DocumentReference) ref);
-//                                    }
-//                                    log.setLogID(logId);
-
                                     PointLog log = new PointLog(logId, document.getData(), context);
                                     logs.add(log);
                                 }
                             } else {
                                 if (floorId.equals(logFloorId) || "Shreve".equals(logFloorId)) {
                                     String logId = document.getId();
-//                                    String description = (String) document.get("Description");
-//                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
-//                                    String resident = (String) document.get("Resident");
-//                                    Object ref = document.get("ResidentRef");
-//                                    PointType pointType = null;
-//                                    for (PointType type : pointTypes) {
-//                                        if (type.getPointID() == Math.abs(pointTypeId)) {
-//                                            pointType = type;
-//                                        }
-//                                    }
-//                                    PointLog log = new PointLog(description, resident, pointType, floorId);
-//                                    if (ref != null) {
-//                                        log.setResidentRef((DocumentReference) ref);
-//                                    }
-//                                    log.setLogID(logId);
                                     PointLog log = new PointLog(logId, document.getData(), context);
                                     logs.add(log);
                                 }
@@ -453,45 +411,12 @@ public class FirebaseUtil {
                             if (!floorId.equals("6N") && !floorId.equals("6S")) {
                                 if (floorId.equals(logFloorId)) {
                                     String logId = document.getId();
-//                                    String description = (String) document.get("Description");
-//                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
-//                                    String resident = (String) document.get("Resident");
-//                                    Object ref = document.get("ResidentRef");
-//                                    PointType pointType = null;
-//                                    for (PointType type : pointTypes) {
-//                                        if (type.getPointID() == Math.abs(pointTypeId)) {
-//                                            pointType = type;
-//                                        }
-//                                    }
-//                                    PointLog log = new PointLog(description, resident, pointType, floorId);
-//                                    if (ref != null) {
-//                                        log.setResidentRef((DocumentReference) ref);
-//                                    }
-//                                    log.setLogID(logId);
                                     PointLog log = new PointLog(logId, document.getData(), context);
                                     logs.add(log);
                                 }
                             } else {
                                 if (floorId.equals(logFloorId) || "Shreve".equals(logFloorId)) {
                                     String logId = document.getId();
-//                                    String description = (String) document.get("Description");
-//                                    int pointTypeId = Objects.requireNonNull(document.getLong("PointTypeID")).intValue();
-//                                    String resident = (String) document.get("Resident");
-//                                    Object ref = document.get("ResidentRef");
-//                                    PointType pointType = null;
-
-
-//                                    for (PointType type : pointTypes) {
-//                                        if (type.getPointID() == Math.abs(pointTypeId)) {
-//                                            pointType = type;
-//                                        }
-//                                    }
-//                                    PointLog log = new PointLog(description, resident, pointType, floorId);
-//                                    if (ref != null) {
-//                                        log.setResidentRef((DocumentReference) ref);
-//                                    }
-//                                    log.setLogID(logId);
-
                                     PointLog log = new PointLog(logId, document.getData(), context);
                                     logs.add(log);
                                 }

@@ -42,12 +42,15 @@ import com.hcrpurdue.jason.hcrhousepoints.Fragments.HouseOverviewFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointApprovalFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointSubmissionFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointTypeListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCodeListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCreationFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRScannerFragment;
 
 import java.util.Objects;
 
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.SubmitPointsFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
 
@@ -107,7 +110,7 @@ public class NavigationDrawer extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         if (fragmentManager.getFragments().isEmpty()) {
             try {
-                fragmentManager.beginTransaction().replace(R.id.content_frame, PointSubmissionFragment.class.newInstance(), Integer.toString(R.id.nav_submit)).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, PointTypeListFragment.class.newInstance(), Integer.toString(R.id.nav_submit)).commit();
             } catch (Exception e) {
                 Toast.makeText(this, "Error loading PointSubmissionFragment Frament", Toast.LENGTH_LONG).show();
                 Log.e("NavigationDrawer", "Failed to load initial fragment", e);
@@ -159,7 +162,7 @@ public class NavigationDrawer extends AppCompatActivity {
                                     .setNegativeButton(android.R.string.no, null).show();
                             break;
                         case R.id.nav_submit:
-                            fragmentClass = PointSubmissionFragment.class;
+                            fragmentClass = PointTypeListFragment.class;
                             break;
                         case R.id.nav_approve:
                             fragmentClass = PointApprovalFragment.class;
@@ -187,8 +190,11 @@ public class NavigationDrawer extends AppCompatActivity {
                         case R.id.point_history:
                             fragmentClass = HousePointHistoryFragment.class;
                             break;
+                        case R.id.nav_submit_point:
+                            fragmentClass = SubmitPointsFragment.class;
+                            break;
                         default:
-                            fragmentClass = PointSubmissionFragment.class;
+                            fragmentClass = HouseOverviewFragment.class;
                             break;
                     }
                     if(fragmentClass == HousePointHistoryFragment.class) {

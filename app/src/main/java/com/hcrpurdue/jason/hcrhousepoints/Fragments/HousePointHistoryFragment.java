@@ -23,14 +23,14 @@ import java.util.List;
 import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
-import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.HouseSubmissionHistoryAdapter;
+import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.PointLogAdapter;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
 public class HousePointHistoryFragment extends ListFragment implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
 
     List<PointLog> allHouseLogs;
-    private HouseSubmissionHistoryAdapter adapter;
+    private PointLogAdapter adapter;
     private Singleton singleton;
     private ProgressBar progressBar;
 
@@ -50,15 +50,6 @@ public class HousePointHistoryFragment extends ListFragment implements SearchVie
 
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("House Point History");
 
-    }
-
-    @Override
-    public void onListItemClick(ListView listView, View v, int position, long id) {
-//        String item = (String) listView.getAdapter().getItem(position);
-//        if (getActivity() instanceof OnItem1SelectedListener) {
-//            ((OnItem1SelectedListener) getActivity()).OnItem1SelectedListener(item);
-//        }
-//        getFragmentManager().popBackStack();
     }
 
     @Override
@@ -112,7 +103,8 @@ public class HousePointHistoryFragment extends ListFragment implements SearchVie
 
         List<PointLog> filteredValues = new ArrayList<PointLog>(allHouseLogs);
         for (PointLog log : allHouseLogs) {
-            if (!(log.getResident().toLowerCase().contains(newText.toLowerCase()) ||
+            if (!(log.getResidentFirstName().toLowerCase().contains(newText.toLowerCase()) ||
+                    log.getResidentLastName().toLowerCase().contains(newText.toLowerCase()) ||
                     log.getPointDescription().toLowerCase().contains(newText.toLowerCase()) ||
                     log.getPointType().getPointDescription().toLowerCase().contains(newText.toLowerCase()))) {
                 filteredValues.remove(log);
@@ -143,7 +135,7 @@ public class HousePointHistoryFragment extends ListFragment implements SearchVie
     }
 
     private void createAdapter(List<PointLog> logs){
-        adapter = new HouseSubmissionHistoryAdapter(logs,getContext(),progressBar);
+        adapter = new PointLogAdapter(logs,getContext(),progressBar);
         setListAdapter(adapter);
     }
 }

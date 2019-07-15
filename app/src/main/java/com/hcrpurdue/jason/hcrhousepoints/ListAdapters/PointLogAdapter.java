@@ -26,13 +26,13 @@ import java.util.Objects;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
 
-public class HouseSubmissionHistoryAdapter extends BaseAdapter  implements ListAdapter {
+public class PointLogAdapter extends BaseAdapter  implements ListAdapter {
     private List<PointLog> list;
     private Context context;
     private final ProgressBar spinner;
     private Singleton singleton;
 
-    public HouseSubmissionHistoryAdapter(List<PointLog> logs, Context c, ProgressBar s){
+    public PointLogAdapter(List<PointLog> logs, Context c, ProgressBar s){
         list = logs;
         context = c;
         spinner = s;
@@ -72,9 +72,9 @@ public class HouseSubmissionHistoryAdapter extends BaseAdapter  implements ListA
         ImageView houseView = view.findViewById(R.id.message_image);
 
 
-        pointTypeLabel.setText(log.getPointType().getPointDescription());
-        nameLabel.setText(log.getResident().split( " ")[0]);
-        lastNameLabel.setText(log.getResident().split( " ")[1]);
+        pointTypeLabel.setText(log.getPointType().getName());
+        nameLabel.setText(log.getResidentFirstName());
+        lastNameLabel.setText(log.getResidentLastName());
         pointDescriptionLabel.setText(log.getPointDescription());
 
         int drawableID = context.getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", context.getPackageName());

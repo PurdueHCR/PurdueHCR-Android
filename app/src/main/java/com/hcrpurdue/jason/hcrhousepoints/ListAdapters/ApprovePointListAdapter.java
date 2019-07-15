@@ -71,7 +71,7 @@ public class ApprovePointListAdapter extends BaseAdapter implements ListAdapter 
         //Handle TextView and display string from your list
         TextView text1 = view.findViewById(R.id.text1);
         TextView text2 = view.findViewById(R.id.text2);
-        String text1String = log.getResident() + " - " +  log.getType().getPointDescription();
+        String text1String = log.getResidentFirstName() +" "+log.getResidentLastName()+" - " +  log.getType().getName();
         text1.setText(text1String);
         text2.setText(log.getPointDescription());
 

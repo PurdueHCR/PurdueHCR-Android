@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.PointLogAdapter;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public class PointApprovalFragment extends Fragment {
         singleton.getUnconfirmedPoints(new SingletonInterface() {
             @Override
             public void onUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
-                ApprovePointListAdapter adapter = new ApprovePointListAdapter(logs, context, singleton.getHouse(), singleton.getName(), progressBar);
+                PointLogAdapter adapter = new PointLogAdapter(logs,context,progressBar);
                 approveList.setAdapter(adapter);
                 progressBar.setVisibility(View.GONE);
                 if (swipeRefresh != null)

@@ -62,11 +62,11 @@ public class PointLogMessageAdapter extends RecyclerView.Adapter<PointLogMessage
             holder.descriptionLabel.setVisibility(View.VISIBLE);
             holder.pointTypeLabel.setVisibility(View.VISIBLE);
             holder.pointTypeView.setVisibility(View.VISIBLE);
-            holder.firstNameView.setText( log.getResident().split(" ")[0]);
-            holder.lastNameView.setText( log.getResident().split(" ")[1]);
+            holder.firstNameView.setText( log.getResidentFirstName());
+            holder.lastNameView.setText( log.getResidentLastName());
             int drawableID = context.getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", context.getPackageName());
             holder.imageView.setImageResource(drawableID);
-            holder.pointTypeView.setText(log.getPointType().getPointDescription());
+            holder.pointTypeView.setText(log.getPointType().getName());
             holder.descriptionView.setText(log.getPointDescription());
         }
         else{

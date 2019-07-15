@@ -145,7 +145,7 @@ public class PointSubmissionFragment extends Fragment {
     private void getPointTypes(View view) {
 
         try {
-            singleton.getPointTypes(new SingletonInterface() {
+            singleton.getUpdatedPointTypes(new SingletonInterface() {
                 public void onPointTypeComplete(List<PointType> data) {
                     List<Map<String, String>> formattedPointTypes = new ArrayList<>();
                     for (PointType type : data) {
@@ -153,7 +153,7 @@ public class PointSubmissionFragment extends Fragment {
                             enabledTypes.add(type);
                             Map<String, String> map = new HashMap<>();
                             map.put("text", type.getPointDescription());
-                            map.put("subText", String.valueOf(type.getPointValue()) + " points");
+                            map.put("subText", String.valueOf(type.getValue()) + " points");
                             formattedPointTypes.add(map);
                         }
                     }

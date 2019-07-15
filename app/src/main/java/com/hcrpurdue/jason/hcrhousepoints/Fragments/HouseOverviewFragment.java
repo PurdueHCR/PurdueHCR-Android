@@ -100,7 +100,7 @@ public class HouseOverviewFragment extends Fragment {
         updatePointData(view, view.findViewById(R.id.statistics_point_chart), null);
         progressBar = Objects.requireNonNull(getActivity()).findViewById(R.id.navigationProgressBar);
         progressBar.setVisibility(View.VISIBLE);
-        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("HouseOverviewFragment");
+        Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Competition Overview");
     }
 
     private void updatePointData(View view, BarChart chart, SwipeRefreshLayout swipeRefreshLayout) {

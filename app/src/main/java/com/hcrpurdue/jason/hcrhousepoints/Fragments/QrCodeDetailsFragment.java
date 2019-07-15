@@ -128,7 +128,7 @@ public class QrCodeDetailsFragment extends Fragment {
         });
 
 
-        pointTypeLabel.setText(qrCodeModel.getPointType(context).getPointDescription());
+        pointTypeLabel.setText(qrCodeModel.getPointType(context).getName());
 
         qrCodeIOSURLLabel.setOnClickListener(view12 -> {
             ClipboardManager cm = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);

@@ -89,7 +89,7 @@ public class QRCreationFragment extends Fragment {
      */
     private void refreshData() {
         try {
-            singleton.getPointTypes(new SingletonInterface() {
+            singleton.getUpdatedPointTypes(new SingletonInterface() {
                 public void onPointTypeComplete(List<PointType> data) {
                     loadSpinner(data);
                 }
@@ -111,8 +111,8 @@ public class QRCreationFragment extends Fragment {
             if (type.getRHPsCanGenerateQRCodes() && type.isEnabled()) {
                 enabledTypes.add(type);
                 Map<String, String> map = new HashMap<>();
-                map.put("text", type.getPointDescription());
-                map.put("subText", String.valueOf(type.getPointValue()) + " points");
+                map.put("text", type.getName());
+                map.put("subText", String.valueOf(type.getValue()) + " points");
                 formattedPointTypes.add(map);
             }
         }
@@ -161,7 +161,9 @@ public class QRCreationFragment extends Fragment {
         }
         else{
             //Create new Link object
-            Link link = new Link(codeDescriptionLabel.getText().toString(),(!multipleUseSwitch.isChecked()),enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getPointID());
+            Link link = new Link(codeDescriptionLabel.getText().toString(),
+                    (!multipleUseSwitch.isChecked()),
+                    enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId());
             //Pass to Singleton then Firebase to handle generation of Links in database
             singleton.createQRCode(link, new SingletonInterface() {
                 @Override

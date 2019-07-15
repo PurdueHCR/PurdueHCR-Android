@@ -51,5 +51,9 @@
             android:id="@+id/nav_point_log_details"
             android:visible="false"
             />
+        <item
+            android:id="@+id/nav_submit_point"
+            android:visible="false"
+            />
     </group>
 </menu>

@@ -27,7 +27,8 @@ public class PointLog implements Serializable {
     private String pointDescription;
     private String floorID;
     private PointType type;
-    private String resident;
+    private String residentFirstName;
+    private String residentLastName;
     private DocumentReference residentRef;
     private Date residentReportTime;
     private String logID;
@@ -41,16 +42,18 @@ public class PointLog implements Serializable {
      * from Firebase database, use the other init method.
      *
      * @param pointDescription - Description of the point
-     * @param resident         - Name of the resident
+     * @param last             - Name of the resident
+     * @param first            - Name of the resident
      * @param type             - Type of point for log
      * @param floorID          - ID of the floor on which the user lives (e.g. 2N)
      * @param residentRef      - Firebase reference for the user
      */
-    public PointLog(String pointDescription, String resident, PointType type, String floorID,
+    public PointLog(String pointDescription, String first, String last, PointType type, String floorID,
                     DocumentReference residentRef) {
         this.pointDescription = pointDescription;
         this.type = type;
-        this.resident = resident;
+        this.residentLastName = last;
+        this.residentFirstName = first;
         this.floorID = floorID;
         this.residentRef = residentRef;
         this.residentReportTime = new Date();
@@ -71,12 +74,10 @@ public class PointLog implements Serializable {
 
         this.floorID = (String) document.get("FloorID");
         this.pointDescription = (String) document.get("Description");
-        this.resident = (String) document.get("Resident");
+        this.residentFirstName = (String) document.get("ResidentFirstName");
+        this.residentLastName = (String) document.get("ResidentLastName");
         this.residentRef = (DocumentReference) document.get("ResidentRef");
         this.approvedBy = (String) document.get("ApprovedBy");
-//        this.approvedOn = (Date) document.get("ApprovedOn");
-//        this.residentReportTime = (Timestamp) document.get("ResidentReportTime");
-
         this.residentReportTime = (Date) document.get("ResidentReportTime");
         this.approvedOn = (Date) document.get("ApprovedOn");
 
@@ -93,7 +94,7 @@ public class PointLog implements Serializable {
         this.type = Singleton.getInstance(context).getPointTypeWithID(Math.abs(idValue));
 
         if (floorID.equals("Shreve")) {
-            resident = SHREVE_RESIDENT + resident;
+            residentFirstName = SHREVE_RESIDENT + residentFirstName;
         }
 
         this.messages = new ArrayList<>();
@@ -157,16 +158,15 @@ public class PointLog implements Serializable {
         updateApprovalStatus(approved, false, context);
     }
 
-    //TODO: Comment
     public HashMap<String, Object> convertToDict() {
 
-        int pointTypeIDValue = this.type.getPointID();
+        int pointTypeIDValue = this.type.getId();
 
         if(!wasHandled) {
             pointTypeIDValue = pointTypeIDValue * -1;
         }
 
-        String residentName = this.resident;
+        String residentName = this.residentFirstName;
 
         if(floorID.equals("Shreve")) {
             residentName = residentName.replace(SHREVE_RESIDENT, "");
@@ -177,7 +177,8 @@ public class PointLog implements Serializable {
         dict.put("Description", this.pointDescription);
         dict.put("FloorID", this.floorID);
         dict.put("PointTypeID", pointTypeIDValue);
-        dict.put("Resident", residentName);
+        dict.put("ResidentFirstName", residentName);
+        dict.put("ResidentLastName", residentLastName);
         dict.put("ResidentRef", this.residentRef);
         dict.put("ResidentReportTime", this.residentReportTime);
 
@@ -215,10 +216,6 @@ public class PointLog implements Serializable {
         return type;
     }
 
-    public String getResident() {
-        return resident;
-    }
-
     public void setResidentRef(DocumentReference ref) {
         residentRef = ref;
     }
@@ -243,5 +240,13 @@ public class PointLog implements Serializable {
 
     public void setMessages(List<PointLogMessage> msg){
         this.messages = msg;
+    }
+
+    public String getResidentFirstName() {
+        return residentFirstName;
+    }
+
+    public String getResidentLastName() {
+        return residentLastName;
     }
 }

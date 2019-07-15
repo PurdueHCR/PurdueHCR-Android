@@ -16,4 +16,7 @@
     <string name="first_name_request_label">Please enter your preferred first name</string>
     <string name="last_name_request_label" translatable="false">Please enter your preferred last name</string>
     <string name="link_house_button">Join the Purdue HCR</string>
+    <string name="no_results_found">No results found.</string>
+    <string name="filler_point_type_message">This is where a point type would go if there were one. It could be long and has to wrap well!</string>
+    <string name="filler_point_details_message">This is where a point type desciption would go too.</string>
 </resources>

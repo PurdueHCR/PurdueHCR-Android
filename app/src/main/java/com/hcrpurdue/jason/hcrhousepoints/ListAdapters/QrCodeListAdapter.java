@@ -65,7 +65,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
         titleTextView.setText(qrCode.getDescription());
 
         TextView typeTextView = view.findViewById(R.id.type);
-        typeTextView.setText(qrCode.getPointType(context).getPointDescription());
+        typeTextView.setText(qrCode.getPointType(context).getName());
         Switch codeActiveSwitch = view.findViewById(R.id.qr_code_switch);
         codeActiveSwitch.setChecked(qrCode.isEnabled());
 

@@ -4,12 +4,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -17,11 +20,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.hcrpurdue.jason.hcrhousepoints.Models.House;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
+import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class AppInitializationActivity extends AppCompatActivity {
 
@@ -36,7 +47,7 @@ public class AppInitializationActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         singleton = Singleton.getInstance(getApplicationContext());
         initializeViews();
-        initializeCachedData();
+        initializeUserData();
 
     }
 
@@ -48,12 +59,12 @@ public class AppInitializationActivity extends AppCompatActivity {
     /**
      * Method will ensure data is cached before loading is complete
      */
-    private void initializeCachedData(){
+    private void initializeUserData(){
         if(isLoggedIn()){
             if (singleton.cacheFileExists()) {
                 singleton.getUserData(new SingletonInterface() {
                     public void onSuccess() {
-                        launchNavigationActivity();
+                        initializeCompetitionData();
                     }
                     public void onError(Exception e, Context context){
                         if(e.getMessage().equals("User does not exist.")){
@@ -69,7 +80,7 @@ public class AppInitializationActivity extends AppCompatActivity {
             } else {
                 singleton.getUserDataNoCache(new SingletonInterface() {
                     public void onSuccess() {
-                        launchNavigationActivity();
+                        initializeCompetitionData();
                     }
                     public void onError(Exception e, Context context){
                         if(e.getMessage().equals("User does not exist.")){
@@ -87,6 +98,52 @@ public class AppInitializationActivity extends AppCompatActivity {
         else{
             launchSignInActivity();
         }
+    }
+
+    private void initializeCompetitionData(){
+        try {
+            singleton.getUpdatedPointTypes(new SingletonInterface() {
+
+                public void onPointTypeComplete(List<PointType> data) {
+                    singleton.getSystemPreferences(new SingletonInterface() {
+                        @Override
+                        public void onGetSystemPreferencesSuccess(SystemPreferences systemPreferences) {
+                            singleton.getPointStatistics(new SingletonInterface() {
+                                @Override
+                                public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
+                                    launchNavigationActivity();
+                                }
+
+                                @Override
+                                public void onError(Exception e, Context context) {
+                                    handleDataInitializationError(e);
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(Exception e, Context context) {
+                            handleDataInitializationError(e);
+                        }
+                    });
+                }
+
+                @Override
+                public void onError(Exception e, Context context) {
+                    handleDataInitializationError(e);
+                }
+            });
+
+        } catch (Exception e) {
+            handleDataInitializationError(e);
+        }
+
+    }
+
+    private void handleDataInitializationError(Exception e){
+        Toast.makeText(this, "Failed to load house data. ", Toast.LENGTH_LONG).show();
+        Log.e("PointSubmissionFragment", "Error loading point types", e);
+        launchSignInActivity();
     }
 
     /**
