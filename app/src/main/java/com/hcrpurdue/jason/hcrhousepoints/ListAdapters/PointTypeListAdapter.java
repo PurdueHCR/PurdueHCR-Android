@@ -16,9 +16,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointLogDetailsFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.SubmitPointsFragment;
-import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 

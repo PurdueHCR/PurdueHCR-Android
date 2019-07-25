@@ -228,7 +228,7 @@ public class Authentication extends AppCompatActivity {
     }
 
     private void launchNextActivity() {
-        Intent intent = new Intent(this, NavigationDrawer.class);
+        Intent intent = new Intent(this, NavigationActivity.class);
         intent.putExtra("PointSubmitted", false);
         startActivity(intent);
         finish();
@@ -267,7 +267,7 @@ public class Authentication extends AppCompatActivity {
                                 singleton.submitPointWithLink(link, new SingletonInterface() {
                                     @Override
                                     public void onSuccess() {
-                                        Intent intent = new Intent(Authentication.this, NavigationDrawer.class);
+                                        Intent intent = new Intent(Authentication.this, NavigationActivity.class);
                                         intent.putExtra("PointSubmitted", true);
                                         startActivity(intent);
                                         finish();

@@ -66,4 +66,6 @@ public interface FirebaseUtilInterface {
     }
 
     default void onGetPointLogMessageUpdates(List<PointLogMessage> messages){}
+
+    default void onGetPersonalPointLogs(List<PointLog> personalLogs){}
 }

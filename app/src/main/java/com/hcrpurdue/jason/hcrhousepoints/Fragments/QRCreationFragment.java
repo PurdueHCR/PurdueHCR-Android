@@ -3,6 +3,7 @@ package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -34,7 +35,7 @@ import java.util.Map;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
-public class QRCreationFragment extends Fragment {
+public class QRCreationFragment extends Fragment implements ListenerCallbackInterface {
     private Context context;
     private ArrayList<PointType> enabledTypes = new ArrayList<PointType>();
     Singleton singleton;

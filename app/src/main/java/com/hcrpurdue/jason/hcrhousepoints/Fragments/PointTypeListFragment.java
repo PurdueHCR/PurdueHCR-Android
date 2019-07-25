@@ -21,6 +21,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class PointTypeListFragment  extends ListFragment implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
+public class PointTypeListFragment  extends ListFragment implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener, ListenerCallbackInterface {
 
     List<PointType> enabledTypes;
     private PointTypeListAdapter adapter;

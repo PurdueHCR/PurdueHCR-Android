@@ -1,67 +1,138 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/point_type_layout"
+    <!--<View-->
+    <!--android:id="@+id/point_type_layout"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignParentTop="true"-->
+    <!--android:paddingStart="16dp"-->
+    <!--android:paddingEnd="16dp"-->
+    <!--android:paddingTop="8dp"-->
+    <!--android:paddingBottom="16dp"-->
+    <!--android:background="@color/secondary"-->
+    <!--android:layout_alignParentStart="true"-->
+    <!--android:layout_alignBottom="@id/submit_point_type_description_text_view"/>-->
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp">
-        <TextView
-            android:id="@+id/submit_point_type_text_view"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/filler_point_type_message"
-            android:textAlignment="center"
-            android:textStyle="bold"
-            android:textSize="20sp"
+            android:orientation="vertical">
 
-            />
-        <TextView
-            android:id="@+id/submit_point_type_description_text_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/filler_point_details_message"
-            android:paddingTop="4dp"
-            android:textAlignment="center"
-            android:textStyle="normal"
-            android:textSize="12sp"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            <Button
+                android:id="@+id/submit_point_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/submit_point"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/description_layout"
+                app:layout_constraintVertical_bias="1.0" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/description_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_below="@id/point_type_layout">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/description_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/time_button">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/description_edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="top"
-            android:maxLines="5"
-            android:hint="@string/description_required"
-            android:scrollbars="vertical"
-            android:inputType="textMultiLine|textCapSentences|textAutoCorrect" />
-    </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/description_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:hint="@string/description_required"
+                    android:inputType="textMultiLine|textCapSentences|textAutoCorrect"
+                    android:maxLength="250"
+                    android:scrollbars="vertical" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
-        android:id="@+id/submit_point_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:text="@string/submit_point"
-        android:layout_alignParentBottom="true"/>
+            <Button
+                android:id="@+id/time_button"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:hint="@string/enter_time"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/date_button"
+                app:layout_constraintTop_toBottomOf="@+id/submit_point_type_description_text_view" />
 
-</RelativeLayout>
+            <TextView
+                android:id="@+id/submit_point_type_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp"
+                android:text="@string/filler_point_type_message"
+                android:textAlignment="viewStart"
+                android:textColor="@color/text_main"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/submit_point_type_description_text_view"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.4"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/submit_point_type_description_text_view"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp"
+                android:text="@string/filler_point_details_message"
+                android:textColor="@color/text_accent"
+                android:textSize="12sp"
+                android:textStyle="normal"
+                app:layout_constraintBottom_toTopOf="@+id/time_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/submit_point_type_text_view" />
+
+            <Button
+                android:id="@+id/date_button"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:hint="@string/enter_date"
+                app:layout_constraintBottom_toTopOf="@+id/description_layout"
+                app:layout_constraintEnd_toStartOf="@+id/time_button"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/submit_point_type_description_text_view" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

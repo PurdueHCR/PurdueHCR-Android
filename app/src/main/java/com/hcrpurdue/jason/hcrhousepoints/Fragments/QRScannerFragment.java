@@ -30,7 +30,7 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.hcrpurdue.jason.hcrhousepoints.Activities.NavigationDrawer;
+import com.hcrpurdue.jason.hcrhousepoints.Activities.NavigationActivity;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.io.IOException;
@@ -38,9 +38,10 @@ import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
-public class QRScannerFragment extends Fragment {
+public class QRScannerFragment extends Fragment implements ListenerCallbackInterface {
     AppCompatActivity activity;
     Context context;
     ProgressBar progressBar;
@@ -161,7 +162,7 @@ public class QRScannerFragment extends Fragment {
                                                         fragment = PointSubmissionFragment.class.newInstance();
                                                     fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_submit)).addToBackStack(Integer.toString(R.id.nav_scanner)).commit();
                                                     fragmentManager.executePendingTransactions();
-                                                    ((NavigationDrawer) activity).animateSuccess();
+                                                    ((NavigationActivity) activity).animateSuccess();
                                                 } catch (Exception e) {
                                                     handler.post(() -> Toast.makeText(context, "Point submitted successfully, please return to another page", Toast.LENGTH_SHORT).show());
                                                 }

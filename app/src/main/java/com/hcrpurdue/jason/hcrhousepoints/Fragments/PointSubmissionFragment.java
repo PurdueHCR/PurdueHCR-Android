@@ -26,7 +26,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.hcrpurdue.jason.hcrhousepoints.Activities.NavigationDrawer;
+import com.hcrpurdue.jason.hcrhousepoints.Activities.NavigationActivity;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.util.ArrayList;
@@ -37,9 +37,10 @@ import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
-public class PointSubmissionFragment extends Fragment {
+public class PointSubmissionFragment extends Fragment implements ListenerCallbackInterface {
     static private Singleton singleton;
     private Context context;
     private AppCompatActivity activity;
@@ -228,16 +229,16 @@ public class PointSubmissionFragment extends Fragment {
 
             PointType type = enabledTypes.get(((Spinner) view.findViewById(R.id.pointTypeSpinner)).getSelectedItemPosition());
 
-            singleton.submitPoints(((EditText) view.findViewById(R.id.descriptionInput)).getText().toString(),
-                    type,
-                    new SingletonInterface() {
-                        @Override
-                        public void onSuccess() {
-                            descriptionInput.setText("");
-                            progressBar.setVisibility(View.GONE);
-                            ((NavigationDrawer) activity).animateSuccess();
-                        }
-                    });
+//            singleton.submitPoints(((EditText) view.findViewById(R.id.descriptionInput)).getText().toString(),
+//                    type,
+//                    new SingletonInterface() {
+//                        @Override
+//                        public void onSuccess() {
+//                            descriptionInput.setText("");
+//                            progressBar.setVisibility(View.GONE);
+//                            ((NavigationActivity) activity).animateSuccess();
+//                        }
+//                    });
         }
 
     }

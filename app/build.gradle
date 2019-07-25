@@ -46,6 +46,9 @@ dependencies {
 
     implementation 'androidmads.library.qrgenearator:QRGenearator:1.0.3'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
+
+    implementation 'com.github.drawers:SpinnerDatePicker:2.0.1'
+
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
 
 }

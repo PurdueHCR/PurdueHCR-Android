@@ -1,0 +1,146 @@
+/**
+ * Created By Brian Johncox on 7/14/19
+ *
+ * This class is designed to hold all information about Listeners for the app. At initialization of
+ * the app, the listeners will be set to call the run all method for that specific collection or
+ * record. As a page is loaded, if needed it can add a ListenerCallback to the queue to be called.
+ * Please make sure that when the page is killed, the Callback is removed from the active list.
+ */
+
+
+package com.hcrpurdue.jason.hcrhousepoints.Utils;
+
+import android.content.Context;
+
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirebaseCollectionListener;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirestoreDocumentListener;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SnapshotInterface;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class FirebaseListenerUtil {
+
+    private Context context;
+    protected FirebaseFirestore db = FirebaseFirestore.getInstance();
+    protected Singleton singleton;
+    static FirebaseListenerUtil fluListener;
+    private FirebaseCollectionListener userPointLogListener;
+    private FirebaseCollectionListener rhpNotificationListener;
+    private FirestoreDocumentListener pointLogListener;
+
+    /**
+     * Get the instance of the FirebaseUtilListener to be used in the app.
+     * @return
+     */
+    public static FirebaseListenerUtil getInstance(Context c){
+        if(fluListener == null){
+            fluListener = new FirebaseListenerUtil(c);
+        }
+        return fluListener;
+    }
+
+    public FirebaseListenerUtil(Context c){
+        context = c;
+        singleton = Singleton.getInstance(context);
+        createPersistantListeners();
+    }
+
+    /**
+     * Create all listeners that are designed to persist for the lifetime of the app
+     */
+    private void createPersistantListeners(){
+        createUserPointLogListener();
+        if(singleton.getPermissionLevel() == 1){
+            //Create RHP only listeners
+            createRHPNotificationListener();
+        }
+    }
+
+    /*------------------------USER POINT LOG LISTENER---------------------------------------------*/
+
+    /**
+     * Create the listener that updates when a point log for this user updates
+     */
+    private void createUserPointLogListener(){
+        Query userPointLogQuery = db.collection("House")
+                .document(singleton.getHouse())
+                .collection("Points")
+                .whereEqualTo("ResidentId",singleton.getUserId());
+        SnapshotInterface si = new SnapshotInterface() {
+            @Override
+            public void handleQuerySnapshots(QuerySnapshot queryDocumentSnapshots, Exception e) {
+                if( e == null){
+                    List<PointLog> userLogs = new ArrayList<>();
+                    for(DocumentSnapshot doc : queryDocumentSnapshots){
+                        userLogs.add(new PointLog(doc.getId(),doc.getData(),context));
+                    }
+                    singleton.setPersonalPointLogs(userLogs);
+                }
+            }
+        };
+        userPointLogListener = new FirebaseCollectionListener(context,userPointLogQuery,si);
+    }
+
+    public FirebaseCollectionListener getUserPointLogListener(){
+        return userPointLogListener;
+    }
+
+    /*------------------------RHP NOTIFICATION LISTENER-------------------------------------------*/
+
+    private void createRHPNotificationListener(){
+        Query rhpNotificationQuery = db.collection("House")
+                .document(singleton.getHouse())
+                .collection("Points")
+                .whereGreaterThan("RHPNotifications", 0);
+        SnapshotInterface si = new SnapshotInterface() {
+            @Override
+            public void handleQuerySnapshots(QuerySnapshot queryDocumentSnapshots, Exception e) {
+                singleton.setNotificationCount(queryDocumentSnapshots.size());
+            }
+        };
+        rhpNotificationListener = new FirebaseCollectionListener(context,rhpNotificationQuery,si);
+    }
+
+    public FirebaseCollectionListener getRHPNotificationListener(){
+        return this.rhpNotificationListener;
+    }
+
+    /*--------------------------INDIVIDUAL POINT LOG LISTENER-------------------------------------*/
+
+    /**
+     * Create a listener for a specific point log document. Please kill this listener after you are done with it.
+     * @param log The Point Log for which to listen for updates
+     */
+    public void createPointLogListener(PointLog log){
+        if(pointLogListener != null){
+            pointLogListener.killListener();
+            pointLogListener = null;
+        }
+        DocumentReference documentReference = db.collection("House")
+                .document(singleton.getHouse())
+                .collection("Points")
+                .document(log.getLogID());
+        SnapshotInterface si = new SnapshotInterface() {
+            @Override
+            public void handleDocumentSnapshot(DocumentSnapshot documentSnapshot, Exception e) {
+                    if( e == null){
+                        PointLog relatedLog = (PointLog) pointLogListener.getUpdatingObject();
+                        relatedLog.updateValues(new PointLog(documentSnapshot.getId(),documentSnapshot.getData(),context));
+                    }
+            }
+        };
+        pointLogListener = new FirestoreDocumentListener(context,documentReference,si,log);
+    }
+
+    public FirestoreDocumentListener getPointLogListener() {
+        return pointLogListener;
+    }
+}

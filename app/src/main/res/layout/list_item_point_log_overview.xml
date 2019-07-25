@@ -39,14 +39,14 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/message_right_column"
+        android:id="@+id/message_middle_column"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_alignParentEnd="true"
         android:padding="10dp"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@id/message_left_column"
+        android:layout_toStartOf="@+id/status_symbol_column"
         >
         <TextView
             android:id="@+id/point_type_text"
@@ -76,6 +76,42 @@
             android:text="After spending several house in this really great tea place in Chicago, I have made this xml. Look, whoever reads this, I think you should go check out Argo Tea. It really is great. Good tea and a comfortable place to work. If you ever get the chance, you should check it out!"
             android:textColor="@color/text_main"
             />
+        <TextView
+            android:id="@+id/date_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date"
+            android:textColor="@color/text_accent"
+            android:textSize="10dp"/>
+        <TextView
+            android:id="@+id/date_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="12/34/56 11:20 pm"
+            android:textColor="@color/text_main"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/status_symbol_column"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:padding="10dp"
+        android:visibility="gone"
+        >
+        <TextView
+            android:id="@+id/status_symbol"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/alert_icon"
+            android:textAlignment="center"
+            android:layout_gravity="center"
+            />
+
     </LinearLayout>
 
 

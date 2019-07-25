@@ -23,6 +23,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CapturePhotoUtils;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.QRCodeUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,7 +31,7 @@ import androidx.fragment.app.Fragment;
 
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
-public class QrCodeDetailsFragment extends Fragment {
+public class QrCodeDetailsFragment extends Fragment implements ListenerCallbackInterface {
     AppCompatActivity activity;
     Context context;
     TextView pointTypeLabel;

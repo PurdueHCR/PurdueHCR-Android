@@ -7,6 +7,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -36,9 +37,11 @@ public class Singleton {
     private String lastName = null;
     private int permissionLevel = 0;
     private int totalPoints = 0;
+    private int notificationCount = 0;
     private List<House> houseList = null;
     private List<Reward> rewardList = null;
     private ArrayList<Link> userCreatedQRCodes = null;
+    private List<PointLog> personalPointLogs = null;
     private SystemPreferences sysPrefs = null;
 
     private Singleton() {
@@ -76,6 +79,14 @@ public class Singleton {
             }
         }
         return null;
+    }
+
+    public int getNotificationCount() {
+        return notificationCount;
+    }
+
+    public void setNotificationCount(int notificationCount) {
+        this.notificationCount = notificationCount;
     }
 
     /**
@@ -223,8 +234,8 @@ public class Singleton {
         return permissionLevel;
     }
 
-    public void submitPoints(String description, PointType type, SingletonInterface si) {
-        PointLog log = new PointLog(description, firstName, lastName, type, floorName, fbutil.getUserReference(userID));
+    public void submitPoints(String description, Date dateOccurred, PointType type, SingletonInterface si) {
+        PointLog log = new PointLog(description, firstName, lastName, type, floorName,userID, dateOccurred);
         boolean preApproved = permissionLevel > 0;
         fbutil.submitPointLog(log, null, houseName, userID, preApproved, sysPrefs, new FirebaseUtilInterface() {
             @Override
@@ -242,7 +253,7 @@ public class Singleton {
                       type = pointType;
                   }
               }
-              PointLog log = new PointLog(link.getDescription(), firstName, lastName, type, floorName, fbutil.getUserReference(userID));
+              PointLog log = new PointLog(link.getDescription(), firstName, lastName, type, floorName, userID);
               fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, link.isSingleUse(), sysPrefs, new FirebaseUtilInterface() {
                   @Override
                   public void onSuccess() {
@@ -509,4 +520,41 @@ public class Singleton {
         PointLogMessage plm = new PointLogMessage(message, firstName, lastName, permissionLevel);
         postMessageToPointLog(log,plm,sui);
     }
+
+    /**
+     * init the logs for this user
+     * @param sui
+     */
+    public void initPersonalPointLogs(SingletonInterface sui){
+        fbutil.getPersonalPointLogs(userID, houseName, new FirebaseUtilInterface() {
+            @Override
+            public void onError(Exception e, Context context) {
+                sui.onError(e,context);
+            }
+
+            @Override
+            public void onGetPersonalPointLogs(List<PointLog> personalLogs) {
+                setPersonalPointLogs(personalLogs);
+                sui.onGetPersonalPointLogs(personalLogs);
+            }
+        });
+    }
+
+    public void setPersonalPointLogs(List<PointLog> logs){
+        personalPointLogs = logs;
+    }
+
+    public List<PointLog> getPersonalPointLogs(){
+        return personalPointLogs;
+    }
+
+    /**
+     * Reset the notifications for the point log and user.
+     * @param log   Point log for which to reset Pointlog
+     * @param resetResident FALSE: reset RHP notification count. TRUE: Reset resident count
+     */
+    public void resetPointLogNotificationCount(PointLog log, boolean resetResident){
+        fbutil.updatePointLogNotificationCount(log, houseName, resetResident, true, new FirebaseUtilInterface() {});
+    }
+
 }

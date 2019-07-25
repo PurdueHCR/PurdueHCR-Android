@@ -19,4 +19,11 @@
     <string name="no_results_found">No results found.</string>
     <string name="filler_point_type_message">This is where a point type would go if there were one. It could be long and has to wrap well!</string>
     <string name="filler_point_details_message">This is where a point type desciption would go too.</string>
+    <string name="enter_date">Enter Date</string>
+    <string name="enter_time">Enter Time</string>
+    <string name="view_points">View My Points</string>
+    <string name="view_points_alert">⚠️View My Points⚠️</string>
+    <string name="house_overview">House Point History</string>
+    <string name="house_overview_alert">House Point History ⚠️</string>
+    <string name="alert_icon">⚠️</string>
 </resources>

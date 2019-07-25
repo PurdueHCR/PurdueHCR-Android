@@ -5,14 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Pair;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.SimpleAdapter;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -21,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
@@ -28,11 +23,7 @@ import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public class AppInitializationActivity extends AppCompatActivity {
 
@@ -111,7 +102,22 @@ public class AppInitializationActivity extends AppCompatActivity {
                             singleton.getPointStatistics(new SingletonInterface() {
                                 @Override
                                 public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
-                                    launchNavigationActivity();
+                                    singleton.initPersonalPointLogs(new SingletonInterface() {
+                                        @Override
+                                        public void onGetPersonalPointLogs(List<PointLog> personalLogs) {
+                                            if(!systemPreferences.isAppUpToDate()){
+                                                alertOutOfDateApp();
+                                            }
+                                            else{
+                                                launchNavigationActivity();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onError(Exception e, Context context) {
+                                            handleDataInitializationError(e);
+                                        }
+                                    });
                                 }
 
                                 @Override
@@ -172,7 +178,7 @@ public class AppInitializationActivity extends AppCompatActivity {
      * transition to Navigation Activity
      */
     private void launchNavigationActivity(){
-        Intent intent = new Intent(this, NavigationDrawer.class);
+        Intent intent = new Intent(this, NavigationActivity.class);
         intent.putExtra("PointSubmitted", false);
         startActivity(intent);
         overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
@@ -184,6 +190,16 @@ public class AppInitializationActivity extends AppCompatActivity {
         startActivity(intent);
         overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
         finish();
+    }
+
+    private void alertOutOfDateApp(){
+        new AlertDialog.Builder(this)
+                .setTitle("App Out Of Date")
+                .setMessage("We noticed that your app is out of date. Please update to the latest version to take advantage of all the new features.")
+                .setPositiveButton("Ok", (dialog, whichButton) -> {
+                    launchNavigationActivity();
+                })
+                .show();
     }
 
     private void handleMissingUserInformation(){

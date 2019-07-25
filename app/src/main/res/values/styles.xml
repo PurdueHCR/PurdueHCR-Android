@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
@@ -41,5 +41,11 @@
         <item name="colorPrimaryDark">@color/titanium</item>
         <item name="android:navigationBarColor">@color/titanium</item>
         <item name="colorAccent">@color/titanium</item>
+    </style>
+
+    <style name="NumberPickerStyle">
+        <item name="android:textSize">22dp</item>
+        <item name="android:textColorPrimary">@color/colorAccent</item>
+        <item name="android:colorControlNormal" tools:targetApi="lollipop">@color/colorAccent</item>
     </style>
 </resources>

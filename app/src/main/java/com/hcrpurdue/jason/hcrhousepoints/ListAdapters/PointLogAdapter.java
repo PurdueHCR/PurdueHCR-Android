@@ -2,11 +2,13 @@ package com.hcrpurdue.jason.hcrhousepoints.ListAdapters;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -29,13 +31,11 @@ import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
 public class PointLogAdapter extends BaseAdapter  implements ListAdapter {
     private List<PointLog> list;
     private Context context;
-    private final ProgressBar spinner;
     private Singleton singleton;
 
-    public PointLogAdapter(List<PointLog> logs, Context c, ProgressBar s){
+    public PointLogAdapter(List<PointLog> logs, Context c){
         list = logs;
         context = c;
-        spinner = s;
         singleton = Singleton.getInstance(context);
     }
 
@@ -70,8 +70,20 @@ public class PointLogAdapter extends BaseAdapter  implements ListAdapter {
         TextView lastNameLabel = view.findViewById(R.id.point_log_last_name);
         TextView pointDescriptionLabel = view.findViewById(R.id.message_log_text);
         ImageView houseView = view.findViewById(R.id.message_image);
+        TextView dateView = view.findViewById(R.id.date_text);
 
+        LinearLayout alertLayout = view.findViewById(R.id.status_symbol_column);
+        if(singleton.getPermissionLevel() > 0 && log.getRhpNotifications() > 0){
+            alertLayout.setVisibility(View.VISIBLE);
+        }
+        else if(singleton.getPermissionLevel() == 0 && log.getResidentNotifications() > 0){
+            alertLayout.setVisibility(View.VISIBLE);
+        }
+        else{
+            alertLayout.setVisibility(View.GONE);
+        }
 
+        dateView.setText(DateFormat.format("M/d/yy h:mm a",log.getDateOccurred()));
         pointTypeLabel.setText(log.getPointType().getName());
         nameLabel.setText(log.getResidentFirstName());
         lastNameLabel.setText(log.getResidentLastName());

@@ -40,8 +40,8 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HouseOverviewFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointApprovalFragment;
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointSubmissionFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointTypeListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCodeListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCreationFragment;
@@ -50,41 +50,52 @@ import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRScannerFragment;
 import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.SubmitPointsFragment;
-import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.R;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 
-public class NavigationDrawer extends AppCompatActivity {
+public class NavigationActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     static private Singleton singleton;
     private FragmentManager fragmentManager;
+    private FirebaseListenerUtil flu;
     private Menu menu;
+    private NavigationView navigationView;
+    private final String RHP_NOTIFICATION_CALLBACK_KEY = "NAVIGATION_ACTIVITY_RHP_NOTIFICATION";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         singleton = Singleton.getInstance(getApplicationContext());
         singleton.getCachedData();
-
+        flu = FirebaseListenerUtil.getInstance(this);
         try {
             int themeID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "style", this.getPackageName());
             setTheme(themeID);
         } catch (Exception e) {
-            Toast.makeText(NavigationDrawer.this, "Error loading house theme", Toast.LENGTH_LONG).show();
-            Log.e("NavigationDrawer", "Failed to load house color", e);
+            Toast.makeText(NavigationActivity.this, "Error loading house theme", Toast.LENGTH_LONG).show();
+            Log.e("NavigationActivity", "Failed to load house color", e);
         }
-
+        if(singleton.getPermissionLevel() == 1){
+            flu.getRHPNotificationListener().addCallback(RHP_NOTIFICATION_CALLBACK_KEY, new ListenerCallbackInterface() {
+                @Override
+                public void onUpdate() {
+                    handleUpdatesToRHPNotifications();
+                }
+            });
+        }
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.drawer_layout);
 
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         View headerView = navigationView.getHeaderView(0);
         try {
             int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", getPackageName());
             ((ImageView) headerView.findViewById(R.id.header_house_image)).setImageResource(drawableID);
         } catch (Exception e) {
-            Toast.makeText(NavigationDrawer.this, "Failed to load house image", Toast.LENGTH_LONG).show();
+            Toast.makeText(NavigationActivity.this, "Failed to load house image", Toast.LENGTH_LONG).show();
             Log.e("PointSubmissionFragment", "Error loading house image", e);
         }
         ((TextView) headerView.findViewById(R.id.header_resident_name)).setText(singleton.getName());
@@ -101,8 +112,8 @@ public class NavigationDrawer extends AppCompatActivity {
                 menu.findItem(R.id.nav_qr_code_list).setVisible(true);
             }
         } catch (Exception e) {
-            Toast.makeText(NavigationDrawer.this, "Error loading permission level", Toast.LENGTH_LONG).show();
-            Log.e("NavigationDrawer", "Failed to load Permission Level", e);
+            Toast.makeText(NavigationActivity.this, "Error loading permission level", Toast.LENGTH_LONG).show();
+            Log.e("NavigationActivity", "Failed to load Permission Level", e);
         }
 
 
@@ -113,7 +124,7 @@ public class NavigationDrawer extends AppCompatActivity {
                 fragmentManager.beginTransaction().replace(R.id.content_frame, PointTypeListFragment.class.newInstance(), Integer.toString(R.id.nav_submit)).commit();
             } catch (Exception e) {
                 Toast.makeText(this, "Error loading PointSubmissionFragment Frament", Toast.LENGTH_LONG).show();
-                Log.e("NavigationDrawer", "Failed to load initial fragment", e);
+                Log.e("NavigationActivity", "Failed to load initial fragment", e);
             }
         }
 
@@ -193,6 +204,9 @@ public class NavigationDrawer extends AppCompatActivity {
                         case R.id.nav_submit_point:
                             fragmentClass = SubmitPointsFragment.class;
                             break;
+                        case R.id.nav_personal_point_log_list:
+                            fragmentClass = PersonalPointLogListFragment.class;
+                            break;
                         default:
                             fragmentClass = HouseOverviewFragment.class;
                             break;
@@ -204,7 +218,7 @@ public class NavigationDrawer extends AppCompatActivity {
                                 listFragment = (ListFragment) fragmentClass.newInstance();
                             } catch (Exception e) {
                                 Toast.makeText(this, "Failed to load Fragment while changing views", Toast.LENGTH_LONG).show();
-                                Log.e("NavigationDrawer", "Failed to load fragment on menu select", e);
+                                Log.e("NavigationActivity", "Failed to load fragment on menu select", e);
                             }
                         }
 
@@ -219,7 +233,7 @@ public class NavigationDrawer extends AppCompatActivity {
                                 fragment = (Fragment) fragmentClass.newInstance();
                             } catch (Exception e) {
                                 Toast.makeText(this, "Failed to load Fragment while changing views", Toast.LENGTH_LONG).show();
-                                Log.e("NavigationDrawer", "Failed to load fragment on menu select", e);
+                                Log.e("NavigationActivity", "Failed to load fragment on menu select", e);
                             }
                         }
 
@@ -267,6 +281,7 @@ public class NavigationDrawer extends AppCompatActivity {
             }
         }
     }
+
 
     @Override
     public void onBackPressed() {
@@ -330,4 +345,15 @@ public class NavigationDrawer extends AppCompatActivity {
 
         successLayout.startAnimation(animation);
     }
+
+    private void handleUpdatesToRHPNotifications(){
+        MenuItem houseOverview = menu.findItem(R.id.point_history);
+        if(singleton.getNotificationCount() > 0){
+            houseOverview.setTitle(R.string.house_overview_alert);
+        }
+        else{
+            houseOverview.setTitle(R.string.house_overview);
+        }
+    }
+
 }

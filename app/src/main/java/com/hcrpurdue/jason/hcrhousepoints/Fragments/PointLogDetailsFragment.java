@@ -1,6 +1,7 @@
 package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.os.Bundle;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
@@ -14,9 +15,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hcrpurdue.jason.hcrhousepoints.R;
@@ -27,14 +31,17 @@ import java.util.Objects;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 
 import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.PointLogMessageAdapter;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
-public class PointLogDetailsFragment extends Fragment {
+public class PointLogDetailsFragment extends Fragment implements ListenerCallbackInterface {
     static private Singleton singleton;
     private Context context;
     private ProgressBar progressBar;
     private PointLog log;
+    private List<PointLogMessage> logMessages;
 
     private Button sendMessageButton;
     private Button rejectButton;
@@ -47,6 +54,9 @@ public class PointLogDetailsFragment extends Fragment {
 
     private PointLogMessageAdapter adapter;
     private LinearLayoutManager manager;
+
+    private FirebaseListenerUtil flu;
+    private final String CALLBACK_KEY = "POINT_LOG_DETAILS";
 
 
     @Override
@@ -62,7 +72,8 @@ public class PointLogDetailsFragment extends Fragment {
 
             @Override
             public void onGetPointLogMessageUpdates(List<PointLogMessage> messages) {
-                log.setMessages(messages);
+                logMessages = messages;
+                log.setMessages(logMessages);
                 adapter.notifyDataSetChanged();
                 recyclerView.scrollToPosition(messages.size());
             }
@@ -86,13 +97,6 @@ public class PointLogDetailsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_point_log_details, container, false);
-//        singleton.getCachedData();
-//        detailsList = view.findViewById(R.id.log_details_list);
-//        retrieveBundleData();
-//        ArrayList<String> items = log.getDetailedMessageList();
-//        detailsList.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, items));
-        //SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.approve_list_swipe_refresh);
-        //swipeRefresh.setOnRefreshListener(() -> getUnconfirmedPoints(swipeRefresh));
         return view;
     }
 
@@ -102,6 +106,7 @@ public class PointLogDetailsFragment extends Fragment {
         AppCompatActivity activity = (AppCompatActivity) Objects.requireNonNull(getActivity());
         progressBar = activity.findViewById(R.id.navigationProgressBar);
         retrieveBundleData();
+        logMessages = log.getMessages();
         initializeFields(activity);
 
         //progressBar.setVisibility(View.VISIBLE);
@@ -116,6 +121,26 @@ public class PointLogDetailsFragment extends Fragment {
                 approveButton.setVisibility(View.VISIBLE);
                 rejectButton.setVisibility(View.VISIBLE);
             }
+        }
+
+        flu = FirebaseListenerUtil.getInstance(getContext());
+        //If Log belongs to this user, update it with UserPointLogListener
+        if(log.getResidentId().equals(singleton.getUserId())){
+            flu.getUserPointLogListener().addCallback(CALLBACK_KEY, new ListenerCallbackInterface() {
+                @Override
+                public void onUpdate() {
+                    handleUserLogUpdate();
+                }
+            });
+        }
+        else{
+            flu.createPointLogListener(log);
+            flu.getPointLogListener().addCallback(CALLBACK_KEY, new ListenerCallbackInterface() {
+                @Override
+                public void onUpdate() {
+                    handleNotOwnedLogUpdate();
+                }
+            });
         }
     }
 
@@ -143,6 +168,7 @@ public class PointLogDetailsFragment extends Fragment {
         sendMessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                hideKeyboard();
                 String message = messageTextField.getText().toString();
                 if(message == null || message.equals("")|| message.matches("\\s*")){
                     return;
@@ -156,7 +182,6 @@ public class PointLogDetailsFragment extends Fragment {
 
                     @Override
                     public void onError(Exception e, Context context) {
-                        Toast.makeText(context,"Failed with error: "+e.getMessage(), Toast.LENGTH_LONG ).show();
                         progressBar.setVisibility(View.INVISIBLE);
                     }
                 });
@@ -164,7 +189,6 @@ public class PointLogDetailsFragment extends Fragment {
         });
         rejectButton = activity.findViewById(R.id.log_detail_reject_button);
         rejectButton.setOnClickListener(new View.OnClickListener() {
-            //TODO Change this to the new method
             @Override
             public void onClick(View view) {
                 progressBar.setVisibility(View.VISIBLE);
@@ -187,7 +211,6 @@ public class PointLogDetailsFragment extends Fragment {
         });
         approveButton = activity.findViewById(R.id.log_detail_approve_button);
         approveButton.setOnClickListener(new View.OnClickListener() {
-            //TODO Change this to the new method
             @Override
             public void onClick(View view) {
                 progressBar.setVisibility(View.VISIBLE);
@@ -210,7 +233,6 @@ public class PointLogDetailsFragment extends Fragment {
         });
         changeStatusButton = activity.findViewById(R.id.log_detail_change_status_button);
         changeStatusButton.setOnClickListener(new View.OnClickListener() {
-            //TODO Change this to the new method
             @Override
             public void onClick(View view) {
                 progressBar.setVisibility(View.VISIBLE);
@@ -235,6 +257,56 @@ public class PointLogDetailsFragment extends Fragment {
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
 
+    }
+
+    /**
+     * When the fragment is done, remove the callbacks
+     */
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        //Remove listeners
+        flu.getUserPointLogListener().removeCallback(CALLBACK_KEY);
+        if(flu.getPointLogListener() != null){
+            flu.getPointLogListener().killListener();
+        }
+        //Reset the notification count when the user leaves.
+        singleton.resetPointLogNotificationCount(log,(log.getResidentId().equals(singleton.getUserId())));
+    }
+
+    /**
+     * If the displayed point log belongs to this user, handle updates here
+     */
+    public void handleUserLogUpdate() {
+        List<PointLog> logs = singleton.getPersonalPointLogs();
+        for(PointLog pointLog: logs){
+            //If the log equals to the displayed logs ID, then update the displayed Log
+            if(pointLog.getLogID().equals(log.getLogID())){
+                //Make sure the point messages are transfered over
+                log.updateValues(pointLog);
+                //Will handle updates for approval status as notification count
+                adapter.notifyDataSetChanged();
+                break;
+            }
+        }
+    }
+
+    /**
+     * If this log is not owned by this user, use this callback handler.
+     */
+    public void handleNotOwnedLogUpdate(){
+        /*
+        When we created the listener, we passed in the reference to this log, so when we get an
+        update it will update our instance.
+         */
+        adapter.notifyDataSetChanged();
+    }
+
+    private void hideKeyboard(){
+        InputMethodManager inputManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (inputManager != null && getActivity().getCurrentFocus() != null) { // Avoids null pointer exceptions
+            inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        }
     }
 
 

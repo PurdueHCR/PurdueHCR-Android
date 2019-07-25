@@ -6,6 +6,9 @@ import android.text.TextUtils;
 import android.util.Pair;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
@@ -41,6 +44,23 @@ public class FirebaseUtil {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Context context;
 
+    public static String ROOT_HOUSE_KEY = "House";
+    public static String ROOT_HOUSE_POINTS_KEY = "Points";
+    public static String ROOT_HOUSE_POINTS_MESSAGES_KEY = "Messages";
+
+
+    public static String ROOT_USERS_KEY = "Users";
+
+    public static String ROOT_REWARDS_KEY = "Rewards";
+
+    public static String ROOT_SYSTEM_PREFERENCES_KEY = "SystemPreferences";
+
+    public static String ROOT_POINT_TYPES_KEY = "PointTypes";
+
+    public static String ROOT_LINKS_KEY = "Links";
+
+
+
     protected void setApplicationContext(Context c) {
         context = c;
     }
@@ -73,52 +93,33 @@ public class FirebaseUtil {
             // If the pointLog does not care about its id, add value to the database with random ID
             if (TextUtils.isEmpty(documentID)) {
                 //Add a value to the Points collection in a house
-                db.collection("House").document(house).collection("Points")
+                db.collection(ROOT_HOUSE_KEY).document(house).collection(ROOT_HOUSE_POINTS_KEY)
                         .add(data)
                         // add an action listener to handle the event when it goes Async
                         .addOnSuccessListener(documentReference -> {
-                            //Now that it is written to the house, we must write it to the user
-                            Map<String, Object> userPointData = new HashMap<>();
-                            userPointData.put("Point", documentReference);
-
-                            log.getResidentRef().collection("Points").document(documentReference.getId())
-                                    .set(userPointData)
-                                    .addOnSuccessListener(aVoid -> {
-                                        //if the point is preapproved, update the house and user points
-                                        if (preapproved) {
-                                            updateHouseAndUserPoints(log, house,false,false, fui);
-                                        } else {
-                                            fui.onSuccess();
-                                        }
-                                    })
-                                    .addOnFailureListener(e -> fui.onError(e, context));
+                            //Now that it is written to the house, check if we need to add points
+                            if (preapproved) {
+                                updateHouseAndUserPoints(log, house,false,false, fui);
+                            } else {
+                                fui.onSuccess();
+                            }
                         })
                         .addOnFailureListener(e -> fui.onError(e, context));
             } else {
                 //Add a value ot the Points collection in the house with the id: documentID
-                DocumentReference ref = db.collection("House").document(house).collection("Points").document(log.getResidentRef().getId() + documentID);
+                DocumentReference ref = db.collection(ROOT_HOUSE_KEY).document(house).collection(ROOT_HOUSE_POINTS_KEY).document(log.getResidentId() + documentID);
                 ref.get()
                         .addOnSuccessListener(task -> {
                             if (!task.exists()) {
                                 ref.set(data)
                                         // add an action listener to handle the event when it goes Async
                                         .addOnSuccessListener(aVoid -> {
-                                            //Now that it is written to the house, we must write it to the user
-                                            Map<String, Object> userPointData = new HashMap<>();
-                                            userPointData.put("Point", ref);
-
-                                            // add the value to the Points table in a user
-                                            log.getResidentRef().collection("Points").document(documentID)
-                                                    .set(userPointData)
-                                                    .addOnSuccessListener(aVoid1 -> {
-                                                        //if the point is preapproved, update the house and user points
-                                                        if (preapproved) {
-                                                            updateHouseAndUserPoints(log, house,false,false, fui);
-                                                        } else {
-                                                            fui.onSuccess();
-                                                        }
-                                                    })
-                                                    .addOnFailureListener(e -> fui.onError(e, context));
+                                            //if the point is preapproved, update the house and user points
+                                            if (preapproved) {
+                                                updateHouseAndUserPoints(log, house,false,false, fui);
+                                            } else {
+                                                fui.onSuccess();
+                                            }
                                         })
                                         .addOnFailureListener(e -> fui.onError(e, context));
                             } else {
@@ -139,7 +140,7 @@ public class FirebaseUtil {
 
     public DocumentReference getUserReference(String userID) {
 
-        return db.collection("Users").document(userID);
+        return db.collection(ROOT_USERS_KEY).document(userID);
     }
 
     /**
@@ -165,7 +166,7 @@ public class FirebaseUtil {
      * @param fui   - FirebaseUtilInterface that implements on Success and On Error
      */
     public void updatePointLogStatus(PointLog log, boolean approved, String house, boolean updating, boolean isRECGrantingAward, FirebaseUtilInterface fui) {
-        DocumentReference housePointRef = db.collection("House").document(house).collection("Points").document(log.getLogID());
+        DocumentReference housePointRef = db.collection(ROOT_HOUSE_KEY).document(house).collection(ROOT_HOUSE_POINTS_KEY).document(log.getLogID());
         log.updateApprovalStatus(approved,context);
         housePointRef.get()
                 .addOnCompleteListener(task -> {
@@ -186,9 +187,12 @@ public class FirebaseUtil {
                                 else{
                                     housePointRef.update(log.convertToDict()).addOnCompleteListener(task1 -> {
                                         if(task1.isSuccessful()){
-                                            //TODO Update the House and User points based on approval and updating
                                             if((approved || updating)){
                                                 updateHouseAndUserPoints(log,house,updating,isRECGrantingAward,fui);
+                                                if(updating){
+                                                    //If the point has been updated, notifiy the user that they have something new!
+                                                    updatePointLogNotificationCount(log, house, true, false, new FirebaseUtilInterface() {});
+                                                }
                                             }
                                             else{
                                                 fui.onSuccess();
@@ -252,7 +256,7 @@ public class FirebaseUtil {
      */
     private void updateHousePoints(PointLog log, String house, Boolean isUpdating, FirebaseUtilInterface fui) {
         //Create the reference for the house
-        final DocumentReference houseRef = db.collection("House").document(house);
+        final DocumentReference houseRef = db.collection(ROOT_HOUSE_KEY).document(house);
 
         //To avoid race conditions, we use transactions
         db.runTransaction((Transaction.Function<Void>) transaction -> {
@@ -295,7 +299,7 @@ public class FirebaseUtil {
      */
     private void updateUserPoints(PointLog log, Boolean isUpdating, FirebaseUtilInterface fui) {
         //Create reference for resident
-        final DocumentReference residentRef = log.getResidentRef();
+        final DocumentReference residentRef = db.collection(ROOT_USERS_KEY).document(log.getResidentId());
 
         //Avoid a race condition with transactions
         db.runTransaction((Transaction.Function<Void>) transaction -> {
@@ -329,6 +333,10 @@ public class FirebaseUtil {
                 .addOnFailureListener(e -> fui.onError(e, context));
     }
 
+    /**
+     * Retrieve the point types for the competition
+     * @param fui
+     */
     public void getPointTypes(final FirebaseUtilInterface fui) {
         db.collection("PointTypes").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -345,8 +353,13 @@ public class FirebaseUtil {
         });
     }
 
+    /**
+     * Retrieve the data for the specific user
+     * @param id
+     * @param fui
+     */
     public void getUserData(String id, final FirebaseUtilInterface fui) {
-        db.collection("Users").document(id)
+        db.collection(ROOT_USERS_KEY).document(id)
                 .get()
                 .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
@@ -354,7 +367,7 @@ public class FirebaseUtil {
                                 if (data != null) {
                                     String firstName = (String) data.get("FirstName");
                                     String lastName = (String) data.get("LastName");
-                                    fui.onUserGetSuccess((String) data.get("FloorID"), (String) data.get("House"),firstName,lastName, ((Long) data.get("Permission Level")).intValue());
+                                    fui.onUserGetSuccess((String) data.get("FloorID"), (String) data.get(ROOT_HOUSE_KEY),firstName,lastName, ((Long) data.get("Permission Level")).intValue());
                                 }
                                 else {
                                     fui.onError(new IllegalStateException("User does not exist."), context);
@@ -368,41 +381,15 @@ public class FirebaseUtil {
                 );
     }
 
+    /**
+     * Get all the points which have not been confirmed so that RHPS can approve/reject them
+     * @param house
+     * @param floorId
+     * @param fui
+     */
     public void getUnconfirmedPoints(String house, String floorId, final FirebaseUtilInterface fui) {
-        CollectionReference housePointRef = db.collection("House").document(house).collection("Points");
+        CollectionReference housePointRef = db.collection(ROOT_HOUSE_KEY).document(house).collection(ROOT_HOUSE_POINTS_KEY);
         housePointRef.whereLessThan("PointTypeID", 0).get()
-                .addOnCompleteListener((Task<QuerySnapshot> task) -> {
-                    if (task.isSuccessful()) {
-                        ArrayList<PointLog> logs = new ArrayList<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            String logFloorId = (String) document.get("FloorID");
-                            if (!floorId.equals("6N") && !floorId.equals("6S")) {
-                                if (floorId.equals(logFloorId)) {
-                                    String logId = document.getId();
-                                    PointLog log = new PointLog(logId, document.getData(), context);
-                                    logs.add(log);
-                                }
-                            } else {
-                                if (floorId.equals(logFloorId) || "Shreve".equals(logFloorId)) {
-                                    String logId = document.getId();
-                                    PointLog log = new PointLog(logId, document.getData(), context);
-                                    logs.add(log);
-                                }
-                            }
-                        }
-                        if (logs.isEmpty())
-                            Toast.makeText(context, "No unapproved points", Toast.LENGTH_SHORT).show();
-                        fui.onGetUnconfirmedPointsSuccess(logs);
-                    } else {
-                        fui.onError(task.getException(), context);
-                    }
-                })
-                .addOnFailureListener(e -> fui.onError(e, context));
-    }
-
-    public void getConfirmedPoints(String house, String floorId, List<PointType> pointTypes, final FirebaseUtilInterface fui) {
-        CollectionReference housePointRef = db.collection("House").document(house).collection("Points");
-        housePointRef.whereGreaterThan("PointTypeID", 0).get()
                 .addOnCompleteListener((Task<QuerySnapshot> task) -> {
                     if (task.isSuccessful()) {
                         ArrayList<PointLog> logs = new ArrayList<>();
@@ -443,7 +430,7 @@ public class FirebaseUtil {
             fui.onError(new Exception(),context);
             return;
         }
-        DocumentReference linkRef = this.db.collection("Links").document(id);
+        DocumentReference linkRef = this.db.collection(ROOT_LINKS_KEY).document(id);
         linkRef.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -467,16 +454,22 @@ public class FirebaseUtil {
                 .addOnFailureListener(e -> fui.onError(e, context));
     }
 
+    /**
+     * Get information to display on the PointStatistics page
+     * @param userID
+     * @param getRewards
+     * @param fui
+     */
     public void getPointStatistics(String userID, boolean getRewards, FirebaseUtilInterface fui) {
         List<House> houseList = new ArrayList<>();
-        DocumentReference userRef = db.collection("Users").document(userID);
+        DocumentReference userRef = db.collection(ROOT_USERS_KEY).document(userID);
         userRef.get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Map<String, Object> data = task.getResult().getData();
                         if (data != null) {
                             int userPoints = ((Long) data.get("TotalPoints")).intValue();
-                            db.collection("House").get()
+                            db.collection(ROOT_HOUSE_KEY).get()
                                     .addOnCompleteListener(houseTask -> {
                                         if (houseTask.isSuccessful()) {
                                             for (QueryDocumentSnapshot doc : houseTask.getResult()) {
@@ -527,8 +520,12 @@ public class FirebaseUtil {
                 .addOnFailureListener(e -> fui.onError(e, context));
     }
 
+    /**
+     * Retrive all of the floor codes for the houses
+     * @param fui
+     */
     public void getFloorCodes(FirebaseUtilInterface fui) {
-        db.collection("House").get().addOnCompleteListener(task -> {
+        db.collection(ROOT_HOUSE_KEY).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 HashMap<String, Pair<String, String>> floorCodes = new HashMap<>();
                 for (QueryDocumentSnapshot document : task.getResult()) {
@@ -554,7 +551,7 @@ public class FirebaseUtil {
      */
     public void getQRCodesForUser(String userId, FirebaseUtilInterface fui){
         //Run Firebase call to retrieve all Links where the CreatorID is equal to the userID
-        db.collection("Links").whereEqualTo("CreatorID",    userId).get().addOnCompleteListener(task -> {
+        db.collection(ROOT_LINKS_KEY).whereEqualTo("CreatorID",    userId).get().addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 ArrayList<Link> qrCodes = new ArrayList<>();
                 //If task is successful, FB returns an array of QueryDocumentSnapshot that matches the request
@@ -668,18 +665,16 @@ public class FirebaseUtil {
         });
     }
 
+    /**
+     * Retrieve the system preferences from Firestore and callback onGetSystemPreferencesSuccess
+     * @param fui   FirebaseUtilInterface which implements onGetSystemPreferencesSuccess and OnError
+     */
     public void getSystemPreferences(FirebaseUtilInterface fui) {
         DocumentReference preference = db.collection("SystemPreferences").document("Preferences");
 
         preference.get().addOnCompleteListener(task -> {
             if(task.isSuccessful()) {
-
-
-
-               boolean isHouseEnabled = ((boolean) task.getResult().get("isHouseEnabled"));
-               String houseEnabledMessage = ((String) task.getResult().get("houseEnabledMessage"));
-
-               SystemPreferences sysPrefs = new SystemPreferences(isHouseEnabled, houseEnabledMessage);
+               SystemPreferences sysPrefs = new SystemPreferences(task.getResult().getData());
                fui.onGetSystemPreferencesSuccess(sysPrefs);
             }
             else {
@@ -691,14 +686,21 @@ public class FirebaseUtil {
 
     }
 
+    /**
+     * Retrieve all the house points for a given house and sort them by ResidentReportTime descending
+     * @param house Firestore Key for the house that you wish to get all the house points for.
+     * @param floorId   String Floor Id for the user who is looking them up. This ensures that the viewer can only see the points for the floor they live on
+     * @param fui
+     */
     public void getAllHousePoints(String house, String floorId, final FirebaseUtilInterface fui) {
-        CollectionReference housePointRef = db.collection("House").document(house).collection("Points");
-        housePointRef.orderBy("ResidentReportTime", Query.Direction.DESCENDING).get()
+        CollectionReference housePointRef = db.collection(ROOT_HOUSE_KEY).document(house).collection(ROOT_HOUSE_POINTS_KEY);
+        housePointRef.orderBy(PointLog.DATE_SUBMITTED_KEY, Query.Direction.DESCENDING).get()
                 .addOnCompleteListener((Task<QuerySnapshot> task) -> {
                     if (task.isSuccessful()) {
                         ArrayList<PointLog> logs = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String logFloorId = (String) document.get("FloorID");
+                            //TODO Think of a more dynamic way to handle this for People WHo do not live in HCRH
                             if (!floorId.equals("6N") && !floorId.equals("6S")) {
                                 if (floorId.equals(logFloorId)) {
                                     String logId = document.getId();
@@ -723,10 +725,17 @@ public class FirebaseUtil {
                 .addOnFailureListener(e -> fui.onError(e, context));
     }
 
+    /**
+     * This poorly named method adds a listener to Firestore to update the local copy of PointLogMessages.
+     * TODO: Move this to the Listener UTIL
+     * @param log   Point Log for which to start listening for messages
+     * @param house House that the point log belongs to
+     * @param fui
+     */
     public void handlePointLogUpdates(PointLog log, String house, final FirebaseUtilInterface fui){
-        CollectionReference housePointRef = db.collection("House").document(house)
-                .collection("Points").document(log.getLogID())
-                .collection("Messages");
+        CollectionReference housePointRef = db.collection(ROOT_HOUSE_KEY).document(house)
+                .collection(ROOT_HOUSE_POINTS_KEY).document(log.getLogID())
+                .collection(ROOT_HOUSE_POINTS_MESSAGES_KEY);
         housePointRef.orderBy(PointLogMessage.MESSAGE_CREATION_DATE_KEY, Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
@@ -744,17 +753,75 @@ public class FirebaseUtil {
         });
     }
 
+    /**
+     * This will save a message to a Point Log in Firestore
+     * @param log   Point Log on which to save the message
+     * @param house House that the point log is for
+     * @param message   String message to be saved
+     * @param fui FUI which implements OnSuccess and optionally OnError
+     */
     public void postMessageToPointLog(PointLog log, String house, PointLogMessage message, FirebaseUtilInterface fui){
-        CollectionReference pointMessageRef = db.collection("House").document(house)
-                .collection("Points").document(log.getLogID())
-                .collection("Messages");
+        CollectionReference pointMessageRef = db.collection(ROOT_HOUSE_KEY).document(house)
+                .collection(ROOT_HOUSE_POINTS_KEY).document(log.getLogID())
+                .collection(ROOT_HOUSE_POINTS_MESSAGES_KEY);
+        //Update the point message collection
         pointMessageRef.add(message.generateFirebaseMap()).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
-                System.out.println("Finishjed");
-                fui.onSuccess();
+                //Once the message is saved, update the notification count on the Point Log.
+                updatePointLogNotificationCount(log,house,(message.getSenderPermissionLevel() == 1),false, fui);
             }
         });
     }
 
+    /**
+     * Get the collection of Point Logs for the given user.
+     * //TODO Change the logic to not need this and instead wait for the Listeners to finish Initialization
+     * @param userId
+     * @param house
+     * @param fui
+     */
+    public void getPersonalPointLogs(String userId, String house, final FirebaseUtilInterface fui){
+        CollectionReference personalPointReference = db.collection(ROOT_HOUSE_KEY).document(house)
+                .collection(ROOT_HOUSE_POINTS_KEY);
+        personalPointReference.whereEqualTo(PointLog.RESIDENT_ID_KEY,userId).get()
+                .addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        List<PointLog> logs = new ArrayList<>();
+                        for(QueryDocumentSnapshot document : task.getResult()) {
+                            logs.add(new PointLog(document.getId(),document.getData(),context));
+                        }
+                        fui.onGetPersonalPointLogs(logs);
+                    }
+                    else{
+                        fui.onError(task.getException(),context);
+                    }
+                });
+    }
+
+    /**
+     * Use this method to update the count of notifications on a point log record
+     * @param log   Point Log Object for which to update the notification count.
+     * @param house House that the point log belongs to.
+     * @param notificationForResident    Boolean false if this number needs to be updated for the rhp count or true to update the resident count.
+     * @param shouldReset Reset the number to 0.
+     * @param fui   FirebaseUtilInterface that implements OnSuccess and OnError.
+     */
+    public void updatePointLogNotificationCount(PointLog log, String house, boolean notificationForResident, boolean shouldReset, final FirebaseUtilInterface fui){
+        DocumentReference pointLogRef = db.collection(ROOT_HOUSE_KEY).document(house)
+                .collection(ROOT_HOUSE_POINTS_KEY).document(log.getLogID());
+        //Use PointLog static method to ensure key is correctly used
+        Map<String,Object> data = log.createNotificationsMap(notificationForResident,shouldReset);
+
+        pointLogRef.update(data).addOnCompleteListener(task1 -> {
+            if(task1.isSuccessful()){
+                fui.onSuccess();
+            }
+            else{
+                fui.onError(task1.getException(), context);
+            }
+        });
+
+
+    }
 }

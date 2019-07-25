@@ -1,74 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:context=".Fragments.QRCreationFragment">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/qr_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Fragments.QRCreationFragment">
+
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
             <TextView
                 android:id="@+id/Message1"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:lineSpacingExtra="8sp"
                 android:text="Select the point category you would like to make a QR code for."
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                android:textColor="@color/common_google_signin_btn_text_dark_focused" />
+                android:textColor="@color/common_google_signin_btn_text_dark_focused"
+                app:layout_constraintBottom_toTopOf="@+id/point_type_spinner"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <Spinner
                 android:id="@+id/point_type_spinner"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/border_bottom"
                 android:dropDownWidth="wrap_content"
-                android:spinnerMode="dropdown"
-                tools:layout_editor_absoluteX="8dp"
-                tools:layout_editor_absoluteY="16dp"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
-                android:background="@drawable/border_bottom"
-                android:paddingBottom="5dp"/>
+                android:paddingBottom="5dp"
+                android:spinnerMode="dialog"
+                app:layout_constraintBottom_toTopOf="@+id/multi_use_switch"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/Message1" />
 
             <Switch
                 android:id="@+id/multi_use_switch"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/border_bottom"
+                android:paddingBottom="5dp"
                 android:switchPadding="8dp"
                 android:text="Can scan multiple times"
                 android:textAlignment="viewStart"
-                android:background="@drawable/border_bottom"
-                android:paddingBottom="5dp"/>
+                app:layout_constraintBottom_toTopOf="@+id/generate_qrcode_description"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/point_type_spinner" />
 
             <EditText
                 android:id="@+id/generate_qrcode_description"
-                android:layout_width="match_parent"
-                android:layout_height="99dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/border_bottom"
                 android:ems="10"
                 android:hint="Enter description for your QR Code"
                 android:inputType="textMultiLine"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
-                android:background="@drawable/border_bottom"
-                android:paddingBottom="5dp"/>
+                android:paddingBottom="5dp"
+                app:layout_constraintBottom_toTopOf="@+id/generate_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/multi_use_switch" />
 
             <Button
                 android:id="@+id/generate_button"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Generate QR Code" />
-        </LinearLayout>
+                android:text="Generate QR Code"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/generate_qrcode_description" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-</FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

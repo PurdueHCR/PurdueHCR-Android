@@ -6,11 +6,15 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -21,6 +25,7 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.util.ArrayList;
@@ -31,15 +36,20 @@ import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
-public class HouseOverviewFragment extends Fragment {
+public class HouseOverviewFragment extends Fragment implements ListenerCallbackInterface {
     static private Singleton singleton;
     private Context context;
     private Resources resources;
     private String packageName;
     private ProgressBar progressBar;
+    private Button viewMyPointsButton;
+    private FirebaseListenerUtil flu;
+    private final String PERSONAL_LOGS_CALLBACK_KEY = "POINT_LOG_DETAILS";
 
     @Override
     public void onAttach(Context context) {
@@ -51,7 +61,20 @@ public class HouseOverviewFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         singleton = Singleton.getInstance(getContext());
+        flu = FirebaseListenerUtil.getInstance(context);
         resources = getResources();
+        flu.getUserPointLogListener().addCallback(PERSONAL_LOGS_CALLBACK_KEY, new ListenerCallbackInterface() {
+            @Override
+            public void onUpdate() {
+                refreshPointsButtonLabel();
+            }
+        });
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        flu.getUserPointLogListener().removeCallback(PERSONAL_LOGS_CALLBACK_KEY);
     }
 
     @Override
@@ -69,6 +92,22 @@ public class HouseOverviewFragment extends Fragment {
         ((ImageView) view.findViewById(R.id.statistics_house_icon_small)).setImageResource(drawableID);
         ((TextView) view.findViewById(R.id.statistics_user_name)).setText(singleton.getName());
         ((TextView) view.findViewById(R.id.statistics_floor_name)).setText(floorText);
+        viewMyPointsButton = view.findViewById(R.id.user_log_history_button);
+        viewMyPointsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Create destination fragment
+                Fragment fragment = new PersonalPointLogListFragment();
+
+                //Create Fragment manager
+                FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_personal_point_log_list));
+                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_statistics));
+                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                fragmentTransaction.commit();
+            }
+        });
 
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.statistics_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> updatePointData(view, chart, swipeRefresh));
@@ -85,7 +124,7 @@ public class HouseOverviewFragment extends Fragment {
         chart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
         chart.setAutoScaleMinMaxEnabled(true);
         chart.invalidate();
-
+        refreshPointsButtonLabel();
         return view;
     }
 
@@ -168,5 +207,18 @@ public class HouseOverviewFragment extends Fragment {
                     swipeRefreshLayout.setRefreshing(false);
             }
         });
+    }
+
+    /**
+     * On personal Point log update, check if there are any new notifications
+     */
+    private void refreshPointsButtonLabel(){
+        for(PointLog log: singleton.getPersonalPointLogs()){
+            if(log.getResidentNotifications() > 0){
+                viewMyPointsButton.setText(R.string.view_points_alert);
+                return;
+            }
+        }
+        viewMyPointsButton.setText(R.string.view_points);
     }
 }

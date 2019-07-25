@@ -26,9 +26,10 @@ import java.util.Objects;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.QrCodeListAdapter;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
-public class QRCodeListFragment extends Fragment {
+public class QRCodeListFragment extends Fragment implements ListenerCallbackInterface {
     static private Singleton singleton;
     private Context context;
     private ProgressBar progressBar;

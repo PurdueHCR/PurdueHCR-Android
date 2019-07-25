@@ -58,4 +58,6 @@ public interface SingletonInterface {
     }
 
     default void onGetPointLogMessageUpdates(List<PointLogMessage> messages){}
+
+    default void onGetPersonalPointLogs(List<PointLog> personalLogs){}
 }
