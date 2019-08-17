@@ -12,20 +12,23 @@ public class PointLogMessage {
     private String senderLastName;
     private int senderPermissionLevel;
     private Date messageCreationDate;
+    private MessageType messageType;
 
     public static final String MESSAGE_KEY = "Message";
     public static final String SENDER_FIRST_NAME_KEY = "SenderFirstName";
     public static final String SENDER_LAST_NAME_KEY = "SenderLastName";
     public static final String SENDER_PERMISSION_LEVEL_KEY = "SenderPermissionLevel";
     public static final String MESSAGE_CREATION_DATE_KEY = "CreationDate";
+    public static final String MESSAGE_TYPE_KEY = "MessageType";
 
 
-    public PointLogMessage(String message, String senderFirstName, String senderLastName, int senderPermissionLevel) {
+    public PointLogMessage(String message, String senderFirstName, String senderLastName, int senderPermissionLevel, MessageType messageType) {
         this.message = message;
         this.senderFirstName = senderFirstName;
         this.senderLastName = senderLastName;
         this.senderPermissionLevel = senderPermissionLevel;
         messageCreationDate = new Date();
+        this.messageType = messageType;
     }
 
     public PointLogMessage(Map<String, Object> document) {
@@ -34,6 +37,7 @@ public class PointLogMessage {
         this.senderLastName = (String) document.get(SENDER_LAST_NAME_KEY);
         this.senderPermissionLevel = ((Long) document.get(SENDER_PERMISSION_LEVEL_KEY)).intValue();
         messageCreationDate = (Date) document.get(MESSAGE_CREATION_DATE_KEY);
+        this.messageType = MessageType.getMessageTypeFromString((String) document.get(MESSAGE_TYPE_KEY));
     }
 
     public Map<String, Object> generateFirebaseMap(){
@@ -43,6 +47,7 @@ public class PointLogMessage {
         map.put(SENDER_LAST_NAME_KEY,this.senderLastName);
         map.put(SENDER_PERMISSION_LEVEL_KEY,this.senderPermissionLevel);
         map.put(MESSAGE_CREATION_DATE_KEY,messageCreationDate);
+        map.put(MESSAGE_TYPE_KEY,messageType.getValue());
         return map;
     }
 

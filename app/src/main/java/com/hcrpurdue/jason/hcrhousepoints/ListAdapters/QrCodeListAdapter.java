@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
 
@@ -73,7 +73,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
             @Override
             public void onClick(View view) {
 
-                Singleton.getInstance(context).setQRCodeEnabledStatus(qrCodeList.get(position), codeActiveSwitch.isChecked(), new SingletonInterface() {
+                CacheManager.getInstance(context).setQRCodeEnabledStatus(qrCodeList.get(position), codeActiveSwitch.isChecked(), new CacheManagementInterface() {
                     @Override
                     public void onSuccess() {
                         if (codeActiveSwitch.isChecked()) {

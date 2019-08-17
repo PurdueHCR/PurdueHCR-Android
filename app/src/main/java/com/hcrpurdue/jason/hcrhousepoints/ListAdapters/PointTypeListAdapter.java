@@ -62,6 +62,9 @@ public class PointTypeListAdapter extends BaseAdapter implements ListAdapter {
         TextView typeTextView = view.findViewById(R.id.type_description_text_view);
         typeTextView.setText(type.getName());
 
+        TextView pointValueTextView = view.findViewById(R.id.point_value_text_view);
+        pointValueTextView.setText(type.getValue() + " Point"+((type.getValue() > 1)?"s":""));
+
 
 
         view.setOnClickListener(new View.OnClickListener() {
@@ -78,7 +81,7 @@ public class PointTypeListAdapter extends BaseAdapter implements ListAdapter {
                 FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_submit_point));
-                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_submit));
+                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_point_type_list));
                 fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 fragmentTransaction.commit();
             }

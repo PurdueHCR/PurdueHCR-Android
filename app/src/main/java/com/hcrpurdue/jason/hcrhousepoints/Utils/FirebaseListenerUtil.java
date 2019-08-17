@@ -11,18 +11,22 @@
 package com.hcrpurdue.jason.hcrhousepoints.Utils;
 
 import android.content.Context;
+import android.widget.Toast;
 
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
+import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirebaseCollectionListener;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirestoreDocumentListener;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SnapshotInterface;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -30,11 +34,12 @@ public class FirebaseListenerUtil {
 
     private Context context;
     protected FirebaseFirestore db = FirebaseFirestore.getInstance();
-    protected Singleton singleton;
+    protected CacheManager cacheManager;
     static FirebaseListenerUtil fluListener;
     private FirebaseCollectionListener userPointLogListener;
     private FirebaseCollectionListener rhpNotificationListener;
     private FirestoreDocumentListener pointLogListener;
+    private FirestoreDocumentListener systemPreferenceListener;
 
     /**
      * Get the instance of the FirebaseUtilListener to be used in the app.
@@ -49,7 +54,7 @@ public class FirebaseListenerUtil {
 
     public FirebaseListenerUtil(Context c){
         context = c;
-        singleton = Singleton.getInstance(context);
+        cacheManager = CacheManager.getInstance(context);
         createPersistantListeners();
     }
 
@@ -58,7 +63,8 @@ public class FirebaseListenerUtil {
      */
     private void createPersistantListeners(){
         createUserPointLogListener();
-        if(singleton.getPermissionLevel() == 1){
+        createSystemPreferencesListener();
+        if(cacheManager.getPermissionLevel() == 1){
             //Create RHP only listeners
             createRHPNotificationListener();
         }
@@ -71,9 +77,9 @@ public class FirebaseListenerUtil {
      */
     private void createUserPointLogListener(){
         Query userPointLogQuery = db.collection("House")
-                .document(singleton.getHouse())
+                .document(cacheManager.getHouse())
                 .collection("Points")
-                .whereEqualTo("ResidentId",singleton.getUserId());
+                .whereEqualTo("ResidentId", cacheManager.getUserId());
         SnapshotInterface si = new SnapshotInterface() {
             @Override
             public void handleQuerySnapshots(QuerySnapshot queryDocumentSnapshots, Exception e) {
@@ -82,7 +88,8 @@ public class FirebaseListenerUtil {
                     for(DocumentSnapshot doc : queryDocumentSnapshots){
                         userLogs.add(new PointLog(doc.getId(),doc.getData(),context));
                     }
-                    singleton.setPersonalPointLogs(userLogs);
+                    Collections.sort(userLogs);
+                    cacheManager.setPersonalPointLogs(userLogs);
                 }
             }
         };
@@ -97,13 +104,13 @@ public class FirebaseListenerUtil {
 
     private void createRHPNotificationListener(){
         Query rhpNotificationQuery = db.collection("House")
-                .document(singleton.getHouse())
+                .document(cacheManager.getHouse())
                 .collection("Points")
                 .whereGreaterThan("RHPNotifications", 0);
         SnapshotInterface si = new SnapshotInterface() {
             @Override
             public void handleQuerySnapshots(QuerySnapshot queryDocumentSnapshots, Exception e) {
-                singleton.setNotificationCount(queryDocumentSnapshots.size());
+                cacheManager.setNotificationCount(queryDocumentSnapshots.size());
             }
         };
         rhpNotificationListener = new FirebaseCollectionListener(context,rhpNotificationQuery,si);
@@ -125,7 +132,7 @@ public class FirebaseListenerUtil {
             pointLogListener = null;
         }
         DocumentReference documentReference = db.collection("House")
-                .document(singleton.getHouse())
+                .document(cacheManager.getHouse())
                 .collection("Points")
                 .document(log.getLogID());
         SnapshotInterface si = new SnapshotInterface() {
@@ -142,5 +149,27 @@ public class FirebaseListenerUtil {
 
     public FirestoreDocumentListener getPointLogListener() {
         return pointLogListener;
+    }
+
+    /*---------------------------SYSTEM PREFERENCES LISTENER--------------------------------------*/
+
+    public void createSystemPreferencesListener(){
+        SystemPreferences systemPreferences = cacheManager.getSystemPreferences();
+        DocumentReference documentReference = db.collection("SystemPreferences")
+                .document("Preferences");
+        SnapshotInterface si = new SnapshotInterface() {
+            @Override
+            public void handleDocumentSnapshot(DocumentSnapshot documentSnapshot, Exception e) {
+                if(e == null){
+                    SystemPreferences sp = (SystemPreferences) systemPreferenceListener.getUpdatingObject();
+                    sp.updateValues(documentSnapshot.getData());
+                }
+            }
+        };
+        systemPreferenceListener = new FirestoreDocumentListener(context,documentReference,si,systemPreferences);
+    }
+
+    public FirestoreDocumentListener getSystemPreferenceListener(){
+        return systemPreferenceListener;
     }
 }

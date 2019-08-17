@@ -26,7 +26,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.hcrpurdue.jason.hcrhousepoints.Activities.NavigationActivity;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.util.ArrayList;
@@ -36,12 +35,12 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
 public class PointSubmissionFragment extends Fragment implements ListenerCallbackInterface {
-    static private Singleton singleton;
+    static private CacheManager cacheManager;
     private Context context;
     private AppCompatActivity activity;
     private ProgressBar progressBar;
@@ -58,14 +57,14 @@ public class PointSubmissionFragment extends Fragment implements ListenerCallbac
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        singleton = Singleton.getInstance(getContext());
+        cacheManager = CacheManager.getInstance(getContext());
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_point_submission, container, false);
-        singleton.getCachedData();
+        cacheManager.getCachedData();
         statUpdateTextView = view.findViewById(R.id.statusUpdateTextView);
 
 //        try {
@@ -85,7 +84,7 @@ public class PointSubmissionFragment extends Fragment implements ListenerCallbac
 
         // Sets the house picture
         try {
-            int drawableID = getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", context.getPackageName());
+            int drawableID = getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", context.getPackageName());
             ((ImageView) view.findViewById(R.id.houseLogoImageView)).setImageResource(drawableID);
         } catch (Exception e) {
             Toast.makeText(context, "Failed to load house image", Toast.LENGTH_LONG).show();
@@ -146,7 +145,7 @@ public class PointSubmissionFragment extends Fragment implements ListenerCallbac
     private void getPointTypes(View view) {
 
         try {
-            singleton.getUpdatedPointTypes(new SingletonInterface() {
+            cacheManager.getUpdatedPointTypes(new CacheManagementInterface() {
                 public void onPointTypeComplete(List<PointType> data) {
                     List<Map<String, String>> formattedPointTypes = new ArrayList<>();
                     for (PointType type : data) {
@@ -159,7 +158,7 @@ public class PointSubmissionFragment extends Fragment implements ListenerCallbac
                         }
                     }
 
-             singleton.getSystemPreferences(new SingletonInterface() {
+             cacheManager.getSystemPreferences(new CacheManagementInterface() {
 //                 @Override
 //                 public void onError(Exception e, Context context) {
 //
@@ -229,9 +228,9 @@ public class PointSubmissionFragment extends Fragment implements ListenerCallbac
 
             PointType type = enabledTypes.get(((Spinner) view.findViewById(R.id.pointTypeSpinner)).getSelectedItemPosition());
 
-//            singleton.submitPoints(((EditText) view.findViewById(R.id.descriptionInput)).getText().toString(),
+//            cacheManager.submitPoints(((EditText) view.findViewById(R.id.descriptionInput)).getText().toString(),
 //                    type,
-//                    new SingletonInterface() {
+//                    new CacheManagementInterface() {
 //                        @Override
 //                        public void onSuccess() {
 //                            descriptionInput.setText("");

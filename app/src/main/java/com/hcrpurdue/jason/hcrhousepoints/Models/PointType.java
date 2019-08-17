@@ -73,11 +73,9 @@ public class PointType implements Comparable<PointType>, Serializable {
 
     @Override
     public int compareTo(@NonNull PointType other) {
-        if (residentsCanSubmit == other.residentsCanSubmit) {
-            if(value == other.value)
-                return id - other.id;
-            return value - other.value;
-        }
-        return Boolean.compare(other.residentsCanSubmit, residentsCanSubmit);
+        if(value == other.value)
+            return id - other.id;
+        return value - other.value;
     }
+
 }

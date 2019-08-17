@@ -10,7 +10,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -26,17 +25,25 @@ import java.util.List;
 import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 public class PointLogAdapter extends BaseAdapter  implements ListAdapter {
     private List<PointLog> list;
     private Context context;
-    private Singleton singleton;
+    private CacheManager cacheManager;
+    private Integer idToUse;
 
-    public PointLogAdapter(List<PointLog> logs, Context c){
+    /**
+     * Create a Point Log Adapter
+     * @param logs  Point logs to create this adapter with
+     * @param c     Context
+     * @param idToUse   R.id. id for the navigation menu so the app knows which page to return to
+     */
+    public PointLogAdapter(List<PointLog> logs, Context c, Integer idToUse ){
         list = logs;
         context = c;
-        singleton = Singleton.getInstance(context);
+        cacheManager = CacheManager.getInstance(context);
+        this.idToUse = idToUse;
     }
 
     @Override
@@ -73,42 +80,45 @@ public class PointLogAdapter extends BaseAdapter  implements ListAdapter {
         TextView dateView = view.findViewById(R.id.date_text);
 
         LinearLayout alertLayout = view.findViewById(R.id.status_symbol_column);
-        if(singleton.getPermissionLevel() > 0 && log.getRhpNotifications() > 0){
+        if(cacheManager.getPermissionLevel() > 0 && log.getRhpNotifications() > 0){
             alertLayout.setVisibility(View.VISIBLE);
         }
-        else if(singleton.getPermissionLevel() == 0 && log.getResidentNotifications() > 0){
+        else if((cacheManager.getPermissionLevel() == 0 || cacheManager.getUserId().equals(log.getResidentId())) && log.getResidentNotifications() > 0){
             alertLayout.setVisibility(View.VISIBLE);
         }
         else{
             alertLayout.setVisibility(View.GONE);
         }
 
-        dateView.setText(DateFormat.format("M/d/yy h:mm a",log.getDateOccurred()));
+        dateView.setText(DateFormat.format("M/d/yy",log.getDateOccurred()));
         pointTypeLabel.setText(log.getPointType().getName());
         nameLabel.setText(log.getResidentFirstName());
         lastNameLabel.setText(log.getResidentLastName());
         pointDescriptionLabel.setText(log.getPointDescription());
 
-        int drawableID = context.getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", context.getPackageName());
+        int drawableID = context.getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", context.getPackageName());
         houseView.setImageResource(drawableID);
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Bundle args = new Bundle();
-                args.putSerializable("POINTLOG", log);
+                boolean isHouseEnabled = cacheManager.getCachedSystemPreferences().isHouseEnabled();
+                if(isHouseEnabled) {
+                    Bundle args = new Bundle();
+                    args.putSerializable("POINTLOG", log);
 
-                //Create destination fragment
-                Fragment fragment = new PointLogDetailsFragment();
-                fragment.setArguments(args);
+                    //Create destination fragment
+                    Fragment fragment = new PointLogDetailsFragment();
+                    fragment.setArguments(args);
 
-                //Create Fragment manager
-                FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_point_log_details));
-                fragmentTransaction.addToBackStack(Integer.toString(R.id.point_history));
-                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                fragmentTransaction.commit();
+                    //Create Fragment manager
+                    FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_point_log_details));
+                    fragmentTransaction.addToBackStack(Integer.toString(idToUse));
+                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    fragmentTransaction.commit();
+                }
             }
         });
 

@@ -4,7 +4,7 @@ import android.content.Context;
 
 import java.io.Serializable;
 
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 public class Link implements Serializable {
     private String linkId;
@@ -96,7 +96,7 @@ public class Link implements Serializable {
     }
 
     public PointType getPointType(Context context){
-        return Singleton.getInstance(context).getPointTypeList().get(pointTypeId);
+        return CacheManager.getInstance(context).getPointTypeWithID(pointTypeId);
     }
 
 }

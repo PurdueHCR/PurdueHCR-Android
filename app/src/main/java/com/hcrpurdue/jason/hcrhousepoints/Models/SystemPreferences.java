@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class SystemPreferences {
 
-    private static final String CURRENT_APP_VERSION = "1.0.1";
+    private static final String CURRENT_APP_VERSION = "1.4.2";
 
 
     private boolean isHouseEnabled;
@@ -19,8 +19,7 @@ public class SystemPreferences {
     public SystemPreferences(Map<String,Object> data) {
         this.isHouseEnabled = (boolean) data.get("isHouseEnabled");
         this.houseIsEnabledMsg = (String) data.get("houseEnabledMessage");
-        this.appVersion = (String) data.get("Version");
-
+        this.appVersion = (String) data.get("Android_Version");
     }
 
     public String getHouseIsEnabledMsg() {
@@ -37,5 +36,11 @@ public class SystemPreferences {
 
     public boolean isAppUpToDate() {
         return appVersion.equals(CURRENT_APP_VERSION);
+    }
+
+    public void updateValues(Map<String,Object> data) {
+        this.isHouseEnabled = (boolean) data.get("isHouseEnabled");
+        this.houseIsEnabledMsg = (String) data.get("houseEnabledMessage");
+        this.appVersion = (String) data.get("Version");
     }
 }

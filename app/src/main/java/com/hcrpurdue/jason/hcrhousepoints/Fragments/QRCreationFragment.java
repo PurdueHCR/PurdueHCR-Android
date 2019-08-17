@@ -2,9 +2,10 @@ package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -38,7 +39,7 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
 public class QRCreationFragment extends Fragment implements ListenerCallbackInterface {
     private Context context;
     private ArrayList<PointType> enabledTypes = new ArrayList<PointType>();
-    Singleton singleton;
+    CacheManager cacheManager;
 
     Spinner pointTypeSpinner;
     Switch multipleUseSwitch;
@@ -61,7 +62,7 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_qr_creation, container, false);
-        singleton = Singleton.getInstance(view.getContext());
+        cacheManager = CacheManager.getInstance(view.getContext());
 
         initializeUIElements(view);
 
@@ -80,7 +81,7 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
         codeDescriptionLabel = (EditText) view.findViewById(R.id.generate_qrcode_description);
         generateQRButton = (Button) view.findViewById(R.id.generate_button);
         generateQRButton.setOnClickListener(v -> generateQRCode(view));
-        loadSpinner(singleton.getPointTypeList());
+        loadSpinner(cacheManager.getPointTypeList());
         refreshData();
 
     }
@@ -90,7 +91,7 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
      */
     private void refreshData() {
         try {
-            singleton.getUpdatedPointTypes(new SingletonInterface() {
+            cacheManager.getUpdatedPointTypes(new CacheManagementInterface() {
                 public void onPointTypeComplete(List<PointType> data) {
                     loadSpinner(data);
                 }
@@ -107,6 +108,7 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
      * @param types List of PointType objects to put into the spinner
      */
     private void loadSpinner(List<PointType> types){
+        enabledTypes = new ArrayList<>();
         List<Map<String, String>> formattedPointTypes = new ArrayList<>();
         for (PointType type : types) {
             if (type.getRHPsCanGenerateQRCodes() && type.isEnabled()) {
@@ -165,8 +167,9 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
             Link link = new Link(codeDescriptionLabel.getText().toString(),
                     (!multipleUseSwitch.isChecked()),
                     enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId());
-            //Pass to Singleton then Firebase to handle generation of Links in database
-            singleton.createQRCode(link, new SingletonInterface() {
+            Toast.makeText(context,"ID: "+enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId(),Toast.LENGTH_LONG).show();
+            //Pass to CacheManager then Firebase to handle generation of Links in database
+            cacheManager.createQRCode(link, new CacheManagementInterface() {
                 @Override
                 public void onSuccess() {
                     //Put the link into the Bundle

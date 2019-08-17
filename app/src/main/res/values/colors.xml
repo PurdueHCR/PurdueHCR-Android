@@ -12,4 +12,6 @@
     <color name="white">#FFFFFF</color>
     <color name="text_main">#000000</color>
     <color name="text_accent">#868585</color>
+    <color name="approve_color">#00FF00</color>
+    <color name="reject_color">#FF0000</color>
 </resources>

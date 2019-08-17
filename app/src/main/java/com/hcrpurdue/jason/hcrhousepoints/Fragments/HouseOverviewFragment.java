@@ -36,13 +36,13 @@ import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 public class HouseOverviewFragment extends Fragment implements ListenerCallbackInterface {
-    static private Singleton singleton;
+    static private CacheManager cacheManager;
     private Context context;
     private Resources resources;
     private String packageName;
@@ -60,7 +60,7 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        singleton = Singleton.getInstance(getContext());
+        cacheManager = CacheManager.getInstance(getContext());
         flu = FirebaseListenerUtil.getInstance(context);
         resources = getResources();
         flu.getUserPointLogListener().addCallback(PERSONAL_LOGS_CALLBACK_KEY, new ListenerCallbackInterface() {
@@ -84,13 +84,13 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
         BarChart chart = view.findViewById(R.id.statistics_point_chart);
         packageName = context.getPackageName();
 
-        singleton.getCachedData();
-        String house = singleton.getHouse();
-        String floorText = house + " - " + singleton.getFloorName();
-        int drawableID = resources.getIdentifier(singleton.getHouse().toLowerCase(), "drawable", packageName);
+        cacheManager.getCachedData();
+        String house = cacheManager.getHouse();
+        String floorText = house + " - " + cacheManager.getFloorName();
+        int drawableID = resources.getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", packageName);
         ((ImageView) view.findViewById(R.id.statistics_house_icon)).setImageResource(drawableID);
         ((ImageView) view.findViewById(R.id.statistics_house_icon_small)).setImageResource(drawableID);
-        ((TextView) view.findViewById(R.id.statistics_user_name)).setText(singleton.getName());
+        ((TextView) view.findViewById(R.id.statistics_user_name)).setText(cacheManager.getName());
         ((TextView) view.findViewById(R.id.statistics_floor_name)).setText(floorText);
         viewMyPointsButton = view.findViewById(R.id.user_log_history_button);
         viewMyPointsButton.setOnClickListener(new View.OnClickListener() {
@@ -103,7 +103,7 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
                 FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_personal_point_log_list));
-                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_statistics));
+                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_profile));
                 fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 fragmentTransaction.commit();
             }
@@ -144,7 +144,7 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
 
     private void updatePointData(View view, BarChart chart, SwipeRefreshLayout swipeRefreshLayout) {
         TextView housePointsTextView = view.findViewById(R.id.statistics_user_points);
-        singleton.getPointStatistics(new SingletonInterface() {
+        cacheManager.getPointStatistics(new CacheManagementInterface() {
             @Override
             public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
                 List<IBarDataSet> dataSetList = new ArrayList<>();
@@ -158,7 +158,7 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
                 float i = 0f;
                 for (House house : houses) {
                     String houseName = house.getName();
-                    if (houseName.equals(singleton.getHouse())) {
+                    if (houseName.equals(cacheManager.getHouse())) {
                         housePoints = house.getTotalPoints();
                         housePointsTextView.setText(String.format(Locale.getDefault(),
                                 "%d House Points | %d Individual Points", housePoints, userPoints));
@@ -213,7 +213,7 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
      * On personal Point log update, check if there are any new notifications
      */
     private void refreshPointsButtonLabel(){
-        for(PointLog log: singleton.getPersonalPointLogs()){
+        for(PointLog log: cacheManager.getPersonalPointLogs()){
             if(log.getResidentNotifications() > 0){
                 viewMyPointsButton.setText(R.string.view_points_alert);
                 return;

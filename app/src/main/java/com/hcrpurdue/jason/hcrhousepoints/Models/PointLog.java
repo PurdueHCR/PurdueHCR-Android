@@ -2,7 +2,7 @@ package com.hcrpurdue.jason.hcrhousepoints.Models;
 
 import android.content.Context;
 
-import com.google.firebase.firestore.DocumentReference;
+import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
-public class PointLog implements Serializable {
+public class PointLog implements Comparable<PointLog>, Serializable {
 
     //TODO: 1: /  2: (2 *)  3: Enter
 
@@ -102,7 +102,7 @@ public class PointLog implements Serializable {
      *
      * @param id       - ID of the point in Firebase
      * @param document - Dictionary returned from Firebase request
-     * @param context  - Context of current activity. Used to get the Point Types from the singleton
+     * @param context  - Context of current activity. Used to get the Point Types from the cacheManager
      */
     public PointLog(String id, Map<String, Object> document, Context context) {
 
@@ -137,7 +137,7 @@ public class PointLog implements Serializable {
             this.wasHandled = true;
         }
 
-        this.type = Singleton.getInstance(context).getPointTypeWithID(Math.abs(idValue));
+        this.type = CacheManager.getInstance(context).getPointTypeWithID(Math.abs(idValue));
 
         if (floorID.equals("Shreve")) {
             residentFirstName = SHREVE_RESIDENT + residentFirstName;
@@ -214,7 +214,7 @@ public class PointLog implements Serializable {
             if (preapproved) {
                 this.approvedBy = "Preapproved";
             } else {
-                this.approvedBy = Singleton.getInstance(context).getName();
+                this.approvedBy = CacheManager.getInstance(context).getName();
             }
 
             this.approvedOn = new Date();
@@ -224,7 +224,7 @@ public class PointLog implements Serializable {
             //Rejecting the point
             if(!wasRejected()) {
                 this.pointDescription = REJECTED_STRING + pointDescription;
-                this.approvedBy = Singleton.getInstance(context).getName();
+                this.approvedBy = CacheManager.getInstance(context).getName();
                 this.approvedOn = new Date();
             }
         }
@@ -309,6 +309,8 @@ public class PointLog implements Serializable {
         return dateOccurred;
     }
 
+    public Date getDateSubmitted() { return dateSubmitted;}
+
     /**
      * This static method is used to create the map to update the number of notifications.
      * Local number of notifications on the Point Log will not update until Firestore Listener fires
@@ -320,11 +322,14 @@ public class PointLog implements Serializable {
         Map<String,Object> data = new HashMap<>();
         if(notificationForResident){
             //We don't update the local number of notifications because our Firestore Listener will update it once it has been saved in the database
-            data.put(RESIDENT_NOTIF_KEY,(shouldReset?0:residentNotifications+1));
+            residentNotifications = (shouldReset?0:residentNotifications+1);
+            data.put(RESIDENT_NOTIF_KEY,residentNotifications);
+
         }
         else{
             //We don't update the local number of notifications because our Firestore Listener will update it once it has been saved in the database
-            data.put(RHP_NOTIF_KEY,(shouldReset?0:rhpNotifications+1));
+            rhpNotifications = (shouldReset?0:rhpNotifications+1);
+            data.put(RHP_NOTIF_KEY,rhpNotifications);
         }
         return data;
     }
@@ -341,5 +346,10 @@ public class PointLog implements Serializable {
             this.residentNotifications = toUpdate.getResidentNotifications();
             this.rhpNotifications = toUpdate.getRhpNotifications();
         }
+    }
+
+    @Override
+    public int compareTo(PointLog pointLog) {
+        return pointLog.getDateSubmitted().compareTo(dateSubmitted);
     }
 }

@@ -18,8 +18,8 @@ import androidx.fragment.app.ListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.PointLogAdapter;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.R;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class PersonalPointLogListFragment extends ListFragment implements Search
 
     List<PointLog> logs;
     private PointLogAdapter adapter;
-    private Singleton singleton;
+    private CacheManager cacheManager;
     private FirebaseListenerUtil flu;
     private TextView emptyMessageTextView;
     private ListView listView;
@@ -40,7 +40,7 @@ public class PersonalPointLogListFragment extends ListFragment implements Search
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        singleton = Singleton.getInstance(getContext());
+        cacheManager = CacheManager.getInstance(getContext());
         setHasOptionsMenu(true);
     }
 
@@ -59,15 +59,16 @@ public class PersonalPointLogListFragment extends ListFragment implements Search
         flu.getUserPointLogListener().removeCallback(CALLBACK_KEY);
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.fragment_point_type_list, container, false);
+        View layout = inflater.inflate(R.layout.fragment_personal_point_list, container, false);
         listView = layout.findViewById(android.R.id.list);
         listView.addFooterView(new View(getContext()), null, true);
         emptyMessageTextView = layout.findViewById(android.R.id.empty);
 
         listView.setEmptyView(emptyMessageTextView);
-        logs = singleton.getPersonalPointLogs();
+        logs = cacheManager.getPersonalPointLogs();
         createAdapter(logs);
         flu = FirebaseListenerUtil.getInstance(getContext());
         flu.getUserPointLogListener().addCallback(CALLBACK_KEY, new ListenerCallbackInterface() {
@@ -132,16 +133,19 @@ public class PersonalPointLogListFragment extends ListFragment implements Search
     }
 
     private void createAdapter(List<PointLog> logs){
-        adapter = new PointLogAdapter(logs,getContext());
+        if(logs.size() == 0){
+            emptyMessageTextView.setText("You haven't submitted any points");
+        }
+        adapter = new PointLogAdapter(logs,getContext(), R.id.nav_personal_point_log_list);
         setListAdapter(adapter);
     }
 
 
     public void handleUpdate() {
-        Toast.makeText(getContext(),"Update to point Log", Toast.LENGTH_LONG).show();
-        logs = singleton.getPersonalPointLogs();
+        logs = cacheManager.getPersonalPointLogs();
         if(!isSearching){
             createAdapter(logs);
         }
     }
+
 }

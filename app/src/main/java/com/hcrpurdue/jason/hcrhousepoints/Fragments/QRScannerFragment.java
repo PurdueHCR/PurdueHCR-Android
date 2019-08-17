@@ -37,9 +37,9 @@ import java.io.IOException;
 import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
 public class QRScannerFragment extends Fragment implements ListenerCallbackInterface {
     AppCompatActivity activity;
@@ -105,8 +105,8 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
             }
         });
 
-        Singleton singleton = Singleton.getInstance(getContext());
-        singleton.getCachedData();
+        CacheManager cacheManager = CacheManager.getInstance(getContext());
+        cacheManager.getCachedData();
         detector.setProcessor(new Detector.Processor<Barcode>() {
             @Override
             public void release() {
@@ -125,8 +125,8 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
                         String[] parts = path.split("/");
                         if (parts.length == 2) {
                             String linkId = parts[1].replace("/", "");
-                            if(singleton.getCachedSystemPreferences().isHouseEnabled()) {
-                                singleton.getLinkWithLinkId(linkId, new SingletonInterface() {
+                            if(cacheManager.getCachedSystemPreferences().isHouseEnabled()) {
+                                cacheManager.getLinkWithLinkId(linkId, new CacheManagementInterface() {
                                     @Override
                                     public void onError(Exception e, Context context) {
                                         handler.post(() -> progressBar.setVisibility(View.GONE));
@@ -149,7 +149,7 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
 
                                     @Override
                                     public void onGetLinkWithIdSuccess(Link link) {
-                                        singleton.submitPointWithLink(link, new SingletonInterface() {
+                                        cacheManager.submitPointWithLink(link, new CacheManagementInterface() {
                                             @Override
                                             public void onSuccess() {
                                                 // onFullSuccess for Ctrl+F
@@ -157,10 +157,10 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
                                                     ((NavigationView) activity.findViewById(R.id.nav_view)).getMenu().getItem(0).setChecked(true);
                                                     handler.post(() -> progressBar.setVisibility(View.GONE));
                                                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
-                                                    Fragment fragment = fragmentManager.findFragmentByTag(Integer.toString(R.id.nav_submit));
+                                                    Fragment fragment = fragmentManager.findFragmentByTag(Integer.toString(R.id.nav_point_type_list));
                                                     if (fragment == null)
                                                         fragment = PointSubmissionFragment.class.newInstance();
-                                                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_submit)).addToBackStack(Integer.toString(R.id.nav_scanner)).commit();
+                                                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_point_type_list)).addToBackStack(Integer.toString(R.id.nav_scan_code)).commit();
                                                     fragmentManager.executePendingTransactions();
                                                     ((NavigationActivity) activity).animateSuccess();
                                                 } catch (Exception e) {

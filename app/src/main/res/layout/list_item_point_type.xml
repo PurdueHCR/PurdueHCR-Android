@@ -12,7 +12,20 @@
         android:layout_marginTop="8dp"
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
+        android:layout_alignParentTop="true"
         android:textAppearance="?attr/textAppearanceListItem"
+        android:text="Point Type"
+        android:layout_centerVertical="true"/>
+    <TextView
+        android:id="@+id/point_value_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/type_description_text_view"
+        android:layout_marginTop="8dp"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:text="5 points"
+        android:textAppearance="?attr/textAppearanceListItemSecondary"
         android:layout_centerVertical="true"/>
 
 

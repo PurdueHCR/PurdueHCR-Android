@@ -24,21 +24,22 @@ import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.PointLogAdapter;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
 
 public class HousePointHistoryFragment extends ListFragment implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener, ListenerCallbackInterface {
 
     List<PointLog> allHouseLogs;
     private PointLogAdapter adapter;
-    private Singleton singleton;
-    private ProgressBar progressBar;
+    private CacheManager cacheManager;
+    private TextView emptyMessageTextView;
+    private ListView listView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        singleton = Singleton.getInstance(getContext());
+        cacheManager = CacheManager.getInstance(getContext());
         setHasOptionsMenu(true);
     }
 
@@ -46,8 +47,6 @@ public class HousePointHistoryFragment extends ListFragment implements SearchVie
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         AppCompatActivity activity = (AppCompatActivity) Objects.requireNonNull(getActivity());
-        progressBar = activity.findViewById(R.id.navigationProgressBar);
-        progressBar.setVisibility(View.VISIBLE);
 
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("House Point History");
 
@@ -61,16 +60,15 @@ public class HousePointHistoryFragment extends ListFragment implements SearchVie
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.fragment_house_submission_history_list, container, false);
-        ListView listView = (ListView) layout.findViewById(android.R.id.list);
-        TextView emptyTextView = (TextView) layout.findViewById(android.R.id.empty);
+        listView = layout.findViewById(android.R.id.list);
+        emptyMessageTextView = layout.findViewById(android.R.id.empty);
 
-        listView.setEmptyView(emptyTextView);
-        singleton.getAllHousePoints(new SingletonInterface() {
+        listView.setEmptyView(emptyMessageTextView);
+        cacheManager.getAllHousePoints(new CacheManagementInterface() {
             @Override
             public void onGetAllHousePointsSuccess(List<PointLog> houseLogs) {
                 allHouseLogs = houseLogs;
                 createAdapter(allHouseLogs);
-                progressBar.setVisibility(View.GONE);
             }
         });
 
@@ -131,12 +129,30 @@ public class HousePointHistoryFragment extends ListFragment implements SearchVie
         return true;
     }
 
-    public interface OnItem1SelectedListener {
-        void OnItem1SelectedListener(String item);
+    private void createAdapter(List<PointLog> logs){
+        adapter = new PointLogAdapter(logs,getContext(), R.id.nav_point_history);
+        setListAdapter(adapter);
+        if (logs.size() == 0) {
+            listView.setVisibility(View.GONE);
+            emptyMessageTextView.setText("No Points to approve!");
+            emptyMessageTextView.setVisibility(View.VISIBLE);
+        }
+        handleSystemPreferences();
     }
 
-    private void createAdapter(List<PointLog> logs){
-        adapter = new PointLogAdapter(logs,getContext());
-        setListAdapter(adapter);
+    private void handleSystemPreferences(){
+        boolean isHouseEnabled = cacheManager.getCachedSystemPreferences().isHouseEnabled();
+
+        if(!isHouseEnabled) {
+            listView.setVisibility(View.GONE);
+            emptyMessageTextView.setText(cacheManager.getCachedSystemPreferences().getHouseIsEnabledMsg());
+            emptyMessageTextView.setVisibility(View.VISIBLE);
+
+        }
+
+        else {
+            listView.setVisibility(View.VISIBLE);
+            emptyMessageTextView.setVisibility(View.GONE);
+        }
     }
 }

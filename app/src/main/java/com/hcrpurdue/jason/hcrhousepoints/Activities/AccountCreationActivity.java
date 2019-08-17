@@ -1,3 +1,11 @@
+/**
+ * AccountCreationActivity - This class holds the controller for Account Creation.
+ *
+ *  On sign-up button press, check the validity of the fields and create the account with Firestore.
+ *  After the account is created, transition to the activity to sign up for a house.
+ *
+ */
+
 package com.hcrpurdue.jason.hcrhousepoints.Activities;
 
 import android.content.Context;
@@ -9,6 +17,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +32,7 @@ public class AccountCreationActivity extends AppCompatActivity {
     private EditText passwordEditText;
     private EditText confirmPasswordEditText;
     private Button signUpButton;
+    private ProgressBar loadingBar;
 
     /**
      * Called when the Activity is created.
@@ -44,29 +54,41 @@ public class AccountCreationActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.password_input);
         confirmPasswordEditText = findViewById(R.id.confirm_password_input);
         signUpButton = findViewById(R.id.sign_up_button);
+        loadingBar = findViewById(R.id.initialization_progress_bar);
+        loadingBar.setVisibility(View.INVISIBLE);
     }
 
     /**
-     * Method that the sign up button calls to crete the account in firebase
+     * Method that the sign up button calls to crete the account in Firestore
      * @param view
      */
     public void signUp(View view) {
-        signUpButton.setEnabled(false);
+        //Disable the button to prevent spamming
+        startLoading();
+
+        //Get the text values
         final String emailText = emailEditText.getText().toString();
         final String passwordText = passwordEditText.getText().toString();
         final String confirmPasswordText = confirmPasswordEditText.getText().toString();
 
         if (isAccountCreationDataValid(emailText,passwordText,confirmPasswordText)){
+            //Use Firestore Auth to create the user
             auth.createUserWithEmailAndPassword(emailText, passwordText)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
+                            //Account successfully created. Transition to house sign up.
                             launchHouseSignUpActivity();
                         } else {
+                            //If there is a problem display a toast.
                             Toast.makeText(this, task.getException().getMessage(),
                                     Toast.LENGTH_SHORT).show();
-                            signUpButton.setEnabled(true);
+                            //Reenable the sign up button
+                            stopLoading();
                         }
                     });
+        }
+        else{
+            stopLoading();
         }
     }
 
@@ -96,6 +118,7 @@ public class AccountCreationActivity extends AppCompatActivity {
             Toast.makeText(this, "Password cannot be empty.", Toast.LENGTH_SHORT).show();
             return false;
         }
+        //ensure the password has appropriate length
         else if (password.length() < 6) {
             Toast.makeText(this, "Password must be at least 6 characters long.", Toast.LENGTH_SHORT).show();
             return false;
@@ -115,6 +138,7 @@ public class AccountCreationActivity extends AppCompatActivity {
      * Transition to House Sign Up activity
      */
     private void launchHouseSignUpActivity(){
+        stopLoading();
         Intent intent = new Intent(this, HouseSignUpActivity.class);
         startActivity(intent);
         finish();
@@ -129,5 +153,15 @@ public class AccountCreationActivity extends AppCompatActivity {
             super.onBackPressed();
             overridePendingTransition(R.anim.slide_in_reverse,R.anim.slide_out_reverse);
 
+    }
+
+    private void startLoading(){
+        loadingBar.setVisibility(View.VISIBLE);
+        signUpButton.setEnabled(false);
+    }
+
+    private void stopLoading(){
+        loadingBar.setVisibility(View.INVISIBLE);
+        signUpButton.setEnabled(true);
     }
 }

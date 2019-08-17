@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
+import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
@@ -17,7 +18,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 
-public interface SingletonInterface {
+public interface CacheManagementInterface {
     default void onPointTypeComplete(List<PointType> data) {
     }
 
@@ -25,8 +26,8 @@ public interface SingletonInterface {
     }
 
     default void onError(Exception e, Context context) {
-        Toast.makeText(context, "A Singleton error occurred", Toast.LENGTH_LONG).show();
-        Log.e("Singleton", e.getMessage(), e);
+        Toast.makeText(context, "A CacheManager error occurred", Toast.LENGTH_LONG).show();
+        Log.e("CacheManager", e.getMessage(), e);
     }
 
     default void onGetLinkWithIdSuccess(Link link) {
@@ -60,4 +61,6 @@ public interface SingletonInterface {
     default void onGetPointLogMessageUpdates(List<PointLogMessage> messages){}
 
     default void onGetPersonalPointLogs(List<PointLog> personalLogs){}
+
+    default void onGetHouseCodes(List<HouseCode> codes){}
 }

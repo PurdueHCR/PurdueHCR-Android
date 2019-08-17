@@ -3,8 +3,7 @@ package com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners;
 import android.content.Context;
 
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.Query;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SnapshotInterface;
 
@@ -14,14 +13,14 @@ import java.util.Map;
 public abstract class FirebaseListener {
 
     protected Map<String, ListenerCallbackInterface> callbackByStringMap = new HashMap<>();
-    protected Singleton singleton;
+    protected CacheManager cacheManager;
     protected Context context;
     protected ListenerRegistration listener;
     protected SnapshotInterface si;
 
     public FirebaseListener(Context context, SnapshotInterface si){
         this.context = context;
-        singleton = Singleton.getInstance(context);
+        cacheManager = CacheManager.getInstance(context);
         this.si = si;
     }
 

@@ -22,9 +22,10 @@ import java.util.Objects;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CapturePhotoUtils;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.QRCodeUtil;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SingletonInterface;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -164,7 +165,7 @@ public class QrCodeDetailsFragment extends Fragment implements ListenerCallbackI
      */
     private void changeEnabledStatus(Boolean isEnabled){
 
-        Singleton.getInstance(context).setQRCodeEnabledStatus(qrCodeModel, isEnabled, new SingletonInterface() {
+        CacheManager.getInstance(context).setQRCodeEnabledStatus(qrCodeModel, isEnabled, new CacheManagementInterface() {
             @Override
             public void onSuccess() {
                 if(isEnabled){
@@ -189,7 +190,7 @@ public class QrCodeDetailsFragment extends Fragment implements ListenerCallbackI
      * @param isArchived
      */
     private void changeArchivedStatus(Boolean isArchived){
-        Singleton.getInstance(context).setQRCodeArchivedStatus(qrCodeModel, isArchived, new SingletonInterface() {
+        CacheManager.getInstance(context).setQRCodeArchivedStatus(qrCodeModel, isArchived, new CacheManagementInterface() {
             @Override
             public void onSuccess() {
                 if(isArchived){

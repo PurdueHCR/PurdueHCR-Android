@@ -1,3 +1,8 @@
+/**
+ *  LogInActivity- will display the log in screen. Here there are options for creating an account
+ *      And launching the forgot password process
+ */
+
 package com.hcrpurdue.jason.hcrhousepoints.Activities;
 
 import android.content.Context;
@@ -11,6 +16,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -19,29 +25,34 @@ import java.util.Map;
 
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.ForgotPasswordDialog;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 public class LogInActivity extends AppCompatActivity {
     private FirebaseAuth auth;
-    private Map<String, Pair<String, String>> floorCodes;
-    private Singleton singleton;
     private EditText emailEditText;
     private EditText passwordEditText;
     private Button logInButton;
     private Button createAccountButton;
+    private ProgressBar loadingBar;
 
-
+    /**
+     * When the activity is created, setup the view and initialize authentication
+     * @param savedInstanceState
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_log_in);
         auth = FirebaseAuth.getInstance();
-        singleton = Singleton.getInstance(getApplicationContext());
         initializeViews();
         handleLogOutIfLoggedIn();
     }
 
+    /**
+     * make sure the user is loggedout
+     */
     private void handleLogOutIfLoggedIn(){
+        //this method will sign the user out if logged in and do nothing if already logged out
         auth.signOut();
     }
 
@@ -52,7 +63,10 @@ public class LogInActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.email_input);
         passwordEditText = findViewById(R.id.password_input);
         logInButton = findViewById(R.id.log_in_button);
+        logInButton.setEnabled(true);
         createAccountButton = findViewById(R.id.create_account_button);
+        loadingBar = findViewById(R.id.initialization_progress_bar);
+        loadingBar.setVisibility(View.INVISIBLE);
     }
 
 
@@ -61,7 +75,8 @@ public class LogInActivity extends AppCompatActivity {
      * @param view
      */
     public void signIn(View view) {
-        logInButton.setEnabled(false);
+        startLoading();
+        //Make sure the info is valid
         if(!signInInvalid(emailEditText,passwordEditText)){
 
             String email = emailEditText.getText().toString();
@@ -70,17 +85,18 @@ public class LogInActivity extends AppCompatActivity {
             auth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
+                            //If the sign in is successful, return to the initialization activity
                             launchInitializationActivity();
                         } else {
+                            //If it fails, toast error and reenable login button
                             Toast.makeText(this, "Authentication failed. Please verify your email and password and try again.",
                                     Toast.LENGTH_LONG).show();
-                            logInButton.setEnabled(true);
-                            //findViewById(R.id.authenticationProgressBar).setVisibility(View.GONE);
+                            stopLoading();
                         }
                     });
         }
         else{
-            logInButton.setEnabled(true);
+            stopLoading();
         }
 
     }
@@ -120,6 +136,7 @@ public class LogInActivity extends AppCompatActivity {
      * Transition to the initialization activity. This ensures that all the other data is cached before moving on.
      */
     private void launchInitializationActivity() {
+        stopLoading();
         Intent intent = new Intent(this, AppInitializationActivity.class);
         startActivity(intent);
     }
@@ -129,17 +146,32 @@ public class LogInActivity extends AppCompatActivity {
      * @param view view passed by button press
      */
     public void launchAccountCreationActivity(View view){
-        createAccountButton.setEnabled(false);
+        startLoading();
         Intent intent = new Intent(this, AccountCreationActivity.class);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in,R.anim.slide_out);
-        createAccountButton.setEnabled(true);
+        stopLoading();
     }
 
-
+    /**
+     * display the password reset dialog
+     * @param view
+     */
     public void openPasswordResetDialog(View view) {
         ForgotPasswordDialog forgotPasswordDialog = new ForgotPasswordDialog(this);
         forgotPasswordDialog.show();
+    }
+
+    private void startLoading(){
+        loadingBar.setVisibility(View.VISIBLE);
+        logInButton.setEnabled(false);
+        createAccountButton.setEnabled(false);
+    }
+
+    private void stopLoading(){
+        loadingBar.setVisibility(View.INVISIBLE);
+        logInButton.setEnabled(true);
+        createAccountButton.setEnabled(true);
     }
 
 }

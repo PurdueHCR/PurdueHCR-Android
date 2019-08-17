@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
+import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
@@ -68,4 +69,6 @@ public interface FirebaseUtilInterface {
     default void onGetPointLogMessageUpdates(List<PointLogMessage> messages){}
 
     default void onGetPersonalPointLogs(List<PointLog> personalLogs){}
+
+    default void onGetHouseCodes(List<HouseCode> codes){}
 }

@@ -67,6 +67,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Write a message ..."
                 android:padding="17dp"
+                android:inputType="textCapSentences|textAutoCorrect|textImeMultiLine"
                 android:layout_weight="4"/>
 
             <Button

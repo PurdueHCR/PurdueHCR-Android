@@ -6,15 +6,15 @@
     <string name="signUpButton">Sign Up</string>
     <string name="confirmPasswordInputHint">Confirm Password</string>
     <string name="nameInputHint">Name (First and Last)</string>
-    <string name="RHPCodeInputHint">Please enter a code given to you by an RHP</string>
+    <string name="RHPCodeInputHint">House Code</string>
     <string name="enter_link">Please enter your link</string>
     <string name="generate_code">Generate Code</string>
     <string name="no_point_types_enabled">No point types enabled.</string>
     <string name="submit_point">Submit Point</string>
     <string name="description_required">Description (Required)</string>
     <string name="point_type_label">Point Type</string>
-    <string name="first_name_request_label">Please enter your preferred first name</string>
-    <string name="last_name_request_label" translatable="false">Please enter your preferred last name</string>
+    <string name="first_name_request_label">Preferred First Name</string>
+    <string name="last_name_request_label" translatable="false">Preferred Last Name</string>
     <string name="link_house_button">Join the Purdue HCR</string>
     <string name="no_results_found">No results found.</string>
     <string name="filler_point_type_message">This is where a point type would go if there were one. It could be long and has to wrap well!</string>

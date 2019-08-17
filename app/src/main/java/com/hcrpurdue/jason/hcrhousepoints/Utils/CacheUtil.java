@@ -58,7 +58,7 @@ class CacheUtil {
         return new File(context.getCacheDir(), FILE_NAME).exists();
     }
 
-    public void getCacheData(Singleton singleton) {
+    public void getCacheData(CacheManager cacheManager) {
         try {
             String userID = null;
             String floorName = null;
@@ -97,7 +97,7 @@ class CacheUtil {
                 }
             }
             bufferedReader.close();
-            singleton.setUserData(floorName, houseName, first, last, permissionLevel, userID);
+            cacheManager.setUserData(floorName, houseName, first, last, permissionLevel, userID);
         } catch (FileNotFoundException e) {
             Toast.makeText(context, "Could not find cache file", Toast.LENGTH_SHORT).show();
             Log.e("CacheUtil", "Could not find cache file", e);

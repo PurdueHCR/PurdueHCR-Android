@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Singleton;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 public class PointLogMessageAdapter extends RecyclerView.Adapter<PointLogMessageAdapter.PointLogMessageHolder> {
 
@@ -22,12 +22,12 @@ public class PointLogMessageAdapter extends RecyclerView.Adapter<PointLogMessage
 
     private PointLog log;
     private Context context;
-    private Singleton singleton;
+    private CacheManager cacheManager;
 
     public PointLogMessageAdapter (PointLog log, Context context){
         this.log = log;
         this.context = context;
-        this.singleton = Singleton.getInstance(context);
+        this.cacheManager = CacheManager.getInstance(context);
     }
 
     public class PointLogMessageHolder extends RecyclerView.ViewHolder{
@@ -69,11 +69,11 @@ public class PointLogMessageAdapter extends RecyclerView.Adapter<PointLogMessage
             holder.dateView.setVisibility(View.VISIBLE);
             holder.firstNameView.setText( log.getResidentFirstName());
             holder.lastNameView.setText( log.getResidentLastName());
-            int drawableID = context.getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", context.getPackageName());
+            int drawableID = context.getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", context.getPackageName());
             holder.imageView.setImageResource(drawableID);
             holder.pointTypeView.setText(log.getPointType().getName());
             holder.descriptionView.setText(log.getPointDescription());
-            holder.dateView.setText(DateFormat.format("M/d/yy h:mm a",log.getDateOccurred()));
+            holder.dateView.setText(DateFormat.format("M/d/yy",log.getDateOccurred()));
         }
         else{
             holder.descriptionLabel.setVisibility(View.GONE);
@@ -84,7 +84,7 @@ public class PointLogMessageAdapter extends RecyclerView.Adapter<PointLogMessage
             holder.firstNameView.setText( log.getMessages().get(position-1).getSenderFirstName());
             holder.lastNameView.setText( log.getMessages().get(position-1).getSenderLastName());
             holder.descriptionView.setText(log.getMessages().get(position-1).getMessage());
-            int drawableID = context.getResources().getIdentifier(singleton.getHouse().toLowerCase(), "drawable", context.getPackageName());
+            int drawableID = context.getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", context.getPackageName());
             holder.imageView.setImageResource(drawableID);
         }
     }
