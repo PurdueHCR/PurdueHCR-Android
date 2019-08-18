@@ -18,16 +18,21 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -149,7 +154,9 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
             public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
                 List<IBarDataSet> dataSetList = new ArrayList<>();
 
-                int housePoints = 0;
+                float pointsPerResident = 0;
+                int totalPoints = 0;
+                int totalResidents = 0;
                 // So that things are in podium order (4, 2, 1, 3, 5)
                 Collections.sort(houses);
                 Collections.swap(houses, 0, 2);
@@ -159,15 +166,24 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
                 for (House house : houses) {
                     String houseName = house.getName();
                     if (houseName.equals(cacheManager.getHouse())) {
-                        housePoints = house.getTotalPoints();
+                        pointsPerResident = (float) house.getPointsPerResident();
+                        totalPoints = house.getTotalPoints();
+                        totalResidents = house.getNumResidents();
                         housePointsTextView.setText(String.format(Locale.getDefault(),
-                                "%d House Points | %d Individual Points", housePoints, userPoints));
+                                "%.2f House PPR | %d Individual Points", pointsPerResident, userPoints));
                     }
 
-                    BarEntry barEntry = new BarEntry(i++, house.getTotalPoints());
+                    BarEntry barEntry = new BarEntry(i++, (float) house.getPointsPerResident());
                     ArrayList<BarEntry> barEntryList = new ArrayList<>();
                     barEntryList.add(barEntry);
                     BarDataSet dataSet = new BarDataSet(barEntryList, houseName);
+                    dataSet.setValueFormatter(new IValueFormatter() {
+                        @Override
+                        public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+                            DecimalFormat formater = new DecimalFormat("###.##");
+                            return formater.format(value);
+                        }
+                    });
                     int colorID = ContextCompat.getColor(context, resources.getIdentifier(houseName.toLowerCase(), "color", packageName));
                     dataSet.setColor(colorID);
                     dataSet.setValueTextSize(12);
@@ -180,22 +196,24 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
                 chart.invalidate();
 
                 Collections.sort(rewards); // Just in case
-                int requiredPoints = 0;
+                float requiredPPR = 0F;
                 for (Reward reward : rewards) {
-                    requiredPoints = reward.getRequiredPoints();
-                    if (housePoints < requiredPoints) {
-                        String nextRewardText = "Next Reward: " + reward.getName();
-                        String progressText = housePoints + "/" + requiredPoints;
-                        ((TextView) view.findViewById(R.id.statistics_next_reward)).setText(nextRewardText);
-                        ((TextView) view.findViewById(R.id.statistics_reward_progress)).setText(progressText);
+                    requiredPPR = reward.getRequiredPointsPerResident();
+                    if (pointsPerResident < requiredPPR) {
+                        ((TextView) view.findViewById(R.id.statistics_next_reward)).setText(String.format(Locale.getDefault(),
+                                "Next Reward: %s (%.0f PPR)", reward.getName(), reward.getRequiredPointsPerResident()));
+
+                        ((TextView) view.findViewById(R.id.statistics_reward_progress)).setText(String.format(Locale.getDefault(),
+                                "%.2f/%.0f", pointsPerResident, requiredPPR));
+
                         ((ImageView) view.findViewById(R.id.statistics_reward_icon)).setImageResource(reward.getImageResource());
                         ProgressBar progressBar = view.findViewById(R.id.statistics_progress_bar);
-                        progressBar.setMax(requiredPoints);
-                        progressBar.setProgress(housePoints);
+                        progressBar.setMax((int)(requiredPPR * totalResidents));
+                        progressBar.setProgress((int)(pointsPerResident * totalResidents));
                         break;
                     }
                 }
-                if (housePoints >= requiredPoints) {
+                if (pointsPerResident >= requiredPPR) {
                     ((ProgressBar) view.findViewById(R.id.statistics_progress_bar)).setProgress(100);
                     ((ImageView) view.findViewById(R.id.statistics_reward_icon)).setImageResource(R.drawable.ic_check);
                     ((TextView) view.findViewById(R.id.statistics_next_reward)).setText("No rewards left to get!");
