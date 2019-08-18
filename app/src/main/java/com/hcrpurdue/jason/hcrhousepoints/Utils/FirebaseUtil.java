@@ -477,9 +477,7 @@ public class FirebaseUtil {
                                     .addOnCompleteListener(houseTask -> {
                                         if (houseTask.isSuccessful()) {
                                             for (QueryDocumentSnapshot doc : houseTask.getResult()) {
-                                                Map<String, Object> houseData = doc.getData();
-                                                Integer housePoints = ((Long) houseData.get("TotalPoints")).intValue();
-                                                House house = new House(doc.getId(), 0, housePoints);
+                                                House house = new House(doc.getId(), doc.getData());
                                                 houseList.add(house);
                                             }
                                             if (getRewards) // Rewards don't update often, don't make an extra query if not needed
@@ -496,7 +494,8 @@ public class FirebaseUtil {
                                                                     String rewardIcon = fileName.replace(".png", "").toLowerCase();
                                                                     int rewardIconResource = resources.getIdentifier(rewardIcon, "drawable", packageName);
                                                                     int rewardPoints = ((Long) rewardData.get("RequiredValue")).intValue();
-                                                                    Reward reward = new Reward(doc.getId(), rewardPoints, rewardIconResource);
+                                                                    float requiredPPR = ((Long) rewardData.get(Reward.REQUIRED_PPR_KEY)).floatValue();
+                                                                    Reward reward = new Reward(doc.getId(), rewardPoints, requiredPPR, rewardIconResource);
                                                                     rewardList.add(reward);
                                                                 }
                                                                 fui.onGetPointStatisticsSuccess(houseList, userPoints, rewardList);
