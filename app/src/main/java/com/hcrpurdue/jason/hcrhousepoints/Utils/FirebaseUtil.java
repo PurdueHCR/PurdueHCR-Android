@@ -88,8 +88,6 @@ public class FirebaseUtil {
             log.updateApprovalStatus(preapproved, context);
         }
 
-        //TODO: Step 2
-
         if(sysPrefs.isHouseEnabled() && log.getPointType() != null && log.getPointType().isEnabled()) {
             //Create the data to be put into the object in the database
             Map<String, Object> data = log.convertToDict();
@@ -120,6 +118,8 @@ public class FirebaseUtil {
                                 ref.set(data)
                                         // add an action listener to handle the event when it goes Async
                                         .addOnSuccessListener(aVoid -> {
+                                            //Set the log id
+                                            log.setLogID(log.getResidentId() + documentID);
                                             //if the point is preapproved, update the house and user points
                                             if (preapproved) {
                                                 updateHouseAndUserPoints(log, house,false,false, fui);

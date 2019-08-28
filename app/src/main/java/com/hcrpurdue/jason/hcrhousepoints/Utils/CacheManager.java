@@ -284,7 +284,7 @@ public class CacheManager {
                   }
               }
               PointLog log = new PointLog(link.getDescription(), firstName, lastName, type, floorName, userID);
-              fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, link.isSingleUse(), sysPrefs, new FirebaseUtilInterface() {
+              fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, link.isSingleUse() || permissionLevel == 1, sysPrefs, new FirebaseUtilInterface() {
                   @Override
                   public void onSuccess() {
                       if(link.isSingleUse()){
@@ -312,9 +312,9 @@ public class CacheManager {
                       if (e.getLocalizedMessage().equals("Code was already submitted")) {
                           Toast.makeText(c, "You have already submitted this code.",
                                   Toast.LENGTH_SHORT).show();
-                      } else {
-                          sui.onError(e, c);
                       }
+                      sui.onError(e, c);
+
                   }
               });
         } else {
@@ -331,6 +331,11 @@ public class CacheManager {
             @Override
             public void onGetLinkWithIdSuccess(Link link) {
                 si.onGetLinkWithIdSuccess(link);
+            }
+
+            @Override
+            public void onError(Exception e, Context context) {
+                si.onError(e,context);
             }
         });
     }

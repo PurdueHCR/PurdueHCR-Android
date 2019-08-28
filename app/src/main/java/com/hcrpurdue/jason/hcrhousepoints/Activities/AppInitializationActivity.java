@@ -23,6 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
@@ -148,7 +149,7 @@ public class AppInitializationActivity extends AppCompatActivity {
                                             }
                                             else{
                                                 //If everything checks out, transition to the main activity
-                                                launchNavigationActivity();
+                                                checkForLinks();
                                             }
                                         }
 
@@ -221,6 +222,19 @@ public class AppInitializationActivity extends AppCompatActivity {
     }
 
     /**
+     * Check for links and transition to naviagtion
+     */
+    private void checkForLinks(){
+        Intent intent = getIntent();
+        if (intent != null && intent.getData() != null && intent.getData().getHost() != null) {
+            handleLinks(intent);
+        }
+        else{
+            launchNavigationActivity();
+        }
+    }
+
+    /**
      * Transition to Sign In Activity
      */
     private void launchSignInActivity(){
@@ -233,8 +247,16 @@ public class AppInitializationActivity extends AppCompatActivity {
      * transition to Navigation Activity
      */
     private void launchNavigationActivity(){
+        launchNaviationActivity(false);
+    }
+
+    /**
+     * transition to Navigation Activity
+     * @param pointSubmitted Was a point submitted?
+     */
+    private void launchNaviationActivity(boolean pointSubmitted){
         Intent intent = new Intent(this, NavigationActivity.class);
-        intent.putExtra("PointSubmitted", false);
+        intent.putExtra("PointSubmitted", pointSubmitted);
         startActivity(intent);
         overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
         finish();
@@ -258,7 +280,7 @@ public class AppInitializationActivity extends AppCompatActivity {
                 .setTitle("App Out Of Date")
                 .setMessage("We noticed that your app is out of date. Please update to the latest version to take advantage of all the new features.")
                 .setPositiveButton("Ok", (dialog, whichButton) -> {
-                    launchNavigationActivity();
+                    checkForLinks();
                 })
                 .show();
     }
@@ -299,8 +321,52 @@ public class AppInitializationActivity extends AppCompatActivity {
                             launchSignInActivity();
                         }
                     }).show();
+    }
 
 
+    private void handleLinks(Intent intent) {
+        String host = intent.getData().getHost();
+        String path = intent.getData().getPath();
 
+        if (host.equals("addpoints")) {
+            String[] parts = path.split("/");
+            if (parts.length == 2) {
+                String linkId = parts[1].replace("/", "");
+                cacheManager.getLinkWithLinkId(linkId, new CacheManagementInterface() {
+                    @Override
+                    public void onError(Exception e, Context context) {
+                        Toast.makeText(context,  e.getLocalizedMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        launchNavigationActivity();
+                    }
+
+                    @Override
+                    public void onGetLinkWithIdSuccess(Link link) {
+                        cacheManager.submitPointWithLink(link, new CacheManagementInterface() {
+                            @Override
+                            public void onSuccess() {
+                                launchNaviationActivity(true);
+                            }
+
+                            @Override
+                            public void onError(Exception e, Context context) {
+                                Toast.makeText(AppInitializationActivity.this, e.getLocalizedMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                                launchNavigationActivity();
+                            }
+                        });
+                    }
+                });
+            }
+            else{
+                Toast.makeText(AppInitializationActivity.this, "Invalid QR Code",
+                        Toast.LENGTH_SHORT).show();
+                launchNavigationActivity();
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "Invalid QR Code",
+                    Toast.LENGTH_SHORT).show();
+            launchNavigationActivity();
+        }
     }
 }
