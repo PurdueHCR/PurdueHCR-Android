@@ -93,6 +93,7 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
         String house = cacheManager.getHouse();
         String floorText = house + " - " + cacheManager.getFloorName();
         int drawableID = resources.getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", packageName);
+
         ((ImageView) view.findViewById(R.id.statistics_house_icon)).setImageResource(drawableID);
         ((ImageView) view.findViewById(R.id.statistics_house_icon_small)).setImageResource(drawableID);
         ((TextView) view.findViewById(R.id.statistics_user_name)).setText(cacheManager.getName());

@@ -16,6 +16,10 @@
             android:icon="@drawable/ic_chart"
             android:title="Profile" />
         <item
+            android:id="@+id/nav_new_profile"
+            android:icon="@drawable/ic_chart"
+            android:title="New Profile" />
+        <item
             android:id="@+id/nav_scan_code"
             android:icon="@drawable/ic_camera_enhance"
             android:title="QR Scanner" />

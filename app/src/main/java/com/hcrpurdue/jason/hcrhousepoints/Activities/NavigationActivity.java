@@ -48,6 +48,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointApprovalFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointTypeListFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.ProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCodeListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCreationFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRScannerFragment;
@@ -138,6 +139,9 @@ public class NavigationActivity extends AppCompatActivity {
                         case R.id.nav_profile:
                             //If house overview is selected, display house overview fragment
                             fragmentClass = HouseOverviewFragment.class;
+                            break;
+                        case R.id.nav_new_profile:
+                            fragmentClass = ProfileFragment.class;
                             break;
                         case R.id.nav_scan_code:
                             //If the QR scanner is selected, check permission and display if approved
