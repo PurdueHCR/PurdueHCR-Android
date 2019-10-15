@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="140dp"
+    android:background="@color/platinum"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+    android:elevation="4dp">
+    <!--    TODO Make the background color the dependent on the house they are in-->
+
+
+<!--    TODO Make Additions to the view here-->
+
+</androidx.appcompat.widget.Toolbar>
