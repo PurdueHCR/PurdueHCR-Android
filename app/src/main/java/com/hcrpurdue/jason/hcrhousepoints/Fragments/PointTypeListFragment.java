@@ -116,7 +116,8 @@ public class PointTypeListFragment  extends ListFragment implements SearchView.O
 
         List<PointType> filteredValues = new ArrayList<>(enabledTypes);
         for (PointType type : enabledTypes) {
-            if (!type.getPointDescription().contains(newText)) {
+            if (!type.getPointDescription().toLowerCase().contains(newText.toLowerCase())
+                    && !type.getName().toLowerCase().contains(newText.toLowerCase())) {
                 filteredValues.remove(type);
             }
         }
