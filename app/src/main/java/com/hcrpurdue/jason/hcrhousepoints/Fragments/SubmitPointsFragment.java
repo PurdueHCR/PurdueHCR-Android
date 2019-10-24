@@ -37,6 +37,8 @@ import com.tsongkha.spinnerdatepicker.SpinnerDatePickerDialogBuilder;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Objects;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SubmitPointsFragment extends Fragment implements ListenerCallbackInterface {
     static private CacheManager cacheManager;
@@ -91,13 +93,20 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
             }
         });
 
-        setDateButton = view.findViewById(R.id.date_button);
-        setDateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                displayDatePicker();
-            }
-        });
+        TextView textView = view.findViewById(R .id.date_button);
+        SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+        String date = formatter.format(new Date());
+        textView.setText(date);
+
+//        setDateButton = view.findViewById(R.id.date_button);
+//        setDateButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                displayDatePicker();
+//            }
+//        });
+
+
 
 //        setTimeButton = view.findViewById(R.id.time_button);
 //        setTimeButton.setOnClickListener(new View.OnClickListener() {
@@ -107,7 +116,7 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
 //            }
 //        });
         return view;
-    }
+    } //onCreateView
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
