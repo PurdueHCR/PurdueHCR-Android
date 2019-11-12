@@ -248,7 +248,7 @@ public class CacheManager {
 
     public void submitPoints(String description, Date dateOccurred, PointType type, CacheManagementInterface sui) {
         PointLog log = new PointLog(description, firstName, lastName, type, floorName,userID, dateOccurred);
-        boolean preApproved = permissionLevel > 0;
+        boolean preApproved = permissionLevel == 1; // preaproved only RHP
         fbutil.submitPointLog(log, null, houseName, userID, preApproved, sysPrefs, new FirebaseUtilInterface() {
             @Override
             public void onSuccess() {
