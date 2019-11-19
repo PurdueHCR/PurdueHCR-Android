@@ -70,6 +70,19 @@ public class PointType implements Comparable<PointType>, Serializable {
     public boolean getRHPsCanGenerateQRCodes(){
         return permissionLevel > 2;
     }
+    public boolean getUserCanGenerateQRCodes(int userAurthorizationNumer){
+        if(userAurthorizationNumer == 1){
+            return permissionLevel > 1;
+        } else if(userAurthorizationNumer == 2){
+            return true;
+        } else if(userAurthorizationNumer == 3){
+            return permissionLevel > 2;
+        } else if(userAurthorizationNumer == 4){
+            return permissionLevel > 2;
+        }
+        return false;
+    }
+
 
     @Override
     public int compareTo(@NonNull PointType other) {
