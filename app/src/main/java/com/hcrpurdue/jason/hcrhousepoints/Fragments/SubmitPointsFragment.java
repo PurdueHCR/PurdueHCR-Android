@@ -87,9 +87,9 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
         cal.set(Calendar.MONTH, currentMonth);
         cal.set(Calendar.DAY_OF_MONTH, currentDay);
         dp.setMaxDate(cal.getTimeInMillis());
-        //setting the maximum Date that can be chosen
-
-        pointTypeTextView = view.findViewById(R.id.submit_point_type_text_view);
+        //setting the maximum Date that can be chosen::wq
+:wq
+:::wq
         pointTypeDescriptionTextView = view.findViewById(R.id.submit_point_type_description_text_view);
         descriptionEditText = view.findViewById(R.id.description_edit_text);
 
