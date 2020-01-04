@@ -52,10 +52,8 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_new_profile, container, false);
-       // Toolbar toolbar = view.findViewById(R.id.profile_toolbar);
-//        ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        //((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-//        actionBar.setTitle(cacheManager.getName());
+        Toolbar toolbar = view.findViewById(R.id.profile_toolbar);
+
         setHasOptionsMenu(true);
         return view;
     }
@@ -67,10 +65,4 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Profile: "+cacheManager.getName());
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.profile_settings_menu, menu);
-        MenuItem settingsButton = menu.findItem(R.id.action_settings_button);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
 }
