@@ -29,18 +29,16 @@
 
         <ImageView
             android:id="@+id/profile_house_image_view"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/round_edges"
+            android:adjustViewBounds="true"
+            android:background="@drawable/white_circle_background"
             android:backgroundTint="#FFFFFF"
+            android:scaleType="fitCenter"
             app:layout_constraintBottom_toTopOf="@+id/house_name_text_view"
-            app:layout_constraintEnd_toStartOf="@+id/CONSTANT_HOUSE_RANK"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toEndOf="@+id/CONSTANT_TOTAL_POINTS"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0"
             app:srcCompat="@drawable/copper" />
 
         <TextView
@@ -70,8 +68,9 @@
             android:id="@+id/CONSTANT_HOUSE_RANK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="8dp"
             android:text="House Rank"
+            android:textAlignment="center"
             android:textColor="@color/text_main"
             android:textSize="18sp"
             android:textStyle="bold"

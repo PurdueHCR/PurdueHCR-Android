@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -137,7 +136,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         super.onCreateView(inflater, container, savedInstanceState);
 
         packageName = context.getPackageName();
-        View baseView = inflater.inflate(R.layout.fragment_new_profile, container, false);
+        View baseView = inflater.inflate(R.layout.fragment_profile, container, false);
 
         connectViews(baseView);
         setValuesForViews();
