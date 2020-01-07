@@ -83,9 +83,9 @@ public class NavigationActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         if (fragmentManager.getFragments().isEmpty()) {
             try {
-                fragmentManager.beginTransaction().replace(R.id.content_frame, PointTypeListFragment.class.newInstance(), Integer.toString(R.id.nav_point_type_list)).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, ProfileFragment.class.newInstance(), Integer.toString(R.id.nav_new_profile)).commit();
             } catch (Exception e) {
-                Toast.makeText(this, "Error loading PointSubmissionFragment Frament", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Error loading Profile Frament", Toast.LENGTH_LONG).show();
                 Log.e("NavigationActivity", "Failed to load initial fragment", e);
             }
         }
@@ -136,10 +136,6 @@ public class NavigationActivity extends AppCompatActivity {
                             //If RHP taps approve option, display PointApproval list
                             fragmentClass = PointApprovalFragment.class;
                             break;
-                        case R.id.nav_profile:
-                            //If house overview is selected, display house overview fragment
-                            fragmentClass = HouseOverviewFragment.class;
-                            break;
                         case R.id.nav_new_profile:
                             fragmentClass = ProfileFragment.class;
                             break;
@@ -178,7 +174,7 @@ public class NavigationActivity extends AppCompatActivity {
                             break;
                         default:
                             //By default display the house overview
-                            fragmentClass = HouseOverviewFragment.class;
+                            fragmentClass = ProfileFragment.class;
                             break;
                     }
                     if (fragmentClass != null && currentItem != selectedItem ) {
@@ -229,7 +225,7 @@ public class NavigationActivity extends AppCompatActivity {
      */
     private void setupAppTheme(){
         try {
-            int themeID = getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "style", this.getPackageName());
+            int themeID = getResources().getIdentifier(cacheManager.getHouseName().toLowerCase(), "style", this.getPackageName());
             setTheme(themeID);
         } catch (Exception e) {
             Toast.makeText(NavigationActivity.this, "Error loading house theme", Toast.LENGTH_LONG).show();
@@ -243,7 +239,7 @@ public class NavigationActivity extends AppCompatActivity {
 
         try {
             //Draw the house icon on the navigation menu
-            int drawableID = getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", getPackageName());
+            int drawableID = getResources().getIdentifier(cacheManager.getHouseName().toLowerCase(), "drawable", getPackageName());
             ((ImageView) headerView.findViewById(R.id.header_house_image)).setImageResource(drawableID);
         } catch (Exception e) {
             Toast.makeText(NavigationActivity.this, "Failed to load house image", Toast.LENGTH_LONG).show();
@@ -251,7 +247,7 @@ public class NavigationActivity extends AppCompatActivity {
         }
         //Set the name and house of the user in the navigation menu
         ((TextView) headerView.findViewById(R.id.header_resident_name)).setText(cacheManager.getName());
-        String floorName = cacheManager.getHouse() + " - " + cacheManager.getFloorName();
+        String floorName = cacheManager.getHouseName() + " - " + cacheManager.getFloorName();
         ((TextView) headerView.findViewById(R.id.header_floor_name)).setText(floorName);
         menu = navigationView.getMenu();
 

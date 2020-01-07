@@ -21,8 +21,12 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.FirebaseUtilInterface;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 // Because non-global variables are for people who care about technical debt
 public class CacheManager {
@@ -90,6 +94,28 @@ public class CacheManager {
 
     public void setNotificationCount(int notificationCount) {
         this.notificationCount = notificationCount;
+    }
+
+    /**
+     * Get a name for the permission level.  Normally "House" - FloorId Rank
+     *
+     * @return String
+     */
+    public String getHouseAndPermissionName(){
+        switch (getPermissionLevel()){
+            case 0:
+                return houseName+ " - "+getFloorName();
+            case 1:
+                return houseName+ " - "+getFloorName()+" RHP";
+            case 2:
+                return "REC";
+            case 3:
+                return houseName+ " - FHP";
+            case 4:
+                return houseName+ " - "+getFloorName()+ " Privileged";
+            default :
+                return houseName;
+        }
     }
 
     /**
@@ -238,8 +264,16 @@ public class CacheManager {
         return firstName+" "+lastName;
     }
 
-    public String getHouse() {
+    public String getHouseName() {
         return houseName;
+    }
+
+    public House getUserHouse(){
+        for(House house: houseList){
+            if(house.getName().equals(houseName))
+                return house;
+        }
+        return null;
     }
 
     public int getPermissionLevel() {
@@ -254,7 +288,7 @@ public class CacheManager {
             public void onSuccess() {
                 if(preApproved){
                     PointLogMessage plm = new PointLogMessage("Preapproved", "PurdueHCR", "",getPermissionLevel(), MessageType.APPROVE);
-                    fbutil.postMessageToPointLog(log, getHouse(), plm, new FirebaseUtilInterface() {
+                    fbutil.postMessageToPointLog(log, getHouseName(), plm, new FirebaseUtilInterface() {
                         @Override
                         public void onSuccess() {
 
@@ -289,7 +323,7 @@ public class CacheManager {
                   public void onSuccess() {
                       if(link.isSingleUse()){
                           PointLogMessage plm = new PointLogMessage("Preapproved", "PurdueHCR", "",getPermissionLevel(), MessageType.APPROVE);
-                          fbutil.postMessageToPointLog(log, getHouse(), plm, new FirebaseUtilInterface() {
+                          fbutil.postMessageToPointLog(log, getHouseName(), plm, new FirebaseUtilInterface() {
                               @Override
                               public void onSuccess() {
 
@@ -494,7 +528,7 @@ public class CacheManager {
      * @param sui                    FirebaseUtilInterface: Implement the OnError and onSuccess methods
      */
     public void handlePointLog(PointLog log, boolean approved, boolean updating, CacheManagementInterface sui){
-        fbutil.updatePointLogStatus(log, approved, getHouse(),updating,false, new FirebaseUtilInterface() {
+        fbutil.updatePointLogStatus(log, approved, getHouseName(),updating,false, new FirebaseUtilInterface() {
             @Override
             public void onSuccess() {
                 MessageType mt = MessageType.REJECT;
@@ -504,7 +538,7 @@ public class CacheManager {
                     mt = MessageType.APPROVE;
                 }
                 PointLogMessage plm = new PointLogMessage(msg, firstName, lastName,getPermissionLevel(), mt);
-                fbutil.postMessageToPointLog(log, getHouse(), plm, new FirebaseUtilInterface() {
+                fbutil.postMessageToPointLog(log, getHouseName(), plm, new FirebaseUtilInterface() {
                     @Override
                     public void onSuccess() {
 
@@ -551,7 +585,7 @@ public class CacheManager {
      * @param sui   CacheManagementInterface with onSuccess and onError
      */
     public void postMessageToPointLog(PointLog log, PointLogMessage plm, CacheManagementInterface sui){
-        fbutil.postMessageToPointLog(log, getHouse(), plm, new FirebaseUtilInterface() {
+        fbutil.postMessageToPointLog(log, getHouseName(), plm, new FirebaseUtilInterface() {
             @Override
             public void onSuccess() {
                 sui.onSuccess();
@@ -625,6 +659,30 @@ public class CacheManager {
             @Override
             public void onGetHouseCodes(List<HouseCode> codes) {
                 cmi.onGetHouseCodes(codes);
+            }
+        });
+    }
+
+
+    /**
+     * Get the rank of the user
+     *
+     * @param context
+     * @param cmi
+     */
+    public void getUserRank(Context context, CacheManagementInterface cmi){
+        APIHelper.getInstance().getUserRank(userID).enqueue(new retrofit2.Callback<Integer>() {
+            @Override
+            public void onResponse(Call<Integer> call, Response<Integer> response) {
+                if(response.isSuccessful())
+                    cmi.onGetRank(response.body());
+                else
+                    cmi.onError(new Exception(response.code()+": "+response.message()),context);
+            }
+
+            @Override
+            public void onFailure(Call<Integer> call, Throwable t) {
+                cmi.onError(new Exception(t.getMessage()), context);
             }
         });
     }

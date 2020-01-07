@@ -2,8 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_point_type_list"
+            android:id="@+id/nav_new_profile"
+            android:icon="@drawable/ic_chart"
             android:checked="true"
+            android:title="Profile" />
+        <item
+            android:id="@+id/nav_point_type_list"
             android:icon="@drawable/ic_add"
             android:title="Submit Points" />
         <item
@@ -11,14 +15,6 @@
             android:icon="@drawable/ic_check"
             android:title="Approve Points"
             android:visible="false" />
-        <item
-            android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_chart"
-            android:title="Profile" />
-        <item
-            android:id="@+id/nav_new_profile"
-            android:icon="@drawable/ic_chart"
-            android:title="New Profile" />
         <item
             android:id="@+id/nav_scan_code"
             android:icon="@drawable/ic_camera_enhance"

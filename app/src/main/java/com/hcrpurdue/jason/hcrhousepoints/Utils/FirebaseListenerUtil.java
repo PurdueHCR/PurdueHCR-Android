@@ -77,7 +77,7 @@ public class FirebaseListenerUtil {
      */
     private void createUserPointLogListener(){
         Query userPointLogQuery = db.collection("House")
-                .document(cacheManager.getHouse())
+                .document(cacheManager.getHouseName())
                 .collection("Points")
                 .whereEqualTo("ResidentId", cacheManager.getUserId());
         SnapshotInterface si = new SnapshotInterface() {
@@ -104,7 +104,7 @@ public class FirebaseListenerUtil {
 
     private void createRHPNotificationListener(){
         Query rhpNotificationQuery = db.collection("House")
-                .document(cacheManager.getHouse())
+                .document(cacheManager.getHouseName())
                 .collection("Points")
                 .whereGreaterThan("RHPNotifications", 0);
         SnapshotInterface si = new SnapshotInterface() {
@@ -132,7 +132,7 @@ public class FirebaseListenerUtil {
             pointLogListener = null;
         }
         DocumentReference documentReference = db.collection("House")
-                .document(cacheManager.getHouse())
+                .document(cacheManager.getHouseName())
                 .collection("Points")
                 .document(log.getLogID());
         SnapshotInterface si = new SnapshotInterface() {

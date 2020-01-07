@@ -84,7 +84,7 @@ public class PointSubmissionFragment extends Fragment implements ListenerCallbac
 
         // Sets the house picture
         try {
-            int drawableID = getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", context.getPackageName());
+            int drawableID = getResources().getIdentifier(cacheManager.getHouseName().toLowerCase(), "drawable", context.getPackageName());
             ((ImageView) view.findViewById(R.id.houseLogoImageView)).setImageResource(drawableID);
         } catch (Exception e) {
             Toast.makeText(context, "Failed to load house image", Toast.LENGTH_LONG).show();

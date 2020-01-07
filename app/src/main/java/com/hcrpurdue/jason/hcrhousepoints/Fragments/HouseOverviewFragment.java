@@ -90,9 +90,9 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
         packageName = context.getPackageName();
 
         cacheManager.getCachedData();
-        String house = cacheManager.getHouse();
+        String house = cacheManager.getHouseName();
         String floorText = house + " - " + cacheManager.getFloorName();
-        int drawableID = resources.getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", packageName);
+        int drawableID = resources.getIdentifier(cacheManager.getHouseName().toLowerCase(), "drawable", packageName);
 
         ((ImageView) view.findViewById(R.id.statistics_house_icon)).setImageResource(drawableID);
         ((ImageView) view.findViewById(R.id.statistics_house_icon_small)).setImageResource(drawableID);
@@ -109,7 +109,7 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
                 FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_personal_point_log_list));
-                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_profile));
+                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_new_profile)); // changed from nav_profile
                 fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 fragmentTransaction.commit();
             }
@@ -166,7 +166,7 @@ public class HouseOverviewFragment extends Fragment implements ListenerCallbackI
                 float i = 0f;
                 for (House house : houses) {
                     String houseName = house.getName();
-                    if (houseName.equals(cacheManager.getHouse())) {
+                    if (houseName.equals(cacheManager.getHouseName())) {
                         pointsPerResident = (float) house.getPointsPerResident();
                         totalPoints = house.getTotalPoints();
                         totalResidents = house.getNumResidents();

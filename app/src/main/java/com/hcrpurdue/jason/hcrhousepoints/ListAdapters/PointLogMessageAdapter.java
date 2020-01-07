@@ -69,7 +69,7 @@ public class PointLogMessageAdapter extends RecyclerView.Adapter<PointLogMessage
             holder.dateView.setVisibility(View.VISIBLE);
             holder.firstNameView.setText( log.getResidentFirstName());
             holder.lastNameView.setText( log.getResidentLastName());
-            int drawableID = context.getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", context.getPackageName());
+            int drawableID = context.getResources().getIdentifier(cacheManager.getHouseName().toLowerCase(), "drawable", context.getPackageName());
             holder.imageView.setImageResource(drawableID);
             holder.pointTypeView.setText(log.getPointType().getName());
             holder.descriptionView.setText(log.getPointDescription());
@@ -84,7 +84,7 @@ public class PointLogMessageAdapter extends RecyclerView.Adapter<PointLogMessage
             holder.firstNameView.setText( log.getMessages().get(position-1).getSenderFirstName());
             holder.lastNameView.setText( log.getMessages().get(position-1).getSenderLastName());
             holder.descriptionView.setText(log.getMessages().get(position-1).getMessage());
-            int drawableID = context.getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", context.getPackageName());
+            int drawableID = context.getResources().getIdentifier(cacheManager.getHouseName().toLowerCase(), "drawable", context.getPackageName());
             holder.imageView.setImageResource(drawableID);
         }
     }

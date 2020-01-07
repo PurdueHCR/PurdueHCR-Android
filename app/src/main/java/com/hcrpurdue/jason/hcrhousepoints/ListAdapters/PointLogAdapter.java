@@ -68,36 +68,49 @@ public class PointLogAdapter extends BaseAdapter  implements ListAdapter {
         if (view == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             Objects.requireNonNull(inflater);
-            view = inflater.inflate(R.layout.list_item_point_log_overview, parent, false);
+            view = inflater.inflate(R.layout.list_item_point_log, parent, false);
         }
 
         //Handle TextView and display string from your list
-        TextView pointTypeLabel = view.findViewById(R.id.message_log_type_text);
-        TextView nameLabel = view.findViewById(R.id.point_log_first_name);
-        TextView lastNameLabel = view.findViewById(R.id.point_log_last_name);
-        TextView pointDescriptionLabel = view.findViewById(R.id.message_log_text);
-        ImageView houseView = view.findViewById(R.id.message_image);
-        TextView dateView = view.findViewById(R.id.date_text);
+        TextView pointTypeLabel = view.findViewById(R.id.point_type_text_view);
+        TextView nameLabel = view.findViewById(R.id.name_text_view);
+        TextView pointDescriptionLabel = view.findViewById(R.id.description_text_view);
+        //ImageView houseView = view.findViewById(R.id.message_image);
+        TextView monthView = view.findViewById(R.id.month_text_view);
+        TextView dateView = view.findViewById(R.id.date_text_view);
 
-        LinearLayout alertLayout = view.findViewById(R.id.status_symbol_column);
+        View statusView = view.findViewById(R.id.status_bar_view);
+
+        ImageView alertView = view.findViewById(R.id.notification_image_view);
         if(cacheManager.getPermissionLevel() > 0 && log.getRhpNotifications() > 0){
-            alertLayout.setVisibility(View.VISIBLE);
+            alertView.setVisibility(View.VISIBLE);
         }
         else if((cacheManager.getPermissionLevel() == 0 || cacheManager.getUserId().equals(log.getResidentId())) && log.getResidentNotifications() > 0){
-            alertLayout.setVisibility(View.VISIBLE);
+            alertView.setVisibility(View.VISIBLE);
         }
         else{
-            alertLayout.setVisibility(View.GONE);
+            alertView.setVisibility(View.GONE);
         }
 
-        dateView.setText(DateFormat.format("M/d/yy",log.getDateOccurred()));
+        monthView.setText(DateFormat.format("MMM",log.getDateOccurred()));
+        dateView.setText(DateFormat.format("dd",log.getDateOccurred()));
         pointTypeLabel.setText(log.getPointType().getName());
         nameLabel.setText(log.getResidentFirstName());
-        lastNameLabel.setText(log.getResidentLastName());
         pointDescriptionLabel.setText(log.getPointDescription());
 
-        int drawableID = context.getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", context.getPackageName());
-        houseView.setImageResource(drawableID);
+        if(log.wasRejected()){
+            //Rejected
+            statusView.setBackgroundTintList(context.getResources().getColorStateList(R.color.reject_color));
+        }
+        else if(log.wasHandled()){
+            //Approved
+            statusView.setBackgroundTintList(context.getResources().getColorStateList(R.color.approve_color));
+        }
+        else{
+            //Unhandled
+            statusView.setBackgroundTintList(context.getResources().getColorStateList(R.color.unhandled_color));
+        }
+
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override
