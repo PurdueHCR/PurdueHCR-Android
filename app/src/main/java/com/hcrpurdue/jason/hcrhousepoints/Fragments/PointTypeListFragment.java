@@ -166,7 +166,6 @@ public class PointTypeListFragment  extends ListFragment implements SearchView.O
 
         } catch (Exception e) {
             Toast.makeText(getContext(), "Failed to load point types", Toast.LENGTH_LONG).show();
-            Log.e("PointSubmissionFragment", "Error loading point types", e);
         }
     }
 

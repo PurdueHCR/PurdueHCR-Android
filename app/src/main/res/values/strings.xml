@@ -26,4 +26,5 @@
     <string name="house_overview">House Point History</string>
     <string name="house_overview_alert">House Point History ⚠️</string>
     <string name="alert_icon">⚠️</string>
+    <string name="empty_recent_submission">You don\'t have any recent submissions. Go to Submit Points on the side menu to help your house!</string>
 </resources>

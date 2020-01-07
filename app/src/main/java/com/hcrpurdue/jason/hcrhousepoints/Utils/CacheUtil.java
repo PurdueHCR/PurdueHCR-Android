@@ -4,6 +4,8 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -65,7 +67,7 @@ class CacheUtil {
             String houseName = null;
             String first = null;
             String last = null;
-            int permissionLevel = 0;
+            UserPermissionLevel permissionLevel = UserPermissionLevel.RESIDENT;
             String line;
             BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(context.getCacheDir(), FILE_NAME)));
 
@@ -91,7 +93,7 @@ class CacheUtil {
                             last = value;
                             break;
                         case "permissionLevel":
-                            permissionLevel = Integer.parseInt(value);
+                            permissionLevel = UserPermissionLevel.fromServerValue(Integer.parseInt(value));
                             break;
                     }
                 }

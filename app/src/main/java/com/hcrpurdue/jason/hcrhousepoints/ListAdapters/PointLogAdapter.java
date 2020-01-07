@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointLogDetailsFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 
@@ -82,10 +83,10 @@ public class PointLogAdapter extends BaseAdapter  implements ListAdapter {
         View statusView = view.findViewById(R.id.status_bar_view);
 
         ImageView alertView = view.findViewById(R.id.notification_image_view);
-        if(cacheManager.getPermissionLevel() > 0 && log.getRhpNotifications() > 0){
+        if(cacheManager.getPermissionLevel() != UserPermissionLevel.RESIDENT && log.getRhpNotifications() > 0){
             alertView.setVisibility(View.VISIBLE);
         }
-        else if((cacheManager.getPermissionLevel() == 0 || cacheManager.getUserId().equals(log.getResidentId())) && log.getResidentNotifications() > 0){
+        else if((cacheManager.getPermissionLevel() == UserPermissionLevel.RESIDENT || cacheManager.getUserId().equals(log.getResidentId())) && log.getResidentNotifications() > 0){
             alertView.setVisibility(View.VISIBLE);
         }
         else{

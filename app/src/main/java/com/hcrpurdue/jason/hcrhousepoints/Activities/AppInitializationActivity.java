@@ -204,7 +204,6 @@ public class AppInitializationActivity extends AppCompatActivity {
      */
     private void handleDataInitializationError(Exception e){
         Toast.makeText(this, "Failed to load house data. ", Toast.LENGTH_LONG).show();
-        Log.e("PointSubmissionFragment", "Error loading point types", e);
         launchSignInActivity();
     }
 

@@ -159,7 +159,7 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
                                                     FragmentManager fragmentManager = activity.getSupportFragmentManager();
                                                     Fragment fragment = fragmentManager.findFragmentByTag(Integer.toString(R.id.nav_point_type_list));
                                                     if (fragment == null)
-                                                        fragment = PointSubmissionFragment.class.newInstance();
+                                                        fragment = ProfileFragment.class.newInstance();
                                                     fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_point_type_list)).addToBackStack(Integer.toString(R.id.nav_scan_code)).commit();
                                                     fragmentManager.executePendingTransactions();
                                                     ((NavigationActivity) activity).animateSuccess();

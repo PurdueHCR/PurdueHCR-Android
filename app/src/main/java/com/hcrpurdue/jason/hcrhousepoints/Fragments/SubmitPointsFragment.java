@@ -45,10 +45,8 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
     private TextView pointTypeTextView;
     private TextView pointTypeDescriptionTextView;
     private Button submitPointButton;
-    private Button setDateButton;
 
     private Calendar calendar;
-    private boolean dateSet;
 
     @Override
     public void onAttach(Context context) {
@@ -90,16 +88,12 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
         //setting the maximum Date that can be chosen::wq
         pointTypeDescriptionTextView = view.findViewById(R.id.submit_point_type_description_text_view);
         descriptionEditText = view.findViewById(R.id.description_edit_text);
+        pointTypeTextView = view.findViewById(R.id.submit_point_type_text_view);
 
         pointTypeTextView.setText(pointType.getName());
         pointTypeDescriptionTextView.setText(pointType.getPointDescription());
         submitPointButton = view.findViewById(R.id.submit_point_button);
-        submitPointButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                submitPoint();
-            }
-        });
+        submitPointButton.setOnClickListener(view1 -> submitPoint());
         return view;
     } //onCreateView
 
@@ -150,24 +144,4 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
         }
     }
 
-    private void displayDatePicker() {
-        // Get Current Date
-        final Calendar c = Calendar.getInstance();
-        int currentYear = c.get(Calendar.YEAR);
-        int currentMonth = c.get(Calendar.MONTH);
-        int currentDay = c.get(Calendar.DAY_OF_MONTH);
-        calendar.set(currentYear, currentMonth, currentDay);
-
-        new SpinnerDatePickerDialogBuilder()
-                .context(context)
-                .callback((view, year, monthOfYear, dayOfMonth) -> calendar.set(year, monthOfYear, dayOfMonth))
-                .spinnerTheme(R.style.NumberPickerStyle)
-                .showTitle(true)
-                .showDaySpinner(true)
-                .defaultDate(currentYear, currentMonth, currentDay)
-                .maxDate(currentYear, currentMonth, currentDay)
-                .minDate(currentYear, 0, 1)
-                .build()
-                .show();
-    }
 }

@@ -32,6 +32,7 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.PointLogAdapter;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
@@ -54,7 +55,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     private FirebaseListenerUtil flu;
     private CacheManager cacheManager;
     private Resources resources;
-    private final String PERSONAL_LOGS_CALLBACK_KEY = "POINT_LOG_DETAILS";
+    private final String PROFILE_FRAGMENT = "PROFILE_FRAGMENT";
     private String packageName;
 
     private BarChart houseChart;
@@ -63,6 +64,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     private TextView houseNameTextView;
     private TextView nextRewardNameTextView;
     private TextView nextRewardPPRTextView;
+    private TextView emptyMessageTextView;
     private ListView recentSubmissionListView;
     private PointLogAdapter adapter;
     private ImageView houseImageView;
@@ -89,13 +91,28 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         cacheManager = CacheManager.getInstance(getContext());
         flu = FirebaseListenerUtil.getInstance(context);
         resources = getResources();
-        //if(cacheManager.getPermissionLevel() == )
-        flu.getUserPointLogListener().addCallback(PERSONAL_LOGS_CALLBACK_KEY, new ListenerCallbackInterface() {
-            @Override
-            public void onUpdate() {
-                handleNotificationsUpdate();
-            }
-        });
+
+        //If the user can submit points, add a listener for when the user submits a new point
+        if(cacheManager.getPermissionLevel().canSubmitPoints()) {
+            flu.getUserPointLogListener().addCallback(PROFILE_FRAGMENT, new ListenerCallbackInterface() {
+                @Override
+                public void onUpdate() {
+                    handleNotificationsUpdate();
+                }
+            });
+        }
+
+        //If the user is an RHP,  add listener to handle residents making submissions
+        if(cacheManager.getPermissionLevel() == UserPermissionLevel.RHP){
+            //When a new pointlog gets a message, change the notification icon
+            flu.getRHPNotificationListener().addCallback(PROFILE_FRAGMENT, new ListenerCallbackInterface() {
+                @Override
+                public void onUpdate() {
+                    setNotificationBarButtonIcon();
+                }
+            });
+        }
+
         updateData();
 
     }
@@ -109,7 +126,10 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     @Override
     public void onDetach() {
         super.onDetach();
-        flu.getUserPointLogListener().removeCallback(PERSONAL_LOGS_CALLBACK_KEY);
+        flu.getUserPointLogListener().removeCallback(PROFILE_FRAGMENT);
+
+        if(cacheManager.getPermissionLevel() == UserPermissionLevel.RHP)
+            flu.getRHPNotificationListener().removeCallback(PROFILE_FRAGMENT);
     }
 
     @Override
@@ -143,6 +163,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         nextRewardNameTextView = view.findViewById(R.id.next_reward_text_view);
         nextRewardPPRTextView = view.findViewById(R.id.ppr_requirement_label);
         nextRewardProgressBar = view.findViewById(R.id.next_reward_progress_bar);
+        emptyMessageTextView = view.findViewById(R.id.recent_submissions_empty_message_text_view);
         scrollView = view.findViewById(R.id.profile_scroll_view);
 
         viewMyPointsButton = view.findViewById(R.id.more_button);
@@ -322,11 +343,19 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     }
 
     private void createAdapter(List<PointLog> logs){
+        Collections.sort(logs);
         if(logs == null || logs.size() == 0){
-            //emptyMessageTextView.setText("You haven't submitted any points");
+            emptyMessageTextView.setVisibility(View.VISIBLE);
+            emptyMessageTextView.setText(R.string.empty_recent_submission);
             return;
         }
-        adapter = new PointLogAdapter(logs.subList(0,3),getContext(), R.id.nav_new_profile);
+        else{
+            emptyMessageTextView.setVisibility(View.GONE);
+        }
+        if(logs.size() > 3){
+            logs = logs.subList(0,3);
+        }
+        adapter = new PointLogAdapter(logs ,getContext(), R.id.nav_new_profile);
         recentSubmissionListView.setAdapter(adapter);
 
     }
@@ -346,41 +375,60 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         super.onCreateOptionsMenu(menu, inflater);
 
         notificationBarButton = menu.findItem(R.id.notifications_action_bar_button);
+        notificationBarButton.setOnMenuItemClickListener(menuItem -> {
+            Fragment fragment = new NotificationListFragment();
+
+            //Create Fragment manager
+            FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_notification_fragment));
+            fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_notification_fragment));
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.commit();
+            return true;
+        });
+
+        notificationBarButton.setIcon(R.drawable.ic_notifications_active);
+        setNotificationBarButtonIcon();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getGroupId()){
-            case R.id.notifications_action_bar_button:
-                    //Transition to a notifications tab
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     /**
      * This method will be called when the userPointLogListener gets activated by Firebase. This will
      *  update the notifications Icon to show if there are new messages.
      */
     private void handleNotificationsUpdate(){
-        //TODO refresh the alert icon saying there are alerts
         setNotificationBarButtonIcon();
-        //createAdapter(cacheManager.getPersonalPointLogs());
+        createAdapter(cacheManager.getPersonalPointLogs());
     }
 
     /**
-     * Check if there are any notifications on any of the Point Logs belonging to the resident
+     * Check if there are any notifications on any of the Point Logs
      *  and if so, set the notification icon to ic_notifications_active, else set to ic_notifications_none
      */
     private void setNotificationBarButtonIcon(){
-        for(PointLog log: cacheManager.getPersonalPointLogs()){
-            if(log.getResidentNotifications() > 0){
-                notificationBarButton.setIcon(R.drawable.ic_notifications_active);
-                return;
+        if(notificationBarButton != null) {
+            UserPermissionLevel userPermissionLevel = cacheManager.getPermissionLevel();
+
+            //If the user has any notifications, set icon to active
+            for (PointLog log : cacheManager.getPersonalPointLogs()) {
+                if (log.getResidentNotifications() > 0) {
+                    notificationBarButton.setIcon(R.drawable.ic_notifications_active);
+                    return;
+                }
             }
+
+            //If the User is an RHP, check the notification count
+            if (userPermissionLevel == UserPermissionLevel.RHP) {
+                if (cacheManager.getNotificationCount() > 0) {
+                    notificationBarButton.setIcon(R.drawable.ic_notifications_active);
+                    return;
+                }
+            }
+            //Otherwise reset the notification button to none.
+            notificationBarButton.setIcon(R.drawable.ic_notifications_none);
         }
-        notificationBarButton.setIcon(R.drawable.ic_notifications_none);
     }
+
+
 }

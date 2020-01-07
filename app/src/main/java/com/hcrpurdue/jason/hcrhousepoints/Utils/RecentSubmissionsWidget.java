@@ -1,3 +1,10 @@
+/**
+ * This file is not currently being used by the app. To find the RecentSubmissionsWidget
+ * that is currently in use, the XML file is res/layout/card_layout_user_history
+ * which is <included> in res/layout/fragment_new_profile
+ * and linked in Fragments/ProfileFragment.java
+ */
+
 package com.hcrpurdue.jason.hcrhousepoints.Utils;
 
 import android.content.Context;

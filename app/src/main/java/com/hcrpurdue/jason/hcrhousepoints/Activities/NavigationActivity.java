@@ -45,6 +45,7 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HouseOverviewFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointApprovalFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointTypeListFragment;
@@ -172,6 +173,9 @@ public class NavigationActivity extends AppCompatActivity {
                             //Display fragment with all of a user's submitted point
                             fragmentClass = PersonalPointLogListFragment.class;
                             break;
+                        case R.id.nav_notification_fragment:
+                            fragmentClass = NotificationListFragment.class;
+                            break;
                         default:
                             //By default display the house overview
                             fragmentClass = ProfileFragment.class;
@@ -208,16 +212,6 @@ public class NavigationActivity extends AppCompatActivity {
         cacheManager = CacheManager.getInstance(getApplicationContext());
         cacheManager.getCachedData();
         flu = FirebaseListenerUtil.getInstance(this);
-
-        //If the user is an RHP, add a callback to the RHPNotificationListener
-        if(cacheManager.getPermissionLevel() == 1){
-            flu.getRHPNotificationListener().addCallback(RHP_NOTIFICATION_CALLBACK_KEY, new ListenerCallbackInterface() {
-                @Override
-                public void onUpdate() {
-                    handleUpdatesToRHPNotifications();
-                }
-            });
-        }
     }
 
     /**
@@ -243,7 +237,6 @@ public class NavigationActivity extends AppCompatActivity {
             ((ImageView) headerView.findViewById(R.id.header_house_image)).setImageResource(drawableID);
         } catch (Exception e) {
             Toast.makeText(NavigationActivity.this, "Failed to load house image", Toast.LENGTH_LONG).show();
-            Log.e("PointSubmissionFragment", "Error loading house image", e);
         }
         //Set the name and house of the user in the navigation menu
         ((TextView) headerView.findViewById(R.id.header_resident_name)).setText(cacheManager.getName());
@@ -255,12 +248,12 @@ public class NavigationActivity extends AppCompatActivity {
         try {
             // cases one through three intentionally cascade down
             switch (cacheManager.getPermissionLevel()){
-                case 4: //privileged Resident Case
+                case PRIVILEGED_RESIDENT: //privileged Resident Case
                     menu.findItem(R.id.nav_qr_code_list).setVisible(true);
                     break;
-                case 3:;//Facility Member
-                case 2:;//Professional Staff
-                case 1://RHP
+                case FHP:;//Facility Member
+                case PROFESSIONAL_STAFF:;//Professional Staff
+                case RHP://RHP
                     menu.findItem(R.id.nav_approve_point).setVisible(true);
                     menu.findItem(R.id.nav_point_history).setVisible(true);
                     menu.findItem(R.id.nav_qr_code_list).setVisible(true);
@@ -374,20 +367,6 @@ public class NavigationActivity extends AppCompatActivity {
         animation.addAnimation(hideAnim);
 
         successLayout.startAnimation(animation);
-    }
-
-    /**
-     * When the RHPNotificationsListener fires, check if the RHP navigation menu needs to change
-     */
-    private void handleUpdatesToRHPNotifications(){
-        MenuItem houseOverview = menu.findItem(R.id.nav_point_history);
-        if(cacheManager.getNotificationCount() > 0){
-            //If there is a new notification, add the warning symbol to the label
-            houseOverview.setTitle(R.string.house_overview_alert);
-        }
-        else{
-            houseOverview.setTitle(R.string.house_overview);
-        }
     }
 
 }

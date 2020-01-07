@@ -10,7 +10,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/constant_recent_submissions"
@@ -49,7 +49,22 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/constant_recent_submissions"
-            tools:listitem="@layout/list_item_point_log" />
+            tools:listitem="@layout/list_item_point_log">
+
+        </ListView>
+
+        <TextView
+            android:id="@+id/recent_submissions_empty_message_text_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@strempty_recent_submission"
+            android:textAlignment="center"
+            app:layout_constraintBottom_toBottomOf="@+id/recent_submission_list_view"
+            app:layout_constraintEnd_toEndOf="@+id/recent_submission_list_view"
+            app:layout_constraintStart_toStartOf="@+id/recent_submission_list_view"
+            app:layout_constraintTop_toTopOf="@+id/recent_submission_list_view" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

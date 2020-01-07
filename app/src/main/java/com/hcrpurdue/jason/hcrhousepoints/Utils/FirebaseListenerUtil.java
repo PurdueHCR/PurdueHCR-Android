@@ -19,6 +19,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirebaseCollectionListener;
@@ -64,7 +65,7 @@ public class FirebaseListenerUtil {
     private void createPersistantListeners(){
         createUserPointLogListener();
         createSystemPreferencesListener();
-        if(cacheManager.getPermissionLevel() == 1){
+        if(cacheManager.getPermissionLevel() == UserPermissionLevel.RHP){
             //Create RHP only listeners
             createRHPNotificationListener();
         }
@@ -110,7 +111,16 @@ public class FirebaseListenerUtil {
         SnapshotInterface si = new SnapshotInterface() {
             @Override
             public void handleQuerySnapshots(QuerySnapshot queryDocumentSnapshots, Exception e) {
-                cacheManager.setNotificationCount(queryDocumentSnapshots.size());
+                if( e == null){
+                    List<PointLog> notifiedLog = new ArrayList<>();
+                    for(DocumentSnapshot doc : queryDocumentSnapshots){
+                        notifiedLog.add(new PointLog(doc.getId(),doc.getData(),context));
+                    }
+                    Collections.sort(notifiedLog);
+                    cacheManager.setRHPNotificationLogs(notifiedLog);
+                    cacheManager.setNotificationCount(queryDocumentSnapshots.size());
+                }
+
             }
         };
         rhpNotificationListener = new FirebaseCollectionListener(context,rhpNotificationQuery,si);

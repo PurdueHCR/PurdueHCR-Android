@@ -21,6 +21,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.FirebaseUtilInterface;
@@ -39,13 +40,14 @@ public class CacheManager {
     private String houseName = null;
     private String firstName = null;
     private String lastName = null;
-    private int permissionLevel = 0;
+    private UserPermissionLevel permissionLevel;
     private int totalPoints = 0;
     private int notificationCount = 0;
     private List<House> houseList = null;
     private List<Reward> rewardList = null;
     private ArrayList<Link> userCreatedQRCodes = null;
     private List<PointLog> personalPointLogs = null;
+    private List<PointLog> rHPNotificationLogs = null;
     private SystemPreferences sysPrefs = null;
 
     private CacheManager() {
@@ -85,6 +87,11 @@ public class CacheManager {
         return null;
     }
 
+    /**
+     * Notification count is set by the RHPNotificationListener. It will be updated whenever
+     *  a user posts a message to a point log
+     * @return
+     */
     public int getNotificationCount() {
         return notificationCount;
     }
@@ -99,16 +106,16 @@ public class CacheManager {
      * @return String
      */
     public String getHouseAndPermissionName(){
-        switch (getPermissionLevel()){
-            case 0:
+        switch (permissionLevel){
+            case RESIDENT:
                 return houseName+ " - "+getFloorName();
-            case 1:
+            case RHP:
                 return houseName+ " - "+getFloorName()+" RHP";
-            case 2:
+            case PROFESSIONAL_STAFF:
                 return "REC";
-            case 3:
+            case FHP:
                 return houseName+ " - FHP";
-            case 4:
+            case PRIVILEGED_RESIDENT:
                 return houseName+ " - "+getFloorName()+ " Privileged";
             default :
                 return houseName;
@@ -198,14 +205,14 @@ public class CacheManager {
         return pointTypeList;
     }
 
-    public void setUserData(String floor, String house, String first, String last, int permission, String id) {
+    public void setUserData(String floor, String house, String first, String last, UserPermissionLevel permission, String id) {
         floorName = floor;
         houseName = house;
         firstName = first;
         lastName = last;
         permissionLevel = permission;
         userID = id;
-        cacheUtil.writeToCache(id, floor, house, first, last, permission);
+        cacheUtil.writeToCache(id, floor, house, first, last, permission.getServerValue());
     }
 
     public boolean cacheFileExists() {
@@ -217,7 +224,7 @@ public class CacheManager {
         if (houseName == null) {
             fbutil.getUserData(id, new FirebaseUtilInterface() {
                 @Override
-                public void onUserGetSuccess(String floor, String house, String firstName, String lastName, int permission) {
+                public void onUserGetSuccess(String floor, String house, String firstName, String lastName, UserPermissionLevel permission) {
                     setUserData(floor, house, firstName,lastName, permission, id);
                     si.onSuccess();
                 }
@@ -236,7 +243,7 @@ public class CacheManager {
             cacheUtil.getCacheData(this);
             fbutil.getUserData(id, new FirebaseUtilInterface() {
                 @Override
-                public void onUserGetSuccess(String floor, String house, String firstName, String lastName, int permission) {
+                public void onUserGetSuccess(String floor, String house, String firstName, String lastName, UserPermissionLevel permission) {
                     setUserData(floor, house, firstName,lastName, permission, id);
                     si.onSuccess();
                 }
@@ -272,18 +279,18 @@ public class CacheManager {
         return null;
     }
 
-    public int getPermissionLevel() {
+    public UserPermissionLevel getPermissionLevel() {
         return permissionLevel;
     }
 
     public void submitPoints(String description, Date dateOccurred, PointType type, CacheManagementInterface sui) {
         PointLog log = new PointLog(description, firstName, lastName, type, floorName,userID, dateOccurred);
-        boolean preApproved = permissionLevel == 1; // preaproved only RHP
+        boolean preApproved = permissionLevel == UserPermissionLevel.RHP; // preaproved only RHP
         fbutil.submitPointLog(log, null, houseName, userID, preApproved, sysPrefs, new FirebaseUtilInterface() {
             @Override
             public void onSuccess() {
                 if(preApproved){
-                    PointLogMessage plm = new PointLogMessage("Preapproved", "PurdueHCR", "",getPermissionLevel(), MessageType.APPROVE);
+                    PointLogMessage plm = new PointLogMessage("Preapproved", "PurdueHCR", "",permissionLevel, MessageType.APPROVE);
                     fbutil.postMessageToPointLog(log, getHouseName(), plm, new FirebaseUtilInterface() {
                         @Override
                         public void onSuccess() {
@@ -314,7 +321,7 @@ public class CacheManager {
                   }
               }
               PointLog log = new PointLog(link.getDescription(), firstName, lastName, type, floorName, userID);
-              fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, link.isSingleUse() || permissionLevel == 1, sysPrefs, new FirebaseUtilInterface() {
+              fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, link.isSingleUse() || permissionLevel == UserPermissionLevel.RHP, sysPrefs, new FirebaseUtilInterface() {
                   @Override
                   public void onSuccess() {
                       if(link.isSingleUse()){
@@ -387,7 +394,7 @@ public class CacheManager {
     public void clearUserData() {
         floorName = null;
         houseName = null;
-        permissionLevel = 0;
+        permissionLevel = UserPermissionLevel.RESIDENT;
         userID = null;
 
         cacheUtil.deleteCache();
@@ -680,6 +687,24 @@ public class CacheManager {
                 cmi.onError(new Exception(t.getMessage()), context);
             }
         });
+    }
+
+    /**
+     * Set RHPNotificationLog List (Usually from Listener)
+     * @param logs
+     */
+    public void setRHPNotificationLogs(List<PointLog> logs){
+        rHPNotificationLogs = logs;
+    }
+
+    /**
+     * Get RHPNotificationLog List
+     * @return
+     */
+    public List<PointLog> getRHPNotificationLogs(){
+        if(rHPNotificationLogs == null)
+            rHPNotificationLogs = new ArrayList<>();
+        return rHPNotificationLogs;
     }
 
 }

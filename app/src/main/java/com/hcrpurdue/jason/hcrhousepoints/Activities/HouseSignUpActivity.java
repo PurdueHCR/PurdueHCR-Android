@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
@@ -148,7 +149,7 @@ public class HouseSignUpActivity extends AppCompatActivity {
         String house = houseCode.getHouseName();
         String firstName = firstNameEditText.getText().toString();
         String lastName = lastNameEditText.getText().toString();
-        int permissionLevel = houseCode.getPermissionLevel().getFirestoreValue();
+        UserPermissionLevel permissionLevel = houseCode.getPermissionLevel();
         Map<String, Object> userData = new HashMap<>();
         userData.put("FirstName", firstName);
         userData.put("LastName", lastName );

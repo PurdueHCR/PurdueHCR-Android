@@ -99,7 +99,6 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
 
         } catch (Exception e) {
             Toast.makeText(context, "Failed to load point types", Toast.LENGTH_LONG).show();
-            Log.e("PointSubmissionFragment", "Error loading point types", e);
         }
     }
 
@@ -115,7 +114,7 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
                 enabledTypes.add(type);
                 Map<String, String> map = new HashMap<>();
                 map.put("text", type.getName());
-                map.put("subText", String.valueOf(type.getValue()) + " points");
+                map.put("subText", type.getValue() + " points");
                 formattedPointTypes.add(map);
             }
         }
