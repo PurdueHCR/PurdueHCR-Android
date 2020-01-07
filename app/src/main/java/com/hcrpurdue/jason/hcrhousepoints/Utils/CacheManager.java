@@ -34,12 +34,9 @@ public class CacheManager {
     private FirebaseUtil fbutil = new FirebaseUtil();
     private CacheUtil cacheUtil = new CacheUtil();
     private List<PointType> pointTypeList = null;
-    private ArrayList<PointLog> unconfirmedPointList = null;
-    private ArrayList<PointLog> confirmedPointList = null;
     private String userID = null;
     private String floorName = null;
     private String houseName = null;
-    private String name = null;
     private String firstName = null;
     private String lastName = null;
     private int permissionLevel = 0;
@@ -192,7 +189,6 @@ public class CacheManager {
         fbutil.getUnconfirmedPoints(houseName, floorName, new FirebaseUtilInterface() {
             @Override
             public void onGetUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
-                unconfirmedPointList = logs;
                 si.onUnconfirmedPointsSuccess(logs);
             }
         });
@@ -391,7 +387,6 @@ public class CacheManager {
     public void clearUserData() {
         floorName = null;
         houseName = null;
-        name = null;
         permissionLevel = 0;
         userID = null;
 

@@ -117,6 +117,9 @@ public class FirebaseListenerUtil {
     }
 
     public FirebaseCollectionListener getRHPNotificationListener(){
+        if(rhpNotificationListener == null){
+            createRHPNotificationListener();
+        }
         return this.rhpNotificationListener;
     }
 

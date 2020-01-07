@@ -12,9 +12,13 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -26,10 +30,7 @@ import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
-import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.PointLogAdapter;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
@@ -70,6 +71,8 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     private ScrollView scrollView;
     private Button viewMyPointsButton;
 
+    private MenuItem notificationBarButton;
+
     private int userPoints;
     private int userRank;
     private List<Reward> allRewards = new ArrayList<>();
@@ -86,11 +89,11 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         cacheManager = CacheManager.getInstance(getContext());
         flu = FirebaseListenerUtil.getInstance(context);
         resources = getResources();
+        if(cacheManager.getPermissionLevel() == )
         flu.getUserPointLogListener().addCallback(PERSONAL_LOGS_CALLBACK_KEY, new ListenerCallbackInterface() {
             @Override
             public void onUpdate() {
-                //TODO refresh the alert icon saying there are alerts
-                //createAdapter(cacheManager.getPersonalPointLogs());
+                handleNotificationsUpdate();
             }
         });
         updateData();
@@ -100,6 +103,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -168,6 +172,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         populateRewardCard();
         populateGraphCard();
         createAdapter(cacheManager.getPersonalPointLogs());
+        setNotificationBarButtonIcon();
 
         //TODO Add this swipe layout
 //                if (swipeRefreshLayout != null)
@@ -334,4 +339,48 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle(cacheManager.getName());
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu items for use in the action bar
+        inflater.inflate(R.menu.profile_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+
+        notificationBarButton = menu.findItem(R.id.notifications_action_bar_button);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getGroupId()){
+            case R.id.notifications_action_bar_button:
+                    //Transition to a notifications tab
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * This method will be called when the userPointLogListener gets activated by Firebase. This will
+     *  update the notifications Icon to show if there are new messages.
+     */
+    private void handleNotificationsUpdate(){
+        //TODO refresh the alert icon saying there are alerts
+        setNotificationBarButtonIcon();
+        //createAdapter(cacheManager.getPersonalPointLogs());
+    }
+
+    /**
+     * Check if there are any notifications on any of the Point Logs belonging to the resident
+     *  and if so, set the notification icon to ic_notifications_active, else set to ic_notifications_none
+     */
+    private void setNotificationBarButtonIcon(){
+        for(PointLog log: cacheManager.getPersonalPointLogs()){
+            if(log.getResidentNotifications() > 0){
+                notificationBarButton.setIcon(R.drawable.ic_notifications_active);
+                return;
+            }
+        }
+        notificationBarButton.setIcon(R.drawable.ic_notifications_none);
+    }
 }
