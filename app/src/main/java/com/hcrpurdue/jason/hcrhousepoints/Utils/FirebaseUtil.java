@@ -32,6 +32,7 @@ import java.util.Objects;
 
 import javax.annotation.Nullable;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
@@ -373,7 +374,7 @@ public class FirebaseUtil {
                                 if (data != null) {
                                     String firstName = (String) data.get("FirstName");
                                     String lastName = (String) data.get("LastName");
-                                    fui.onUserGetSuccess((String) data.get("FloorID"), (String) data.get(ROOT_HOUSE_KEY),firstName,lastName, ((Long) data.get("Permission Level")).intValue());
+                                    fui.onUserGetSuccess((String) data.get("FloorID"), (String) data.get(ROOT_HOUSE_KEY),firstName,lastName, UserPermissionLevel.fromServerValue(((Long) data.get("Permission Level")).intValue()));
                                 }
                                 else {
                                     fui.onError(new IllegalStateException("User does not exist."), context);
@@ -765,12 +766,9 @@ public class FirebaseUtil {
                 .collection(ROOT_HOUSE_POINTS_KEY).document(log.getLogID())
                 .collection(ROOT_HOUSE_POINTS_MESSAGES_KEY);
         //Update the point message collection
-        pointMessageRef.add(message.generateFirebaseMap()).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-            @Override
-            public void onSuccess(DocumentReference documentReference) {
-                //Once the message is saved, update the notification count on the Point Log.
-                updatePointLogNotificationCount(log,house,(message.getSenderPermissionLevel() == 1),false, fui);
-            }
+        pointMessageRef.add(message.generateFirebaseMap()).addOnSuccessListener(documentReference -> {
+            //Once the message is saved, update the notification count on the Point Log.
+            updatePointLogNotificationCount(log,house,(message.getSenderPermissionLevel() == UserPermissionLevel.RHP),false, fui);
         });
     }
 

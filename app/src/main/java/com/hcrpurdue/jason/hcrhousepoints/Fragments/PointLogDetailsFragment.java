@@ -3,6 +3,7 @@ package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 import android.content.Context;
 import android.os.Bundle;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 
 import androidx.annotation.NonNull;
@@ -111,7 +112,7 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Point Details");
 
         // If user is an RHP
-        if(CacheManager.getInstance(context).getPermissionLevel() == 1){
+        if(CacheManager.getInstance(context).getPermissionLevel() == UserPermissionLevel.RHP){
             if(log.wasHandled()){
                 changeStatusButton.setVisibility(View.VISIBLE);
                 changeStatusButton.setText(log.wasRejected()?"Approve":"Reject");

@@ -4,6 +4,8 @@
 
 package com.hcrpurdue.jason.hcrhousepoints.Models;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,13 +19,13 @@ public class HouseCode {
 
     private String code;
     private String codeName;
-    private PermissionLevel permissionLevel;
+    private UserPermissionLevel permissionLevel;
 
 
     private String floorId;
     private String houseName;
 
-    public HouseCode(String code, String codeName, PermissionLevel permissionLevel, String floorId, String houseName){
+    public HouseCode(String code, String codeName, UserPermissionLevel permissionLevel, String floorId, String houseName){
         this.code = code;
         this.codeName = codeName;
         this.permissionLevel = permissionLevel;
@@ -39,7 +41,7 @@ public class HouseCode {
     public HouseCode(Map<String,Object> dataMap){
         this.code = (String) dataMap.get(CODE_KEY);
         this.codeName = (String) dataMap.get(CODE_NAME_KEY);
-        this.permissionLevel = PermissionLevel.getPermissionLevelFromFirestore(((Long) dataMap.get(PERMISSION_LEVEL)).intValue());
+        this.permissionLevel = UserPermissionLevel.fromServerValue((((Long) dataMap.get(PERMISSION_LEVEL)).intValue()));
         this.floorId = (String) dataMap.get(FLOOR_ID_KEY);
         this.houseName = (String) dataMap.get(HOUSE_NAME_KEY);
     }
@@ -52,7 +54,7 @@ public class HouseCode {
         Map<String,Object> map = new HashMap<>();
         map.put(CODE_KEY,this.code);
         map.put(CODE_NAME_KEY,this.codeName);
-        map.put(PERMISSION_LEVEL,this.permissionLevel.getFirestoreValue());
+        map.put(PERMISSION_LEVEL,this.permissionLevel.getServerValue());
         map.put(FLOOR_ID_KEY,this.floorId);
         map.put(HOUSE_NAME_KEY,this.houseName);
         return map;
@@ -66,7 +68,7 @@ public class HouseCode {
         return codeName;
     }
 
-    public PermissionLevel getPermissionLevel() {
+    public UserPermissionLevel getPermissionLevel() {
         return permissionLevel;
     }
 
