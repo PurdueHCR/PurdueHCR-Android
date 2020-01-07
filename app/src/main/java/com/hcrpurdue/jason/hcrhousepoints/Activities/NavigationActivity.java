@@ -253,10 +253,18 @@ public class NavigationActivity extends AppCompatActivity {
 
         //Use the permission levels to set the appropriate navigation menu options
         try {
-            if (cacheManager.getPermissionLevel() > 0) {
-                menu.findItem(R.id.nav_approve_point).setVisible(true);
-                menu.findItem(R.id.nav_point_history).setVisible(true);
-                menu.findItem(R.id.nav_qr_code_list).setVisible(true);
+            // cases one through three intentionally cascade down
+            switch (cacheManager.getPermissionLevel()){
+                case 4: //privileged Resident Case
+                    menu.findItem(R.id.nav_qr_code_list).setVisible(true);
+                    break;
+                case 3:;//Facility Member
+                case 2:;//Professional Staff
+                case 1://RHP
+                    menu.findItem(R.id.nav_approve_point).setVisible(true);
+                    menu.findItem(R.id.nav_point_history).setVisible(true);
+                    menu.findItem(R.id.nav_qr_code_list).setVisible(true);
+                default:break;// Resident
             }
         } catch (Exception e) {
             Toast.makeText(NavigationActivity.this, "Error loading permission level", Toast.LENGTH_LONG).show();

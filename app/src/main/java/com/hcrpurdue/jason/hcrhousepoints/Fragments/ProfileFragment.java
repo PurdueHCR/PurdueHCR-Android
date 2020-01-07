@@ -89,7 +89,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         cacheManager = CacheManager.getInstance(getContext());
         flu = FirebaseListenerUtil.getInstance(context);
         resources = getResources();
-        if(cacheManager.getPermissionLevel() == )
+        //if(cacheManager.getPermissionLevel() == )
         flu.getUserPointLogListener().addCallback(PERSONAL_LOGS_CALLBACK_KEY, new ListenerCallbackInterface() {
             @Override
             public void onUpdate() {

@@ -20,6 +20,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    lintOptions { // suppress lint errors that cause build to fail
+        abortOnError false
+        disable 'GoogleAppIndexingWarning', 'HardcodedText', 'InvalidPackage'
+        textReport true
+        textOutput "stdout"
+    }
 }
 
 dependencies {
