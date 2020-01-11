@@ -155,7 +155,7 @@ public class HouseSignUpActivity extends AppCompatActivity {
         userData.put("LastName", lastName );
         userData.put("FloorID", floor);
         userData.put("House", house);
-        userData.put("Permission Level", permissionLevel);
+        userData.put("Permission Level", permissionLevel.getServerValue());
         userData.put("TotalPoints", 0);
         if (user != null) {
             String id = user.getUid();

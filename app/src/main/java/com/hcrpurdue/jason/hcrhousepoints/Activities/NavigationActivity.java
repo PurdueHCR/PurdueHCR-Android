@@ -58,6 +58,7 @@ import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.SubmitPointsFragment;
 import com.hcrpurdue.jason.hcrhousepoints.R;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
@@ -295,7 +296,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             } else {
                 ((NavigationView) findViewById(R.id.nav_view)).getMenu().findItem(R.id.nav_scan_code).setChecked(false);
-                Toast.makeText(this, "Camera permissions denied, please allow camera permissions to scan QR codes", Toast.LENGTH_SHORT).show();
+                cameraPermissionDenied();
             }
         }
     }
@@ -367,6 +368,11 @@ public class NavigationActivity extends AppCompatActivity {
         animation.addAnimation(hideAnim);
 
         successLayout.startAnimation(animation);
+    }
+
+    private void cameraPermissionDenied(){
+        AlertDialogHelper.showSingleButtonDialog(this, "Could Not Launch Camera", "Camera permissions denied, please accept them in your settings.", "OK", null)
+                .show();
     }
 
 }

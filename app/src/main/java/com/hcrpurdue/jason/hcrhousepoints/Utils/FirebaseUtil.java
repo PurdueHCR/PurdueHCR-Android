@@ -130,18 +130,18 @@ public class FirebaseUtil {
                                         })
                                         .addOnFailureListener(e -> fui.onError(e, context));
                             } else {
-                                fui.onError(new IllegalStateException("Code was already submitted"), context);
+                                fui.onError(new IllegalStateException("You have already submitted points for this QR Code."), context);
                             }
                         })
                         .addOnFailureListener(e -> fui.onError(e, context));
             }
         }
-        else if(sysPrefs.isHouseEnabled()) {
-            Toast.makeText(context, "Point not enabled", Toast.LENGTH_SHORT).show();
+        else if(!log.getPointType().isEnabled()) {
+            fui.onError(new Exception(log.getPointType().getName()+" is not enabled."),context);
         }
         else
         {
-            Toast.makeText(context, sysPrefs.getHouseIsEnabledMsg(), Toast.LENGTH_SHORT).show();
+            fui.onError(new Exception("The house is not enabled"),context);
         }
     }
 

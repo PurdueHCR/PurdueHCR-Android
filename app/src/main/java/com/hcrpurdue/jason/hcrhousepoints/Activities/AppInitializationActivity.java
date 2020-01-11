@@ -143,14 +143,26 @@ public class AppInitializationActivity extends AppCompatActivity {
                                     cacheManager.initPersonalPointLogs(new CacheManagementInterface() {
                                         @Override
                                         public void onGetPersonalPointLogs(List<PointLog> personalLogs) {
-                                            //Check the system preferences for app version, and if not in sync, post update message
-                                            if(!systemPreferences.isAppUpToDate()){
-                                                alertOutOfDateApp();
-                                            }
-                                            else{
-                                                //If everything checks out, transition to the main activity
-                                                checkForLinks();
-                                            }
+                                            //Refresh the user rank
+                                            cacheManager.refreshUserRank(getBaseContext(), new CacheManagementInterface() {
+                                                @Override
+                                                public void onError(Exception e, Context context) {
+                                                    handleDataInitializationError(e);
+                                                }
+
+                                                @Override
+                                                public void onGetRank(Integer rank) {
+                                                    //Check the system preferences for app version, and if not in sync, post update message
+                                                    if(!systemPreferences.isAppUpToDate()){
+                                                        alertOutOfDateApp();
+                                                    }
+                                                    else{
+                                                        //If everything checks out, transition to the main activity
+                                                        checkForLinks();
+                                                    }
+                                                }
+                                            });
+
                                         }
 
                                         @Override

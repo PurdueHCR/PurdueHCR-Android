@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
@@ -78,7 +77,7 @@ public class PointLogAdapter extends BaseAdapter  implements ListAdapter {
         TextView pointDescriptionLabel = view.findViewById(R.id.description_text_view);
         //ImageView houseView = view.findViewById(R.id.message_image);
         TextView monthView = view.findViewById(R.id.month_text_view);
-        TextView dateView = view.findViewById(R.id.date_text_view);
+        TextView dateView = view.findViewById(R.id.month_date_view);
 
         View statusView = view.findViewById(R.id.status_bar_view);
 

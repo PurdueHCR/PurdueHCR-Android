@@ -49,6 +49,7 @@ public class CacheManager {
     private List<PointLog> personalPointLogs = null;
     private List<PointLog> rHPNotificationLogs = null;
     private SystemPreferences sysPrefs = null;
+    private int userRank = -1;
 
     private CacheManager() {
         // Exists only to defeat instantiation. Get rekt, instantiation
@@ -673,11 +674,28 @@ public class CacheManager {
      * @param cmi
      */
     public void getUserRank(Context context, CacheManagementInterface cmi){
+        if(userRank == -1){
+            refreshUserRank(context,cmi);
+        }
+        else{
+            cmi.onGetRank(userRank);
+        }
+    }
+
+
+    /**
+     * Refresh the rank from the server
+     * @param context
+     * @param cmi
+     */
+    public void refreshUserRank(Context context, CacheManagementInterface cmi){
         APIHelper.getInstance().getUserRank(userID).enqueue(new retrofit2.Callback<Integer>() {
             @Override
             public void onResponse(Call<Integer> call, Response<Integer> response) {
-                if(response.isSuccessful())
-                    cmi.onGetRank(response.body());
+                if(response.isSuccessful()) {
+                    userRank = response.body();
+                    cmi.onGetRank(userRank);
+                }
                 else
                     cmi.onError(new Exception(response.code()+": "+response.message()),context);
             }
