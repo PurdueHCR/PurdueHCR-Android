@@ -19,7 +19,7 @@ public class NotificationListFragment extends PersonalPointLogListFragment {
             flu.getRHPNotificationListener().addCallback(CALLBACK_KEY, new ListenerCallbackInterface() {
                 @Override
                 public void onUpdate() {
-                    setLogs();
+                    handleUpdate();
                 }
             });
         }

@@ -137,11 +137,11 @@ public class FirebaseUtil {
             }
         }
         else if(!log.getPointType().isEnabled()) {
-            fui.onError(new Exception(log.getPointType().getName()+" is not enabled."),context);
+            fui.onError(new Exception("This point type is not currently enabled for submissions."),context);
         }
         else
         {
-            fui.onError(new Exception("The house is not enabled"),context);
+            fui.onError(new Exception("The house competition is not currently active."),context);
         }
     }
 

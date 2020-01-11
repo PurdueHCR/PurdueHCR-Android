@@ -356,7 +356,7 @@ public class CacheManager {
                   }
               });
         } else {
-            sui.onError(new Exception("QR is not enabled."), fbutil.getContext());
+            sui.onError(new Exception("This QR code is not enabled."), fbutil.getContext());
         }
     }
 

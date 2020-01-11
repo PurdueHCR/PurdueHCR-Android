@@ -26,6 +26,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -182,6 +183,7 @@ public class PointApprovalFragment extends ListFragment implements SearchView.On
     }
 
     public void createAdapter(List<PointLog> logs){
+        Collections.sort(logs);
         PointLogAdapter adapter = new PointLogAdapter(logs,context, R.id.nav_approve_point);
         listView.setAdapter(adapter);
         if (logs.size() == 0) {

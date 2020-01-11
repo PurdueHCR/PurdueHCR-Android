@@ -160,9 +160,11 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
 
                                     @Override
                                     public void onGetLinkWithIdSuccess(Link link) {
+                                        handler.post(() -> progressBar.setVisibility(View.GONE));
                                         foundQrCode(link, new AlertDialogInterface() {
                                             @Override
                                             public void onPositiveButtonListener() {
+                                                handler.post(() -> progressBar.setVisibility(View.VISIBLE));
                                                 cacheManager.submitPointWithLink(link, new CacheManagementInterface() {
                                                     @Override
                                                     public void onSuccess() {
@@ -208,7 +210,16 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
                                 });
                             }///
                             else {
-                                houseSystemIsDisabled();
+                                handler.post(() -> progressBar.setVisibility(View.GONE));
+                                houseSystemIsDisabled(new AlertDialogInterface() {
+                                    @Override
+                                    public void onPositiveButtonListener() {
+                                        handler.post(() -> {
+                                            setProcessor(detector,cameraSource,cameraView);
+                                        });
+                                        restartCamera(handler, cameraSource, cameraView);
+                                    }
+                                });
 
                             }
                         } else {
@@ -243,8 +254,9 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
     }
 
     private void cameraPermissionDenied(){
-        AlertDialogHelper.showSingleButtonDialog(getActivity(), "Could Not Launch Camera", "Camera permissions denied, please accept them in your settings.", "OK", null)
-                .show();
+        activity.runOnUiThread(() -> AlertDialogHelper.showSingleButtonDialog(getActivity(), "Could Not Launch Camera", "Camera permissions denied, please accept them in your settings.", "OK", null)
+                .show());
+
     }
 
     private void errorStartingCamera(){
@@ -259,13 +271,17 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
     }
 
     private void couldNotFindLink(AlertDialogInterface alertDialogInterface){
-        AlertDialogHelper.showSingleButtonDialog(getActivity(), "Invalid QR Code", "The QR code you scanned wasn't found. Please try scanning it again.", "OK", alertDialogInterface)
-                .show();
+
+
+        activity.runOnUiThread(() -> AlertDialogHelper.showSingleButtonDialog(getActivity(),
+                "Invalid QR Code", "The QR code you scanned wasn't found. Please try scanning it again.",
+                "OK", alertDialogInterface)
+                .show());
     }
 
     private void failedToSubmitPoints(Exception e, AlertDialogInterface alertDialogInterface){
-        AlertDialogHelper.showSingleButtonDialog(getActivity(), "Failed To Submit Points", e.getMessage(), "OK", alertDialogInterface)
-                .show();
+        activity.runOnUiThread(() -> AlertDialogHelper.showSingleButtonDialog(getActivity(), "Failed To Submit Points", e.getMessage(), "OK", alertDialogInterface)
+                .show());
     }
 
     private void restartCamera(Handler handler, CameraSource cameraSource, SurfaceView cameraView){
@@ -274,22 +290,23 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
                 try {
                     cameraSource.start(cameraView.getHolder());
                 } catch (IOException ex) {
-                    handler.post(() -> errorStartingCamera());
+                    errorStartingCamera();
                     Log.e("QRScanner", "Error in starting camera", ex);
                 }
             });
         } catch (SecurityException ex) {
-            handler.post(() -> cameraPermissionDenied());
+            cameraPermissionDenied();
             Log.e("QRScanner", "Camera access not granted", ex);
         }
     }
 
-    private void houseSystemIsDisabled(){
-        AlertDialogHelper.showSingleButtonDialog(getActivity(), "House System Is Disabled", "Points can not be submitted when the house system is disabled.", "Drats", null)
-                .show();
+    private void houseSystemIsDisabled(AlertDialogInterface alertDialogInterface){
+        activity.runOnUiThread(() -> AlertDialogHelper.showSingleButtonDialog(getActivity(), "House System Is Disabled",
+                "Points can not be submitted when the house system is disabled.", "Drats", alertDialogInterface)
+                .show());
     }
 
     private void foundQrCode(Link link, AlertDialogInterface alertDialogInterface){
-        AlertDialogHelper.showQRSubmissionDialog(getActivity(), link, alertDialogInterface).show();
+        activity.runOnUiThread(() -> AlertDialogHelper.showQRSubmissionDialog(getActivity(), link, alertDialogInterface).show());
     }
 }

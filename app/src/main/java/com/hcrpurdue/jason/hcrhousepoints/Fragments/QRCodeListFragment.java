@@ -59,25 +59,22 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
         cacheManager.getCachedData();
         qrCodeListView = view.findViewById(android.R.id.list);
         houseDisabledTextView = view.findViewById(android.R.id.empty);
-        qrCodeCreateFab = (FloatingActionButton) view.findViewById(R.id.qr_code_create_fab);
+        qrCodeCreateFab = view.findViewById(R.id.qr_code_create_fab);
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.qr_code_list_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> getQRCodesFromServer(swipeRefresh));
 
-        qrCodeCreateFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        qrCodeCreateFab.setOnClickListener(view1 -> {
 
-                //Create destination fragment
-                Fragment fragment = new QRCreationFragment();
+            //Create destination fragment
+            Fragment fragment = new QRCreationFragment();
 
-                //Create Fragment manager
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.generateQRCode));
-                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_qr_code_display));
-                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                fragmentTransaction.commit();
-            }
+            //Create Fragment manager
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.generateQRCode));
+            fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_qr_code_display));
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.commit();
         });
 
         return view;
@@ -141,20 +138,8 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
     }
 
     private void handleSystemPreferences(){
-        boolean isHouseEnabled = cacheManager.getCachedSystemPreferences().isHouseEnabled();
-
-        if(!isHouseEnabled) {
-            qrCodeListView.setVisibility(View.GONE);
-            houseDisabledTextView.setText(cacheManager.getCachedSystemPreferences().getHouseIsEnabledMsg());
-            houseDisabledTextView.setVisibility(View.VISIBLE);
-            qrCodeCreateFab.setEnabled(false);
-
-        }
-
-        else {
-            qrCodeListView.setVisibility(View.VISIBLE);
-            qrCodeCreateFab.setEnabled(true);
-            houseDisabledTextView.setVisibility(View.GONE);
-        }
+        qrCodeListView.setVisibility(View.VISIBLE);
+        qrCodeCreateFab.setEnabled(true);
+        houseDisabledTextView.setVisibility(View.GONE);
     }
 }

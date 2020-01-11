@@ -143,8 +143,10 @@ public class NavigationActivity extends AppCompatActivity {
                             break;
                         case R.id.nav_scan_code:
                             //If the QR scanner is selected, check permission and display if approved
-                            if (ContextCompat.checkSelfPermission(Objects.requireNonNull(this), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+                            if (ContextCompat.checkSelfPermission(Objects.requireNonNull(this), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 10);
+                                return true;
+                            }
                             else
                                 fragmentClass = QRScannerFragment.class;
                             break;
