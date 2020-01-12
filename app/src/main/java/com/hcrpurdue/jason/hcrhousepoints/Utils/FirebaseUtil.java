@@ -41,6 +41,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
+import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.FirebaseUtilInterface;
 
 public class FirebaseUtil {
@@ -372,9 +373,8 @@ public class FirebaseUtil {
                             if (task.isSuccessful()) {
                                 Map<String, Object> data = task.getResult().getData();
                                 if (data != null) {
-                                    String firstName = (String) data.get("FirstName");
-                                    String lastName = (String) data.get("LastName");
-                                    fui.onUserGetSuccess((String) data.get("FloorID"), (String) data.get(ROOT_HOUSE_KEY),firstName,lastName, UserPermissionLevel.fromServerValue(((Long) data.get("Permission Level")).intValue()));
+                                    User user = new User(id, data);
+                                    fui.onUserGetSuccess(user);
                                 }
                                 else {
                                     fui.onError(new IllegalStateException("User does not exist."), context);
@@ -460,7 +460,8 @@ public class FirebaseUtil {
     }
 
     /**
-     * Get information to display on the PointStatistics page
+     * Get information to display on the PointStatistics page. Gets Total Points, get rewards, get houses
+     * TODO break this into 2 methods that get rewards and get houses
      * @param userID
      * @param getRewards
      * @param fui
@@ -762,13 +763,29 @@ public class FirebaseUtil {
      * @param fui FUI which implements OnSuccess and optionally OnError
      */
     public void postMessageToPointLog(PointLog log, String house, PointLogMessage message, FirebaseUtilInterface fui){
+        postMessageToPointLog(log, house, message, true, fui);
+    }
+
+    /**
+     * This will save a message to a Point Log in Firestore
+     * @param log   Point Log on which to save the message
+     * @param house House that the point log is for
+     * @param message   String message to be saved
+     * @param shouldNotify  Boolean for if notifications should be posted
+     * @param fui FUI which implements OnSuccess and optionally OnError
+     */
+    public void postMessageToPointLog(PointLog log, String house, PointLogMessage message, Boolean shouldNotify, FirebaseUtilInterface fui){
         CollectionReference pointMessageRef = db.collection(ROOT_HOUSE_KEY).document(house)
                 .collection(ROOT_HOUSE_POINTS_KEY).document(log.getLogID())
                 .collection(ROOT_HOUSE_POINTS_MESSAGES_KEY);
         //Update the point message collection
         pointMessageRef.add(message.generateFirebaseMap()).addOnSuccessListener(documentReference -> {
             //Once the message is saved, update the notification count on the Point Log.
-            updatePointLogNotificationCount(log,house,(message.getSenderPermissionLevel() == UserPermissionLevel.RHP),false, fui);
+            if(shouldNotify)
+                updatePointLogNotificationCount(log,house,(message.getSenderPermissionLevel() == UserPermissionLevel.RHP),false, fui);
+            else{
+                fui.onSuccess();
+            }
         });
     }
 
@@ -828,19 +845,16 @@ public class FirebaseUtil {
     public void retrieveHouseCodes(final FirebaseUtilInterface fui){
         CollectionReference houseCodesRef = db.collection(ROOT_CODES_KEY);
         houseCodesRef.get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()){
-                            ArrayList<HouseCode> codes = new ArrayList<>();
-                            for(QueryDocumentSnapshot doc: task.getResult()){
-                                codes.add(new HouseCode(doc.getData()));
-                            }
-                            fui.onGetHouseCodes(codes);
+                .addOnCompleteListener(task -> {
+                    if(task.isSuccessful()){
+                        ArrayList<HouseCode> codes = new ArrayList<>();
+                        for(QueryDocumentSnapshot doc: task.getResult()){
+                            codes.add(new HouseCode(doc.getData()));
                         }
-                        else{
-                            fui.onError(task.getException(),context);
-                        }
+                        fui.onGetHouseCodes(codes);
+                    }
+                    else{
+                        fui.onError(task.getException(),context);
                     }
                 });
     }

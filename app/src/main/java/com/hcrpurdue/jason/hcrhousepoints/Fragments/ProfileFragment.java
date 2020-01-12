@@ -74,7 +74,6 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
 
     private MenuItem notificationBarButton;
 
-    private int userPoints;
     private int userRank;
     private List<Reward> allRewards = new ArrayList<>();
     private List<House> allHouses = new ArrayList<>();
@@ -97,6 +96,12 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
                 @Override
                 public void onUpdate() {
                     handleNotificationsUpdate();
+                }
+            });
+            flu.getUserAccountListener().addCallback(PROFILE_FRAGMENT, new ListenerCallbackInterface() {
+                @Override
+                public void onUpdate() {
+                    handleUserUpdate();
                 }
             });
         }
@@ -125,10 +130,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     @Override
     public void onDetach() {
         super.onDetach();
-        flu.getUserPointLogListener().removeCallback(PROFILE_FRAGMENT);
-
-        if(cacheManager.getPermissionLevel() == UserPermissionLevel.RHP)
-            flu.getRHPNotificationListener().removeCallback(PROFILE_FRAGMENT);
+        flu.removeCallbacks(PROFILE_FRAGMENT);
     }
 
     @Override
@@ -226,7 +228,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
 
         houseImageView.setImageResource(drawableID);
         houseNameTextView.setText(cacheManager.getHouseAndPermissionName());
-        String userPointsText = "" + userPoints;
+        String userPointsText = "" + cacheManager.getUser().getTotalPoints();
         String houseRankText = (userRank != -1)? "# "+userRank: "";
         userPointTotalTextView.setText(userPointsText);
         userHouseRankTextView.setText(houseRankText);
@@ -242,7 +244,6 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
             @Override
             public void onGetPointStatisticsSuccess(List<House> houses, int points, List<Reward> rewards) {
 
-                userPoints = points;
                 allRewards = rewards;
                 allHouses = houses;
 
@@ -256,6 +257,10 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
                 }
             }
         });
+    }
+
+    private void handleUserUpdate(){
+        populateTopBar();
     }
 
 

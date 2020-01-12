@@ -28,9 +28,7 @@ public class NotificationListFragment extends PersonalPointLogListFragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        if(cacheManager.getPermissionLevel() == UserPermissionLevel.RHP){
-            flu.getRHPNotificationListener().removeCallback(CALLBACK_KEY);
-        }
+        flu.removeCallbacks(CALLBACK_KEY);
     }
 
     @Override

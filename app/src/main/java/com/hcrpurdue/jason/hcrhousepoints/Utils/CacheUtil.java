@@ -5,6 +5,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
+import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,16 +39,17 @@ class CacheUtil {
         context = c;
     }
 
-    public void writeToCache(String userID, String floorName, String houseName, String first, String last, int permissionLevel) {
+    public void writeUserToCache(String userID, User user) {
         try {
             File file = new File(context.getCacheDir(), FILE_NAME);
             FileWriter fileWriter = new FileWriter(file, false);
             String fileContent = "userID:" + userID +
-                    "\nfloorName:" + floorName +
-                    "\nhouseName:" + houseName +
-                    "\nfirstName:" + first +
-                    "\nlastName:"  + last +
-                    "\npermissionLevel:" + permissionLevel;
+                    "\nfloorName:" + user.getFloorId() +
+                    "\nhouseName:" + user.getHouseName() +
+                    "\nfirstName:" + user.getFirstName() +
+                    "\nlastName:"  + user.getLastName() +
+                    "\ntotalPoints" + user.getTotalPoints() +
+                    "\npermissionLevel:" + user.getPermissionLevel().getServerValue();
             fileWriter.write(fileContent);
             fileWriter.close();
         } catch (IOException e) {
@@ -60,13 +62,18 @@ class CacheUtil {
         return new File(context.getCacheDir(), FILE_NAME).exists();
     }
 
-    public void getCacheData(CacheManager cacheManager) {
+    /**
+     * Get any cached user data that is available
+     * @return the user that was found
+     */
+    public User getCachedUserData() {
         try {
             String userID = null;
             String floorName = null;
             String houseName = null;
             String first = null;
             String last = null;
+            int totalPoints = 0;
             UserPermissionLevel permissionLevel = UserPermissionLevel.RESIDENT;
             String line;
             BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(context.getCacheDir(), FILE_NAME)));
@@ -92,6 +99,8 @@ class CacheUtil {
                         case "lastName":
                             last = value;
                             break;
+                        case "totalPoints":
+                            totalPoints = Integer.parseInt(value);
                         case "permissionLevel":
                             permissionLevel = UserPermissionLevel.fromServerValue(Integer.parseInt(value));
                             break;
@@ -99,13 +108,17 @@ class CacheUtil {
                 }
             }
             bufferedReader.close();
-            cacheManager.setUserData(floorName, houseName, first, last, permissionLevel, userID);
+            User user = new User(userID, first, last, floorName, houseName, permissionLevel, totalPoints);
+
+            return user;
         } catch (FileNotFoundException e) {
             Toast.makeText(context, "Could not find cache file", Toast.LENGTH_SHORT).show();
             Log.e("CacheUtil", "Could not find cache file", e);
+            return null;
         } catch (IOException e) {
             Toast.makeText(context, "Error reading cache file", Toast.LENGTH_SHORT).show();
             Log.e("CacheUtil", "Error reading cache file", e);
+            return null;
         }
     }
 

@@ -43,7 +43,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.HouseOverviewFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
@@ -61,7 +60,6 @@ import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 
 public class NavigationActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
@@ -85,11 +83,14 @@ public class NavigationActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         if (fragmentManager.getFragments().isEmpty()) {
             try {
-                fragmentManager.beginTransaction().replace(R.id.content_frame, ProfileFragment.class.newInstance(), Integer.toString(R.id.nav_new_profile)).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, ProfileFragment.class.newInstance(), Integer.toString(R.id.nav_new_profile)).addToBackStack("BASE").commit();
             } catch (Exception e) {
                 Toast.makeText(this, "Error loading Profile Frament", Toast.LENGTH_LONG).show();
                 Log.e("NavigationActivity", "Failed to load initial fragment", e);
             }
+        }
+        else{
+            fragmentManager.popBackStackImmediate("BASE", FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
 
         //Look to see if the intent contains a qr code to submit
@@ -279,6 +280,7 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     private void signOut() {
+        FirebaseListenerUtil.getInstance(getApplicationContext()).resetFirebaseListeners();
         findViewById(R.id.navigationProgressBar).setVisibility(View.VISIBLE);
         AsyncTask.execute(() -> cacheManager.clearUserData());
         FirebaseAuth.getInstance().signOut();

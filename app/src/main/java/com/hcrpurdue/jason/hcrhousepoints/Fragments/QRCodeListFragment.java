@@ -38,7 +38,7 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
     private ProgressBar progressBar;
     private ListView qrCodeListView;
     private FloatingActionButton qrCodeCreateFab;
-    private TextView houseDisabledTextView;
+    private TextView messageTextView;
 
     @Override
     public void onAttach(Context context) {
@@ -58,7 +58,7 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
         View view = inflater.inflate(R.layout.fragment_qr_code_list, container, false);
         cacheManager.getCachedData();
         qrCodeListView = view.findViewById(android.R.id.list);
-        houseDisabledTextView = view.findViewById(android.R.id.empty);
+        messageTextView = view.findViewById(android.R.id.empty);
         qrCodeCreateFab = view.findViewById(R.id.qr_code_create_fab);
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.qr_code_list_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> getQRCodesFromServer(swipeRefresh));
@@ -105,13 +105,22 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
 
             @Override
             public void onGetQRCodesForUserSuccess(ArrayList<Link> qrCodes) {
-                QrCodeListAdapter adapter = new QrCodeListAdapter(qrCodes,context);
-                qrCodeListView.setAdapter(adapter);
                 progressBar.setVisibility(View.GONE);
                 if(swipeRefresh != null){
                     swipeRefresh.setRefreshing(false);
                 }
-                handleSystemPreferences();
+
+                if(qrCodes != null && qrCodes.size() != 0){
+                    QrCodeListAdapter adapter = new QrCodeListAdapter(qrCodes,context);
+                    qrCodeListView.setVisibility(View.VISIBLE);
+                    qrCodeListView.setAdapter(adapter);
+                    messageTextView.setVisibility(View.GONE);
+                }
+                else{
+                    qrCodeListView.setVisibility(View.INVISIBLE);
+                    messageTextView.setVisibility(View.VISIBLE);
+                    messageTextView.setText("You haven't made any QR Codes.");
+                }
 
             }
         });
@@ -137,9 +146,5 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
         return false;
     }
 
-    private void handleSystemPreferences(){
-        qrCodeListView.setVisibility(View.VISIBLE);
-        qrCodeCreateFab.setEnabled(true);
-        houseDisabledTextView.setVisibility(View.GONE);
-    }
+
 }

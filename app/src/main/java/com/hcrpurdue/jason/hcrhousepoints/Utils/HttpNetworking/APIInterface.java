@@ -9,7 +9,7 @@ import retrofit2.http.Header;
 
 public interface APIInterface {
 
-    @GET("user/rank")
+    @GET("rank")
     Call<Integer> getUserRank(@Header("User-Auth") String userId);
 
 }

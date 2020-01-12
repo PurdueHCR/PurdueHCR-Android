@@ -29,7 +29,10 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.R;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.AlertDialogInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 import java.util.List;
@@ -126,6 +129,7 @@ public class AppInitializationActivity extends AppCompatActivity {
      * Make sure that the house competition data is cached
      */
     private void initializeCompetitionData(){
+
         try {
             //get point types from Firestore
             cacheManager.getUpdatedPointTypes(new CacheManagementInterface() {
@@ -293,6 +297,7 @@ public class AppInitializationActivity extends AppCompatActivity {
                 .setPositiveButton("Ok", (dialog, whichButton) -> {
                     checkForLinks();
                 })
+                .setCancelable(false)
                 .show();
     }
 
@@ -346,23 +351,39 @@ public class AppInitializationActivity extends AppCompatActivity {
                 cacheManager.getLinkWithLinkId(linkId, new CacheManagementInterface() {
                     @Override
                     public void onError(Exception e, Context context) {
-                        Toast.makeText(context,  e.getLocalizedMessage(),
-                                Toast.LENGTH_SHORT).show();
-                        launchNavigationActivity();
+                        couldNotFindLink(new AlertDialogInterface() {
+                            @Override
+                            public void onPositiveButtonListener() {
+                                launchNavigationActivity();
+                            }
+                        });
                     }
 
                     @Override
                     public void onGetLinkWithIdSuccess(Link link) {
-                        cacheManager.submitPointWithLink(link, new CacheManagementInterface() {
+                        foundQrCode(link, new AlertDialogInterface() {
                             @Override
-                            public void onSuccess() {
-                                launchNaviationActivity(true);
+                            public void onPositiveButtonListener() {
+                                cacheManager.submitPointWithLink(link, new CacheManagementInterface() {
+                                    @Override
+                                    public void onSuccess() {
+                                        launchNaviationActivity(true);
+                                    }
+
+                                    @Override
+                                    public void onError(Exception e, Context context) {
+                                        failedToSubmitPoints(e, new AlertDialogInterface() {
+                                            @Override
+                                            public void onPositiveButtonListener() {
+                                                launchNavigationActivity();
+                                            }
+                                        });
+                                    }
+                                });
                             }
 
                             @Override
-                            public void onError(Exception e, Context context) {
-                                Toast.makeText(AppInitializationActivity.this, e.getLocalizedMessage(),
-                                        Toast.LENGTH_SHORT).show();
+                            public void onNegativeButtonListener() {
                                 launchNavigationActivity();
                             }
                         });
@@ -379,5 +400,21 @@ public class AppInitializationActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
             launchNavigationActivity();
         }
+    }
+
+    private void couldNotFindLink(AlertDialogInterface alertDialogInterface){
+        AlertDialogHelper.showSingleButtonDialog(this,
+                "Invalid QR Code", "The QR code you scanned wasn't found. Please try scanning it again.",
+                "OK", alertDialogInterface)
+                .show();
+    }
+
+    private void foundQrCode(Link link, AlertDialogInterface alertDialogInterface){
+        AlertDialogHelper.showQRSubmissionDialog(this, link, alertDialogInterface).show();
+    }
+
+    private void failedToSubmitPoints(Exception e, AlertDialogInterface alertDialogInterface){
+        AlertDialogHelper.showSingleButtonDialog(this, "Failed To Submit Points", e.getMessage(), "OK", alertDialogInterface)
+                .show();
     }
 }

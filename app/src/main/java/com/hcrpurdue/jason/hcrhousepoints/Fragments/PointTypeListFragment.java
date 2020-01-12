@@ -58,24 +58,27 @@ public class PointTypeListFragment  extends ListFragment implements SearchView.O
                 handleSystemPreferencesUpdate();
             }
         });
+        flu.getPointTypeListener().addCallback(POINT_TYPE_CALLBACK_KEY, new ListenerCallbackInterface() {
+            @Override
+            public void onUpdate() {
+                handlePointTypeUpdate();
+            }
+        });
 
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        getUpdatedPointTypes();
+    public void onResume() {
+        super.onResume();
+        handlePointTypeUpdate();
+        handleSystemPreferencesUpdate();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        flu.getSystemPreferenceListener().removeCallback(POINT_TYPE_CALLBACK_KEY);
-    }
 
-    @Override
-    public void onListItemClick(ListView listView, View v, int position, long id) {
-
+        flu.removeCallbacks(POINT_TYPE_CALLBACK_KEY);
     }
 
     @Override
@@ -85,7 +88,8 @@ public class PointTypeListFragment  extends ListFragment implements SearchView.O
         emptyMessageTextView = layout.findViewById(android.R.id.empty);
 
         listView.setEmptyView(emptyMessageTextView);
-        enabledTypes = cacheManager.getCachedPointTypes();
+        storeEnabledTypes(cacheManager.getPointTypeList());
+        handleSystemPreferencesUpdate();
         return layout;
     }
 
@@ -153,19 +157,17 @@ public class PointTypeListFragment  extends ListFragment implements SearchView.O
         handleSystemPreferencesUpdate();
     }
 
-
-    private void getUpdatedPointTypes() {
-        try {
-            cacheManager.getUpdatedPointTypes(new CacheManagementInterface() {
-                public void onPointTypeComplete(List<PointType> data) {
-                    storeEnabledTypes(data);
-                    handleSystemPreferencesUpdate();
-                    createAdapter(enabledTypes);
-                }
-            });
-
-        } catch (Exception e) {
-            Toast.makeText(getContext(), "Failed to load point types", Toast.LENGTH_LONG).show();
+    private void handlePointTypeUpdate() {
+        storeEnabledTypes(cacheManager.getPointTypeList());
+        createAdapter(enabledTypes);
+        if (enabledTypes.size() == 0) {
+            listView.setVisibility(View.GONE);
+            emptyMessageTextView.setText(R.string.no_point_types_enabled);
+            emptyMessageTextView.setVisibility(View.VISIBLE);
+        }
+        else {
+            listView.setVisibility(View.VISIBLE);
+            emptyMessageTextView.setVisibility(View.GONE);
         }
     }
 
@@ -182,13 +184,8 @@ public class PointTypeListFragment  extends ListFragment implements SearchView.O
         SystemPreferences systemPreferences = cacheManager.getSystemPreferences();
         if(!systemPreferences.isHouseEnabled()) {
             listView.setVisibility(View.GONE);
+            emptyMessageTextView.setVisibility(View.VISIBLE);
             emptyMessageTextView.setText(systemPreferences.getHouseIsEnabledMsg());
-            emptyMessageTextView.setVisibility(View.VISIBLE);
-        }
-        else if (enabledTypes.size() == 0) {
-            listView.setVisibility(View.GONE);
-            emptyMessageTextView.setText(R.string.no_point_types_enabled);
-            emptyMessageTextView.setVisibility(View.VISIBLE);
         }
         else {
             listView.setVisibility(View.VISIBLE);

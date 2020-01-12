@@ -21,8 +21,11 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
+import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirebaseCollectionListener;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirebaseListener;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirestoreDocumentListener;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SnapshotInterface;
 
@@ -39,8 +42,18 @@ public class FirebaseListenerUtil {
     static FirebaseListenerUtil fluListener;
     private FirebaseCollectionListener userPointLogListener;
     private FirebaseCollectionListener rhpNotificationListener;
+    private FirebaseCollectionListener pointTypeListener;
     private FirestoreDocumentListener pointLogListener;
     private FirestoreDocumentListener systemPreferenceListener;
+    private FirestoreDocumentListener userAccountListener;
+
+    /**
+     * Call this from the AppInitializationActivity to initialize the Listeners
+     * @param c
+     */
+    public static void initializeListeners(Context c){
+        FirebaseListenerUtil.getInstance(c);
+    }
 
     /**
      * Get the instance of the FirebaseUtilListener to be used in the app.
@@ -65,10 +78,74 @@ public class FirebaseListenerUtil {
     private void createPersistantListeners(){
         createUserPointLogListener();
         createSystemPreferencesListener();
+        createPointTypeListener();
+        createUserAccountListener(cacheManager.getUser());
         if(cacheManager.getPermissionLevel() == UserPermissionLevel.RHP){
             //Create RHP only listeners
             createRHPNotificationListener();
         }
+    }
+
+    public void removeCallbacks(String key){
+        if(userPointLogListener != null){
+            userPointLogListener.removeCallback(key);
+        }
+        if(rhpNotificationListener != null){
+            rhpNotificationListener.removeCallback(key);
+        }
+        if(pointTypeListener != null){
+            pointTypeListener.removeCallback(key);
+        }
+        if(pointLogListener != null){
+            pointLogListener.removeCallback(key);
+        }
+        if(systemPreferenceListener != null){
+            systemPreferenceListener.removeCallback(key);
+        }
+        if(userAccountListener != null){
+            userAccountListener.removeCallback(key);
+        }
+    }
+
+    public void resetFirebaseListeners(){
+        killUserAccountListener();
+        killPointLogListener();
+        killRHPNotificationListener();
+        killUserPointLogListener();
+        killSystemPreferencesListener();
+        killPointTypeListener();
+        fluListener = null;
+    }
+
+    /*--------------------------User Account LISTENER-------------------------------------*/
+
+
+    public void createUserAccountListener(User user){
+        if(userAccountListener != null){
+            userAccountListener.killListener();
+            userAccountListener = null;
+        }
+        DocumentReference documentReference = db.collection("Users")
+                .document(cacheManager.getUserId());
+        SnapshotInterface si = new SnapshotInterface() {
+            @Override
+            public void handleDocumentSnapshot(DocumentSnapshot documentSnapshot, Exception e) {
+                if( e == null){
+                    User user = (User) userAccountListener.getUpdatingObject();
+                    user.setTotalPoints(((Long) documentSnapshot.getData().get(User.TOTAL_POINTS_KEY)).intValue());
+                }
+            }
+        };
+        userAccountListener = new FirestoreDocumentListener(context,documentReference,si,user);
+    }
+
+    public FirestoreDocumentListener getUserAccountListener() {
+        return userAccountListener;
+    }
+
+    private void killUserAccountListener(){
+        userAccountListener.killListener();
+        userAccountListener = null;
     }
 
     /*------------------------USER POINT LOG LISTENER---------------------------------------------*/
@@ -99,6 +176,11 @@ public class FirebaseListenerUtil {
 
     public FirebaseCollectionListener getUserPointLogListener(){
         return userPointLogListener;
+    }
+
+    private void killUserPointLogListener(){
+        userPointLogListener.killListener();
+        userPointLogListener = null;
     }
 
     /*------------------------RHP NOTIFICATION LISTENER-------------------------------------------*/
@@ -133,6 +215,13 @@ public class FirebaseListenerUtil {
         return this.rhpNotificationListener;
     }
 
+    private void killRHPNotificationListener(){
+        if(rhpNotificationListener != null){
+            rhpNotificationListener.killListener();
+            rhpNotificationListener = null;
+        }
+    }
+
     /*--------------------------INDIVIDUAL POINT LOG LISTENER-------------------------------------*/
 
     /**
@@ -141,8 +230,7 @@ public class FirebaseListenerUtil {
      */
     public void createPointLogListener(PointLog log){
         if(pointLogListener != null){
-            pointLogListener.killListener();
-            pointLogListener = null;
+            killPointLogListener();
         }
         DocumentReference documentReference = db.collection("House")
                 .document(cacheManager.getHouseName())
@@ -162,6 +250,13 @@ public class FirebaseListenerUtil {
 
     public FirestoreDocumentListener getPointLogListener() {
         return pointLogListener;
+    }
+
+    private void killPointLogListener(){
+        if(pointLogListener != null){
+            pointLogListener.killListener();
+            pointLogListener = null;
+        }
     }
 
     /*---------------------------SYSTEM PREFERENCES LISTENER--------------------------------------*/
@@ -184,5 +279,46 @@ public class FirebaseListenerUtil {
 
     public FirestoreDocumentListener getSystemPreferenceListener(){
         return systemPreferenceListener;
+    }
+
+    private void killSystemPreferencesListener(){
+        if(systemPreferenceListener != null){
+            systemPreferenceListener.killListener();
+            systemPreferenceListener = null;
+        }
+    }
+
+    /*------------------------POINT TYPE LISTENER---------------------------------------------*/
+
+    /**
+     * Create the listener that updates when a point type is updated
+     */
+    private void createPointTypeListener(){
+        Query pointTypeQuery = db.collection("PointTypes");
+        SnapshotInterface si = new SnapshotInterface() {
+            @Override
+            public void handleQuerySnapshots(QuerySnapshot queryDocumentSnapshots, Exception e) {
+                if( e == null){
+                    List<PointType> types = new ArrayList<>();
+                    for(DocumentSnapshot doc : queryDocumentSnapshots){
+                        types.add(new PointType(Integer.parseInt(doc.getId()),doc.getData()));
+                    }
+                    Collections.sort(types);
+                    cacheManager.setPointTypeList(types);
+                }
+            }
+        };
+        pointTypeListener = new FirebaseCollectionListener(context,pointTypeQuery,si);
+    }
+
+    public FirebaseCollectionListener getPointTypeListener(){
+        return pointTypeListener;
+    }
+
+    private void killPointTypeListener(){
+        if(pointTypeListener != null){
+            pointTypeListener.killListener();
+            pointTypeListener = null;
+        }
     }
 }

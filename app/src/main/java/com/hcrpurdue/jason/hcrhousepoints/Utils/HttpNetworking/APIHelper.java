@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class APIHelper {
 
     private static APIInterface apiInterface;
-    public static String domain = "https://us-central1-purdue-hcr-test.cloudfunctions.net/webApi/api/v1/";
+    public static String domain = "https://us-central1-purdue-hcr-test.cloudfunctions.net/user/";
 
     public static APIInterface getInstance() {
         if(apiInterface == null) {

@@ -90,16 +90,7 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
      * Refresh the point types in the Spinner
      */
     private void refreshData() {
-        try {
-            cacheManager.getUpdatedPointTypes(new CacheManagementInterface() {
-                public void onPointTypeComplete(List<PointType> data) {
-                    loadSpinner(data);
-                }
-            });
-
-        } catch (Exception e) {
-            Toast.makeText(context, "Failed to load point types", Toast.LENGTH_LONG).show();
-        }
+        loadSpinner(cacheManager.getPointTypeList());
     }
 
     /**
@@ -166,7 +157,6 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
             Link link = new Link(codeDescriptionLabel.getText().toString(),
                     (!multipleUseSwitch.isChecked()),
                     enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId());
-            Toast.makeText(context,"ID: "+enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId(),Toast.LENGTH_LONG).show();
             //Pass to CacheManager then Firebase to handle generation of Links in database
             cacheManager.createQRCode(link, new CacheManagementInterface() {
                 @Override

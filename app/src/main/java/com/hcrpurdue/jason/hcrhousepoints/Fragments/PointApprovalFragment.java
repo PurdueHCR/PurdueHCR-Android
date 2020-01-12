@@ -58,6 +58,13 @@ public class PointApprovalFragment extends ListFragment implements SearchView.On
         cacheManager = CacheManager.getInstance(context);
     }
 
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        flu.removeCallbacks(POINT_TYPE_CALLBACK_KEY);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.fragment_point_approval, container, false);

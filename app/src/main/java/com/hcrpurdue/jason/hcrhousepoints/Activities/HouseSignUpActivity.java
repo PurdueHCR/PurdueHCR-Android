@@ -22,6 +22,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
+import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
@@ -143,25 +144,23 @@ public class HouseSignUpActivity extends AppCompatActivity {
      */
     private void createUser(HouseCode houseCode){
 
-        FirebaseUser user = auth.getCurrentUser();
-
-        String floor = houseCode.getFloorId();
-        String house = houseCode.getHouseName();
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        String floorId = houseCode.getFloorId();
+        String houseName = houseCode.getHouseName();
         String firstName = firstNameEditText.getText().toString();
         String lastName = lastNameEditText.getText().toString();
         UserPermissionLevel permissionLevel = houseCode.getPermissionLevel();
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("FirstName", firstName);
-        userData.put("LastName", lastName );
-        userData.put("FloorID", floor);
-        userData.put("House", house);
-        userData.put("Permission Level", permissionLevel.getServerValue());
-        userData.put("TotalPoints", 0);
-        if (user != null) {
-            String id = user.getUid();
+
+        User user = new User(firstName, lastName, floorId, houseName, permissionLevel, 0);
+
+
+        Map<String, Object> userData = user.convertToDict();
+
+        if (firebaseUser != null) {
+            String id = firebaseUser.getUid();
             db.collection("Users").document(id).set(userData)
                     .addOnSuccessListener(aVoid -> {
-                        cacheManager.setUserData(floor, house, firstName,lastName, permissionLevel, id);
+                        cacheManager.setUserAndCache(user, id);
                         launchInitializationActivity();
                     })
                     .addOnFailureListener(e -> {

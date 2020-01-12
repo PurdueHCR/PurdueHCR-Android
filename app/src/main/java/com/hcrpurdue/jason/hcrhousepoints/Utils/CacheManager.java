@@ -22,6 +22,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
+import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.FirebaseUtilInterface;
@@ -35,13 +36,7 @@ public class CacheManager {
     private FirebaseUtil fbutil = new FirebaseUtil();
     private CacheUtil cacheUtil = new CacheUtil();
     private List<PointType> pointTypeList = null;
-    private String userID = null;
-    private String floorName = null;
-    private String houseName = null;
-    private String firstName = null;
-    private String lastName = null;
-    private UserPermissionLevel permissionLevel;
-    private int totalPoints = 0;
+    private User user = null;
     private int notificationCount = 0;
     private List<House> houseList = null;
     private List<Reward> rewardList = null;
@@ -74,7 +69,7 @@ public class CacheManager {
     }
 
     public String getUserId(){
-        return this.userID;
+        return this.user.getUserId();
     }
 
 
@@ -107,48 +102,22 @@ public class CacheManager {
      * @return String
      */
     public String getHouseAndPermissionName(){
-        switch (permissionLevel){
+        switch (user.getPermissionLevel()){
             case RESIDENT:
-                return houseName+ " - "+getFloorName();
+                return getHouseName()+ " - "+getFloorName();
             case RHP:
-                return houseName+ " - "+getFloorName()+" RHP";
+                return getHouseName()+ " - "+getFloorName()+" RHP";
             case PROFESSIONAL_STAFF:
                 return "REC";
             case FHP:
-                return houseName+ " - FHP";
+                return getHouseName()+ " - FHP";
             case PRIVILEGED_RESIDENT:
-                return houseName+ " - "+getFloorName()+ " Privileged";
+                return getHouseName()+ " - "+getFloorName()+ " Privileged";
             default :
-                return houseName;
+                return getHouseName();
         }
     }
 
-    /**
-     * Get the point types which are currently cached
-     * @return
-     */
-    public List<PointType> getCachedPointTypes(){
-        return this.pointTypeList;
-    }
-
-    /**
-     * REfresh the point types from the server
-     * @param si
-     */
-    public void getUpdatedPointTypes(CacheManagementInterface si) {
-        fbutil.getPointTypes(new FirebaseUtilInterface() {
-            @Override
-            public void onPointTypeComplete(List<PointType> data) {
-                if (data != null && !data.isEmpty()) {
-                    pointTypeList = data;
-                    Collections.sort(pointTypeList);
-                    si.onPointTypeComplete(data);
-                } else {
-                    si.onError(new IllegalStateException("Point Type list is empty"), fbutil.getContext());
-                }
-            }
-        });
-    }
 
     /**
      *
@@ -194,7 +163,7 @@ public class CacheManager {
     }
 
     public void getUnconfirmedPoints(CacheManagementInterface si) {
-        fbutil.getUnconfirmedPoints(houseName, floorName, new FirebaseUtilInterface() {
+        fbutil.getUnconfirmedPoints(user.getHouseName(), user.getFloorId(), new FirebaseUtilInterface() {
             @Override
             public void onGetUnconfirmedPointsSuccess(ArrayList<PointLog> logs) {
                 si.onUnconfirmedPointsSuccess(logs);
@@ -203,17 +172,27 @@ public class CacheManager {
     }
 
     public List<PointType> getPointTypeList() {
+        if(pointTypeList == null){
+            pointTypeList = new ArrayList<>();
+        }
         return pointTypeList;
     }
 
-    public void setUserData(String floor, String house, String first, String last, UserPermissionLevel permission, String id) {
-        floorName = floor;
-        houseName = house;
-        firstName = first;
-        lastName = last;
-        permissionLevel = permission;
-        userID = id;
-        cacheUtil.writeToCache(id, floor, house, first, last, permission.getServerValue());
+    public void setPointTypeList(List<PointType> pointTypes){
+        this.pointTypeList = pointTypes;
+    }
+
+    public void setUserAndCache(User user, String id) {
+        this.user = user;
+        cacheUtil.writeUserToCache(id, this.user);
+    }
+
+    private void setUser(User user){
+        this.user = user;
+    }
+
+    public User getUser(){
+        return this.user;
     }
 
     public boolean cacheFileExists() {
@@ -222,11 +201,11 @@ public class CacheManager {
 
     public void getUserDataNoCache(CacheManagementInterface si) {
         String id = FirebaseAuth.getInstance().getUid();
-        if (houseName == null) {
+        if (user == null) {
             fbutil.getUserData(id, new FirebaseUtilInterface() {
                 @Override
-                public void onUserGetSuccess(String floor, String house, String firstName, String lastName, UserPermissionLevel permission) {
-                    setUserData(floor, house, firstName,lastName, permission, id);
+                public void onUserGetSuccess(User user) {
+                    setUserAndCache(user, id);
                     si.onSuccess();
                 }
                 @Override
@@ -238,14 +217,18 @@ public class CacheManager {
             si.onSuccess();
     }
 
+    /**
+     * Retrieve the User data from the server. This method only sets the cache manager's User object
+     * @param si
+     */
     public void getUserData(CacheManagementInterface si) {
         String id = FirebaseAuth.getInstance().getUid();
-        if (houseName == null) {
-            cacheUtil.getCacheData(this);
+        if (getHouseName() == null) {
+            user = cacheUtil.getCachedUserData();
             fbutil.getUserData(id, new FirebaseUtilInterface() {
                 @Override
-                public void onUserGetSuccess(String floor, String house, String firstName, String lastName, UserPermissionLevel permission) {
-                    setUserData(floor, house, firstName,lastName, permission, id);
+                public void onUserGetSuccess(User user) {
+                    setUser(user);
                     si.onSuccess();
                 }
 
@@ -258,44 +241,61 @@ public class CacheManager {
             si.onSuccess();
     }
 
+    /**
+     * Check the cache if data exists and set the User object in the CacheManager
+     */
     public void getCachedData() {
-        if (houseName == null) {
-            cacheUtil.getCacheData(this);
+        if (user == null) {
+            user = cacheUtil.getCachedUserData();
         }
     }
 
     public String getName() {
-        return firstName+" "+lastName;
+        if(user == null){
+            return null;
+        }
+        else {
+            return user.getFirstName() + " " + user.getLastName();
+        }
     }
 
     public String getHouseName() {
-        return houseName;
+        if(user == null){
+            return null;
+        }
+        else {
+            return user.getHouseName();
+        }
     }
 
     public House getUserHouse(){
         for(House house: houseList){
-            if(house.getName().equals(houseName))
+            if(house.getName().equals(user.getHouseName()))
                 return house;
         }
         return null;
     }
 
     public UserPermissionLevel getPermissionLevel() {
-        return permissionLevel;
+        if(user == null){
+            return null;
+        }
+        else {
+            return user.getPermissionLevel();
+        }
     }
 
     public void submitPoints(String description, Date dateOccurred, PointType type, CacheManagementInterface sui) {
-        PointLog log = new PointLog(description, firstName, lastName, type, floorName,userID, dateOccurred);
-        boolean preApproved = permissionLevel == UserPermissionLevel.RHP; // preaproved only RHP
-        fbutil.submitPointLog(log, null, houseName, userID, preApproved, sysPrefs, new FirebaseUtilInterface() {
+        PointLog log = new PointLog(description, type, dateOccurred, user);
+        boolean preApproved = user.getPermissionLevel() == UserPermissionLevel.RHP; // preaproved only RHP
+        fbutil.submitPointLog(log, null, user.getHouseName(), user.getUserId(), preApproved, sysPrefs, new FirebaseUtilInterface() {
             @Override
             public void onSuccess() {
                 if(preApproved){
-                    PointLogMessage plm = new PointLogMessage("Preapproved", "PurdueHCR", "",permissionLevel, MessageType.APPROVE);
-                    fbutil.postMessageToPointLog(log, getHouseName(), plm, new FirebaseUtilInterface() {
+                    PointLogMessage plm = new PointLogMessage("Preapproved", "PurdueHCR", "",user.getPermissionLevel(), MessageType.APPROVE);
+                    fbutil.postMessageToPointLog(log, getHouseName(), plm, false, new FirebaseUtilInterface() {
                         @Override
                         public void onSuccess() {
-
                             sui.onSuccess();
                         }
 
@@ -321,13 +321,13 @@ public class CacheManager {
                       type = pointType;
                   }
               }
-              PointLog log = new PointLog(link.getDescription(), firstName, lastName, type, floorName, userID);
-              fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, houseName, userID, link.isSingleUse() || permissionLevel == UserPermissionLevel.RHP, sysPrefs, new FirebaseUtilInterface() {
+              PointLog log = new PointLog(link.getDescription(), type, user);
+              fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, user.getHouseName(), user.getUserId(), link.isSingleUse() || user.getPermissionLevel() == UserPermissionLevel.RHP, sysPrefs, new FirebaseUtilInterface() {
                   @Override
                   public void onSuccess() {
                       if(link.isSingleUse()){
                           PointLogMessage plm = new PointLogMessage("Preapproved", "PurdueHCR", "",getPermissionLevel(), MessageType.APPROVE);
-                          fbutil.postMessageToPointLog(log, getHouseName(), plm, new FirebaseUtilInterface() {
+                          fbutil.postMessageToPointLog(log, getHouseName(), plm,false, new FirebaseUtilInterface() {
                               @Override
                               public void onSuccess() {
 
@@ -361,7 +361,12 @@ public class CacheManager {
     }
 
     public String getFloorName() {
-        return floorName;
+        if(user == null){
+            return null;
+        }
+        else {
+            return user.getFloorId();
+        }
     }
 
     public void getLinkWithLinkId(String linkId, CacheManagementInterface si) {
@@ -380,38 +385,40 @@ public class CacheManager {
 
     public void getPointStatistics(CacheManagementInterface si) {
         boolean getRewards = rewardList == null;
-        fbutil.getPointStatistics(userID, getRewards, new FirebaseUtilInterface() {
+        fbutil.getPointStatistics(user.getUserId(), getRewards, new FirebaseUtilInterface() {
             @Override
             public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
                 houseList = houses;
-                totalPoints = userPoints;
+                user.setTotalPoints(userPoints);
                 if (getRewards)
                     rewardList = rewards;
-                si.onGetPointStatisticsSuccess(houseList, totalPoints, rewardList);
+                si.onGetPointStatisticsSuccess(houseList, user.getTotalPoints(), rewardList);
             }
         });
     }
 
     public void clearUserData() {
-        floorName = null;
-        houseName = null;
-        permissionLevel = UserPermissionLevel.RESIDENT;
-        userID = null;
-
+        user = null;
         cacheUtil.deleteCache();
     }
 
-    public void getFloorCodes(CacheManagementInterface si) {
-        fbutil.getFloorCodes(new FirebaseUtilInterface() {
+    /**
+     * Refresh the point types from the server
+     * @param si
+     */
+    public void getUpdatedPointTypes(CacheManagementInterface si) {
+        fbutil.getPointTypes(new FirebaseUtilInterface() {
             @Override
-            public void onGetFloorCodesSuccess(Map<String, Pair<String, String>> data) {
-                si.onGetFloorCodesSuccess(data);
+            public void onPointTypeComplete(List<PointType> data) {
+                if (data != null && !data.isEmpty()) {
+                    pointTypeList = data;
+                    Collections.sort(pointTypeList);
+                    si.onPointTypeComplete(data);
+                } else {
+                    si.onError(new IllegalStateException("Point Type list is empty"), fbutil.getContext());
+                }
             }
         });
-    }
-
-    public boolean showDialog(){
-        return cacheUtil.showDialog();
     }
 
 
@@ -425,7 +432,7 @@ public class CacheManager {
 
         if(this.userCreatedQRCodes == null || shouldRefresh) {
             //No data is currently cached or the cache needs to be refreshed
-            fbutil.getQRCodesForUser(userID, new FirebaseUtilInterface() {
+            fbutil.getQRCodesForUser(user.getUserId(), new FirebaseUtilInterface() {
                 @Override
                 public void onError(Exception e, Context context) {
                     si.onError(e,context);
@@ -514,7 +521,7 @@ public class CacheManager {
     }
 
     public void getAllHousePoints(CacheManagementInterface si) {
-        fbutil.getAllHousePoints(houseName, floorName, new FirebaseUtilInterface() {
+        fbutil.getAllHousePoints(user.getHouseName(), user.getFloorId(), new FirebaseUtilInterface() {
 
             @Override
             public void onGetAllHousePointsSuccess(List<PointLog> houseLogs) {
@@ -540,7 +547,7 @@ public class CacheManager {
                     msg = getName()+" approved the point request.";
                     mt = MessageType.APPROVE;
                 }
-                PointLogMessage plm = new PointLogMessage(msg, firstName, lastName,getPermissionLevel(), mt);
+                PointLogMessage plm = new PointLogMessage(msg, user.getFirstName(), user.getLastName(), user.getPermissionLevel(), mt);
                 fbutil.postMessageToPointLog(log, getHouseName(), plm, new FirebaseUtilInterface() {
                     @Override
                     public void onSuccess() {
@@ -568,7 +575,7 @@ public class CacheManager {
      * @param sui
      */
     public void handlePointLogUpdates(PointLog log, final CacheManagementInterface sui){
-        fbutil.handlePointLogUpdates(log, houseName, new FirebaseUtilInterface() {
+        fbutil.handlePointLogUpdates(log, getHouseName(), new FirebaseUtilInterface() {
             @Override
             public void onError(Exception e, Context context) {
                 sui.onError(e,context);
@@ -608,7 +615,7 @@ public class CacheManager {
      * @param sui   CacheManagementInterface with onSuccess and onError
      */
     public void postMessageToPointLog(PointLog log, String message, CacheManagementInterface sui){
-        PointLogMessage plm = new PointLogMessage(message, firstName, lastName, permissionLevel, MessageType.COMMENT);
+        PointLogMessage plm = new PointLogMessage(message, user.getFirstName(), user.getLastName(), getPermissionLevel(), MessageType.COMMENT);
         postMessageToPointLog(log,plm,sui);
     }
 
@@ -617,7 +624,7 @@ public class CacheManager {
      * @param sui
      */
     public void initPersonalPointLogs(CacheManagementInterface sui){
-        fbutil.getPersonalPointLogs(userID, houseName, new FirebaseUtilInterface() {
+        fbutil.getPersonalPointLogs(user.getUserId(), getHouseName(), new FirebaseUtilInterface() {
             @Override
             public void onError(Exception e, Context context) {
                 sui.onError(e,context);
@@ -645,7 +652,7 @@ public class CacheManager {
      * @param resetResident FALSE: reset RHP notification count. TRUE: Reset resident count
      */
     public void resetPointLogNotificationCount(PointLog log, boolean resetResident){
-        fbutil.updatePointLogNotificationCount(log, houseName, resetResident, true, new FirebaseUtilInterface() {});
+        fbutil.updatePointLogNotificationCount(log, getHouseName(), resetResident, true, new FirebaseUtilInterface() {});
     }
 
     /**
@@ -689,7 +696,7 @@ public class CacheManager {
      * @param cmi
      */
     public void refreshUserRank(Context context, CacheManagementInterface cmi){
-        APIHelper.getInstance().getUserRank(userID).enqueue(new retrofit2.Callback<Integer>() {
+        APIHelper.getInstance().getUserRank(getUserId()).enqueue(new retrofit2.Callback<Integer>() {
             @Override
             public void onResponse(Call<Integer> call, Response<Integer> response) {
                 if(response.isSuccessful()) {

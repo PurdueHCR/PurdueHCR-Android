@@ -69,7 +69,7 @@ public class PersonalPointLogListFragment extends ListFragment implements Search
     @Override
     public void onDetach() {
         super.onDetach();
-        flu.getUserPointLogListener().removeCallback(CALLBACK_KEY);
+        flu.removeCallbacks(CALLBACK_KEY);
     }
 
 

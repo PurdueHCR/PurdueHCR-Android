@@ -24,13 +24,14 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
+import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 
 public interface FirebaseUtilInterface {
 
     default void onPointTypeComplete(List<PointType> data) {
     }
 
-    default void onUserGetSuccess(String floor, String house, String firstName, String lastName, UserPermissionLevel permission) {
+    default void onUserGetSuccess(User user) {
     }
 
     default void onSuccess() {

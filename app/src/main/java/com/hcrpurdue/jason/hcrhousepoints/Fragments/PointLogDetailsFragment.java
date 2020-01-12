@@ -79,6 +79,8 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
         });
     }
 
+
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -284,10 +286,7 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
     public void onDetach() {
         super.onDetach();
         //Remove listeners
-        flu.getUserPointLogListener().removeCallback(CALLBACK_KEY);
-        if(flu.getPointLogListener() != null){
-            flu.getPointLogListener().killListener();
-        }
+        flu.removeCallbacks(CALLBACK_KEY);
         //Reset the notification count when the user leaves.
         cacheManager.resetPointLogNotificationCount(log,(log.getResidentId().equals(cacheManager.getUserId())));
     }
