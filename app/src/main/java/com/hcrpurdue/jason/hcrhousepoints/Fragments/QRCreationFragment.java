@@ -90,17 +90,7 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
      * Refresh the point types in the Spinner
      */
     private void refreshData() {
-        try {
-            cacheManager.getUpdatedPointTypes(new CacheManagementInterface() {
-                public void onPointTypeComplete(List<PointType> data) {
-                    loadSpinner(data);
-                }
-            });
-
-        } catch (Exception e) {
-            Toast.makeText(context, "Failed to load point types", Toast.LENGTH_LONG).show();
-            Log.e("PointSubmissionFragment", "Error loading point types", e);
-        }
+        loadSpinner(cacheManager.getPointTypeList());
     }
 
     /**
@@ -111,11 +101,11 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
         enabledTypes = new ArrayList<>();
         List<Map<String, String>> formattedPointTypes = new ArrayList<>();
         for (PointType type : types) {
-            if (type.getRHPsCanGenerateQRCodes() && type.isEnabled()) {
+            if (type.getUserCanGenerateQRCodes(cacheManager.getPermissionLevel()) && type.isEnabled()) {
                 enabledTypes.add(type);
                 Map<String, String> map = new HashMap<>();
                 map.put("text", type.getName());
-                map.put("subText", String.valueOf(type.getValue()) + " points");
+                map.put("subText", type.getValue() + " points");
                 formattedPointTypes.add(map);
             }
         }
@@ -167,7 +157,6 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
             Link link = new Link(codeDescriptionLabel.getText().toString(),
                     (!multipleUseSwitch.isChecked()),
                     enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId());
-            Toast.makeText(context,"ID: "+enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId(),Toast.LENGTH_LONG).show();
             //Pass to CacheManager then Firebase to handle generation of Links in database
             cacheManager.createQRCode(link, new CacheManagementInterface() {
                 @Override

@@ -43,11 +43,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.HouseOverviewFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointApprovalFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointTypeListFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.ProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCodeListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCreationFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRScannerFragment;
@@ -56,9 +57,9 @@ import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.SubmitPointsFragment;
 import com.hcrpurdue.jason.hcrhousepoints.R;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 
 public class NavigationActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
@@ -82,11 +83,14 @@ public class NavigationActivity extends AppCompatActivity {
         fragmentManager = getSupportFragmentManager();
         if (fragmentManager.getFragments().isEmpty()) {
             try {
-                fragmentManager.beginTransaction().replace(R.id.content_frame, PointTypeListFragment.class.newInstance(), Integer.toString(R.id.nav_point_type_list)).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, ProfileFragment.class.newInstance(), Integer.toString(R.id.nav_new_profile)).addToBackStack("BASE").commit();
             } catch (Exception e) {
-                Toast.makeText(this, "Error loading PointSubmissionFragment Frament", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Error loading Profile Frament", Toast.LENGTH_LONG).show();
                 Log.e("NavigationActivity", "Failed to load initial fragment", e);
             }
+        }
+        else{
+            fragmentManager.popBackStackImmediate("BASE", FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
 
         //Look to see if the intent contains a qr code to submit
@@ -135,14 +139,15 @@ public class NavigationActivity extends AppCompatActivity {
                             //If RHP taps approve option, display PointApproval list
                             fragmentClass = PointApprovalFragment.class;
                             break;
-                        case R.id.nav_profile:
-                            //If house overview is selected, display house overview fragment
-                            fragmentClass = HouseOverviewFragment.class;
+                        case R.id.nav_new_profile:
+                            fragmentClass = ProfileFragment.class;
                             break;
                         case R.id.nav_scan_code:
                             //If the QR scanner is selected, check permission and display if approved
-                            if (ContextCompat.checkSelfPermission(Objects.requireNonNull(this), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+                            if (ContextCompat.checkSelfPermission(Objects.requireNonNull(this), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 10);
+                                return true;
+                            }
                             else
                                 fragmentClass = QRScannerFragment.class;
                             break;
@@ -172,9 +177,12 @@ public class NavigationActivity extends AppCompatActivity {
                             //Display fragment with all of a user's submitted point
                             fragmentClass = PersonalPointLogListFragment.class;
                             break;
+                        case R.id.nav_notification_fragment:
+                            fragmentClass = NotificationListFragment.class;
+                            break;
                         default:
                             //By default display the house overview
-                            fragmentClass = HouseOverviewFragment.class;
+                            fragmentClass = ProfileFragment.class;
                             break;
                     }
                     if (fragmentClass != null && currentItem != selectedItem ) {
@@ -208,16 +216,6 @@ public class NavigationActivity extends AppCompatActivity {
         cacheManager = CacheManager.getInstance(getApplicationContext());
         cacheManager.getCachedData();
         flu = FirebaseListenerUtil.getInstance(this);
-
-        //If the user is an RHP, add a callback to the RHPNotificationListener
-        if(cacheManager.getPermissionLevel() == 1){
-            flu.getRHPNotificationListener().addCallback(RHP_NOTIFICATION_CALLBACK_KEY, new ListenerCallbackInterface() {
-                @Override
-                public void onUpdate() {
-                    handleUpdatesToRHPNotifications();
-                }
-            });
-        }
     }
 
     /**
@@ -225,7 +223,7 @@ public class NavigationActivity extends AppCompatActivity {
      */
     private void setupAppTheme(){
         try {
-            int themeID = getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "style", this.getPackageName());
+            int themeID = getResources().getIdentifier(cacheManager.getHouseName().toLowerCase(), "style", this.getPackageName());
             setTheme(themeID);
         } catch (Exception e) {
             Toast.makeText(NavigationActivity.this, "Error loading house theme", Toast.LENGTH_LONG).show();
@@ -239,24 +237,31 @@ public class NavigationActivity extends AppCompatActivity {
 
         try {
             //Draw the house icon on the navigation menu
-            int drawableID = getResources().getIdentifier(cacheManager.getHouse().toLowerCase(), "drawable", getPackageName());
+            int drawableID = getResources().getIdentifier(cacheManager.getHouseName().toLowerCase(), "drawable", getPackageName());
             ((ImageView) headerView.findViewById(R.id.header_house_image)).setImageResource(drawableID);
         } catch (Exception e) {
             Toast.makeText(NavigationActivity.this, "Failed to load house image", Toast.LENGTH_LONG).show();
-            Log.e("PointSubmissionFragment", "Error loading house image", e);
         }
         //Set the name and house of the user in the navigation menu
         ((TextView) headerView.findViewById(R.id.header_resident_name)).setText(cacheManager.getName());
-        String floorName = cacheManager.getHouse() + " - " + cacheManager.getFloorName();
+        String floorName = cacheManager.getHouseName() + " - " + cacheManager.getFloorName();
         ((TextView) headerView.findViewById(R.id.header_floor_name)).setText(floorName);
         menu = navigationView.getMenu();
 
         //Use the permission levels to set the appropriate navigation menu options
         try {
-            if (cacheManager.getPermissionLevel() > 0) {
-                menu.findItem(R.id.nav_approve_point).setVisible(true);
-                menu.findItem(R.id.nav_point_history).setVisible(true);
-                menu.findItem(R.id.nav_qr_code_list).setVisible(true);
+            // cases one through three intentionally cascade down
+            switch (cacheManager.getPermissionLevel()){
+                case PRIVILEGED_RESIDENT: //privileged Resident Case
+                    menu.findItem(R.id.nav_qr_code_list).setVisible(true);
+                    break;
+                case FHP:;//Facility Member
+                case PROFESSIONAL_STAFF:;//Professional Staff
+                case RHP://RHP
+                    menu.findItem(R.id.nav_approve_point).setVisible(true);
+                    menu.findItem(R.id.nav_point_history).setVisible(true);
+                    menu.findItem(R.id.nav_qr_code_list).setVisible(true);
+                default:break;// Resident
             }
         } catch (Exception e) {
             Toast.makeText(NavigationActivity.this, "Error loading permission level", Toast.LENGTH_LONG).show();
@@ -275,6 +280,7 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     private void signOut() {
+        FirebaseListenerUtil.getInstance(getApplicationContext()).resetFirebaseListeners();
         findViewById(R.id.navigationProgressBar).setVisibility(View.VISIBLE);
         AsyncTask.execute(() -> cacheManager.clearUserData());
         FirebaseAuth.getInstance().signOut();
@@ -294,7 +300,7 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             } else {
                 ((NavigationView) findViewById(R.id.nav_view)).getMenu().findItem(R.id.nav_scan_code).setChecked(false);
-                Toast.makeText(this, "Camera permissions denied, please allow camera permissions to scan QR codes", Toast.LENGTH_SHORT).show();
+                cameraPermissionDenied();
             }
         }
     }
@@ -368,18 +374,9 @@ public class NavigationActivity extends AppCompatActivity {
         successLayout.startAnimation(animation);
     }
 
-    /**
-     * When the RHPNotificationsListener fires, check if the RHP navigation menu needs to change
-     */
-    private void handleUpdatesToRHPNotifications(){
-        MenuItem houseOverview = menu.findItem(R.id.nav_point_history);
-        if(cacheManager.getNotificationCount() > 0){
-            //If there is a new notification, add the warning symbol to the label
-            houseOverview.setTitle(R.string.house_overview_alert);
-        }
-        else{
-            houseOverview.setTitle(R.string.house_overview);
-        }
+    private void cameraPermissionDenied(){
+        AlertDialogHelper.showSingleButtonDialog(this, "Could Not Launch Camera", "Camera permissions denied, please accept them in your settings.", "OK", null)
+                .show();
     }
 
 }

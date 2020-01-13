@@ -63,4 +63,7 @@ public interface CacheManagementInterface {
     default void onGetPersonalPointLogs(List<PointLog> personalLogs){}
 
     default void onGetHouseCodes(List<HouseCode> codes){}
+
+
+    default void onGetRank(Integer rank){}
 }

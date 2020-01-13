@@ -14,4 +14,5 @@
     <color name="text_accent">#868585</color>
     <color name="approve_color">#00FF00</color>
     <color name="reject_color">#FF0000</color>
+    <color name="unhandled_color">#FFCC00</color>
 </resources>

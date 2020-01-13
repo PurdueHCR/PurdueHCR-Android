@@ -2,6 +2,8 @@ package com.hcrpurdue.jason.hcrhousepoints.Models;
 
 import androidx.annotation.NonNull;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -63,13 +65,19 @@ public class PointType implements Comparable<PointType>, Serializable {
         return isEnabled;
     }
 
-    public int getPermissionLevel() {
-        return permissionLevel;
+    public boolean getUserCanGenerateQRCodes(UserPermissionLevel userPermissionLevel){
+        if(userPermissionLevel == UserPermissionLevel.RHP){
+            return permissionLevel > 1;
+        } else if(userPermissionLevel == UserPermissionLevel.PROFESSIONAL_STAFF){
+            return true;
+        } else if(userPermissionLevel == UserPermissionLevel.FHP){
+            return permissionLevel > 2;
+        } else if(userPermissionLevel == UserPermissionLevel.PRIVILEGED_RESIDENT){
+            return permissionLevel > 2;
+        }
+        return false;
     }
 
-    public boolean getRHPsCanGenerateQRCodes(){
-        return permissionLevel > 2;
-    }
 
     @Override
     public int compareTo(@NonNull PointType other) {

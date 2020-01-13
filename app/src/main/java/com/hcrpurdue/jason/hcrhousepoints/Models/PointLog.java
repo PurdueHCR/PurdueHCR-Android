@@ -70,6 +70,10 @@ public class PointLog implements Comparable<PointLog>, Serializable {
         this(pointDescription,first,last,type,floorID,residentId, new Date());
     }
 
+    public PointLog(String pointDescription, PointType type, User user){
+        this(pointDescription, user.getFirstName(), user.getLastName(), type, user.getFloorId(), user.getUserId());
+    }
+
     /**
      * Initialization for newly created points before they are created in Firebase. If these points are being pulled
      * from Firebase database, use the other init method.
@@ -95,6 +99,10 @@ public class PointLog implements Comparable<PointLog>, Serializable {
         this.dateOccurred = dateOccurred;
         this.residentNotifications = 0;
         this.rhpNotifications = 0;
+    }
+
+    public PointLog(String pointDescription, PointType type, Date dateOccurred, User user){
+        this(pointDescription, user.getFirstName(), user.getLastName(), type, user.getFloorId(), user.getUserId(), dateOccurred);
     }
 
     /**

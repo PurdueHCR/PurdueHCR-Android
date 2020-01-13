@@ -38,7 +38,7 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
     private ProgressBar progressBar;
     private ListView qrCodeListView;
     private FloatingActionButton qrCodeCreateFab;
-    private TextView houseDisabledTextView;
+    private TextView messageTextView;
 
     @Override
     public void onAttach(Context context) {
@@ -58,26 +58,23 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
         View view = inflater.inflate(R.layout.fragment_qr_code_list, container, false);
         cacheManager.getCachedData();
         qrCodeListView = view.findViewById(android.R.id.list);
-        houseDisabledTextView = view.findViewById(android.R.id.empty);
-        qrCodeCreateFab = (FloatingActionButton) view.findViewById(R.id.qr_code_create_fab);
+        messageTextView = view.findViewById(android.R.id.empty);
+        qrCodeCreateFab = view.findViewById(R.id.qr_code_create_fab);
         SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.qr_code_list_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> getQRCodesFromServer(swipeRefresh));
 
-        qrCodeCreateFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        qrCodeCreateFab.setOnClickListener(view1 -> {
 
-                //Create destination fragment
-                Fragment fragment = new QRCreationFragment();
+            //Create destination fragment
+            Fragment fragment = new QRCreationFragment();
 
-                //Create Fragment manager
-                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.generateQRCode));
-                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_qr_code_display));
-                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                fragmentTransaction.commit();
-            }
+            //Create Fragment manager
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.generateQRCode));
+            fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_qr_code_display));
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            fragmentTransaction.commit();
         });
 
         return view;
@@ -108,13 +105,22 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
 
             @Override
             public void onGetQRCodesForUserSuccess(ArrayList<Link> qrCodes) {
-                QrCodeListAdapter adapter = new QrCodeListAdapter(qrCodes,context);
-                qrCodeListView.setAdapter(adapter);
                 progressBar.setVisibility(View.GONE);
                 if(swipeRefresh != null){
                     swipeRefresh.setRefreshing(false);
                 }
-                handleSystemPreferences();
+
+                if(qrCodes != null && qrCodes.size() != 0){
+                    QrCodeListAdapter adapter = new QrCodeListAdapter(qrCodes,context);
+                    qrCodeListView.setVisibility(View.VISIBLE);
+                    qrCodeListView.setAdapter(adapter);
+                    messageTextView.setVisibility(View.GONE);
+                }
+                else{
+                    qrCodeListView.setVisibility(View.INVISIBLE);
+                    messageTextView.setVisibility(View.VISIBLE);
+                    messageTextView.setText("You haven't made any QR Codes.");
+                }
 
             }
         });
@@ -140,21 +146,5 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
         return false;
     }
 
-    private void handleSystemPreferences(){
-        boolean isHouseEnabled = cacheManager.getCachedSystemPreferences().isHouseEnabled();
 
-        if(!isHouseEnabled) {
-            qrCodeListView.setVisibility(View.GONE);
-            houseDisabledTextView.setText(cacheManager.getCachedSystemPreferences().getHouseIsEnabledMsg());
-            houseDisabledTextView.setVisibility(View.VISIBLE);
-            qrCodeCreateFab.setEnabled(false);
-
-        }
-
-        else {
-            qrCodeListView.setVisibility(View.VISIBLE);
-            qrCodeCreateFab.setEnabled(true);
-            houseDisabledTextView.setVisibility(View.GONE);
-        }
-    }
 }

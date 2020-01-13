@@ -3,6 +3,7 @@ package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 import android.content.Context;
 import android.os.Bundle;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 
 import androidx.annotation.NonNull;
@@ -78,6 +79,8 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
         });
     }
 
+
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -110,27 +113,6 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
         //progressBar.setVisibility(View.VISIBLE);
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Point Details");
 
-        // If user is an RHP
-        if(CacheManager.getInstance(context).getPermissionLevel() == 1){
-            if(log.wasHandled()){
-                changeStatusButton.setVisibility(View.VISIBLE);
-                changeStatusButton.setText(log.wasRejected()?"Approve":"Reject");
-            }
-            else{
-                approveButton.setVisibility(View.VISIBLE);
-                rejectButton.setVisibility(View.VISIBLE);
-            }
-        }
-        if(isFromPersonalPointLog){
-            changeStatusButton.setVisibility(View.GONE);
-            approveButton.setVisibility(View.GONE);
-            rejectButton.setVisibility(View.GONE);
-        }
-        if(log.getResidentId().equals(cacheManager.getUserId())){
-            changeStatusButton.setVisibility(View.GONE);
-            rejectButton.setVisibility(View.GONE);
-            approveButton.setVisibility(View.GONE);
-        }
 
         flu = FirebaseListenerUtil.getInstance(getContext());
         //If Log belongs to this user, update it with UserPointLogListener
@@ -151,6 +133,13 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
                 }
             });
         }
+
+        flu.getSystemPreferenceListener().addCallback(CALLBACK_KEY, new ListenerCallbackInterface() {
+            @Override
+            public void onUpdate() {
+                handleSystemPreferences();
+            }
+        });
     }
 
     /**
@@ -214,7 +203,7 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
                         rejectButton.setVisibility(View.GONE);
                         approveButton.setVisibility(View.GONE);
                         changeStatusButton.setVisibility(View.VISIBLE);
-                        changeStatusButton.setText("Reject");
+                        changeStatusButton.setText("Approve");
                     }
                     @Override
                     public void onError(Exception e, Context context){
@@ -236,7 +225,7 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
                         rejectButton.setVisibility(View.GONE);
                         approveButton.setVisibility(View.GONE);
                         changeStatusButton.setVisibility(View.VISIBLE);
-                        changeStatusButton.setText("Approve");
+                        changeStatusButton.setText("Reject");
                     }
                     @Override
                     public void onError(Exception e, Context context){
@@ -272,8 +261,7 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
 
-
-
+        handleSystemPreferences();
     }
 
     /**
@@ -283,10 +271,7 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
     public void onDetach() {
         super.onDetach();
         //Remove listeners
-        flu.getUserPointLogListener().removeCallback(CALLBACK_KEY);
-        if(flu.getPointLogListener() != null){
-            flu.getPointLogListener().killListener();
-        }
+        flu.removeCallbacks(CALLBACK_KEY);
         //Reset the notification count when the user leaves.
         cacheManager.resetPointLogNotificationCount(log,(log.getResidentId().equals(cacheManager.getUserId())));
     }
@@ -326,5 +311,37 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
         }
     }
 
+    public void handleSystemPreferences(){
+        if(cacheManager.getSystemPreferences().isHouseEnabled()){
+            // If user is an RHP
+            if(CacheManager.getInstance(context).getPermissionLevel() == UserPermissionLevel.RHP){
+                if(log.wasHandled()){
+                    changeStatusButton.setVisibility(View.VISIBLE);
+                    changeStatusButton.setText(log.wasRejected()?"Approve":"Reject");
+                }
+                else{
+                    approveButton.setVisibility(View.VISIBLE);
+                    rejectButton.setVisibility(View.VISIBLE);
+                }
+            }
+            if(isFromPersonalPointLog){
+                changeStatusButton.setVisibility(View.GONE);
+                approveButton.setVisibility(View.GONE);
+                rejectButton.setVisibility(View.GONE);
+            }
+            if(log.getResidentId().equals(cacheManager.getUserId())){
+                changeStatusButton.setVisibility(View.GONE);
+                rejectButton.setVisibility(View.GONE);
+                approveButton.setVisibility(View.GONE);
+            }
+        }
+        else{
+            sendMessageButton.setVisibility(View.GONE);
+            rejectButton.setVisibility(View.GONE);
+            approveButton.setVisibility(View.GONE);
+            changeStatusButton.setVisibility(View.GONE);
+            messageTextField.setVisibility(View.GONE);
+        }
+    }
 
 }

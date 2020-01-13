@@ -1,6 +1,8 @@
 package com.hcrpurdue.jason.hcrhousepoints.Models;
 
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +12,7 @@ public class PointLogMessage {
     private String message;
     private String senderFirstName;
     private String senderLastName;
-    private int senderPermissionLevel;
+    private UserPermissionLevel senderPermissionLevel;
     private Date messageCreationDate;
     private MessageType messageType;
 
@@ -22,7 +24,7 @@ public class PointLogMessage {
     public static final String MESSAGE_TYPE_KEY = "MessageType";
 
 
-    public PointLogMessage(String message, String senderFirstName, String senderLastName, int senderPermissionLevel, MessageType messageType) {
+    public PointLogMessage(String message, String senderFirstName, String senderLastName, UserPermissionLevel senderPermissionLevel, MessageType messageType) {
         this.message = message;
         this.senderFirstName = senderFirstName;
         this.senderLastName = senderLastName;
@@ -35,7 +37,7 @@ public class PointLogMessage {
         this.message = (String) document.get(MESSAGE_KEY);
         this.senderFirstName = (String) document.get(SENDER_FIRST_NAME_KEY);
         this.senderLastName = (String) document.get(SENDER_LAST_NAME_KEY);
-        this.senderPermissionLevel = ((Long) document.get(SENDER_PERMISSION_LEVEL_KEY)).intValue();
+        this.senderPermissionLevel = UserPermissionLevel.fromServerValue(((Long) document.get(SENDER_PERMISSION_LEVEL_KEY)).intValue());
         messageCreationDate = (Date) document.get(MESSAGE_CREATION_DATE_KEY);
         this.messageType = MessageType.getMessageTypeFromString((String) document.get(MESSAGE_TYPE_KEY));
     }
@@ -45,7 +47,7 @@ public class PointLogMessage {
         map.put(MESSAGE_KEY,this.message);
         map.put(SENDER_FIRST_NAME_KEY,this.senderFirstName);
         map.put(SENDER_LAST_NAME_KEY,this.senderLastName);
-        map.put(SENDER_PERMISSION_LEVEL_KEY,this.senderPermissionLevel);
+        map.put(SENDER_PERMISSION_LEVEL_KEY,this.senderPermissionLevel.getServerValue());
         map.put(MESSAGE_CREATION_DATE_KEY,messageCreationDate);
         map.put(MESSAGE_TYPE_KEY,messageType.getValue());
         return map;
@@ -64,7 +66,7 @@ public class PointLogMessage {
         return senderLastName;
     }
 
-    public int getSenderPermissionLevel() {
+    public UserPermissionLevel getSenderPermissionLevel() {
         return senderPermissionLevel;
     }
 
