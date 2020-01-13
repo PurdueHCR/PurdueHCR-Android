@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class SystemPreferences {
 
-    private static final String CURRENT_APP_VERSION = "1.4.4";
+    private static final String CURRENT_APP_VERSION = "2.0.0";
 
 
     private boolean isHouseEnabled;

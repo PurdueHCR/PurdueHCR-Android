@@ -113,27 +113,6 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
         //progressBar.setVisibility(View.VISIBLE);
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Point Details");
 
-        // If user is an RHP
-        if(CacheManager.getInstance(context).getPermissionLevel() == UserPermissionLevel.RHP){
-            if(log.wasHandled()){
-                changeStatusButton.setVisibility(View.VISIBLE);
-                changeStatusButton.setText(log.wasRejected()?"Approve":"Reject");
-            }
-            else{
-                approveButton.setVisibility(View.VISIBLE);
-                rejectButton.setVisibility(View.VISIBLE);
-            }
-        }
-        if(isFromPersonalPointLog){
-            changeStatusButton.setVisibility(View.GONE);
-            approveButton.setVisibility(View.GONE);
-            rejectButton.setVisibility(View.GONE);
-        }
-        if(log.getResidentId().equals(cacheManager.getUserId())){
-            changeStatusButton.setVisibility(View.GONE);
-            rejectButton.setVisibility(View.GONE);
-            approveButton.setVisibility(View.GONE);
-        }
 
         flu = FirebaseListenerUtil.getInstance(getContext());
         //If Log belongs to this user, update it with UserPointLogListener
@@ -154,6 +133,13 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
                 }
             });
         }
+
+        flu.getSystemPreferenceListener().addCallback(CALLBACK_KEY, new ListenerCallbackInterface() {
+            @Override
+            public void onUpdate() {
+                handleSystemPreferences();
+            }
+        });
     }
 
     /**
@@ -275,8 +261,7 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
 
-
-
+        handleSystemPreferences();
     }
 
     /**
@@ -326,5 +311,37 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
         }
     }
 
+    public void handleSystemPreferences(){
+        if(cacheManager.getSystemPreferences().isHouseEnabled()){
+            // If user is an RHP
+            if(CacheManager.getInstance(context).getPermissionLevel() == UserPermissionLevel.RHP){
+                if(log.wasHandled()){
+                    changeStatusButton.setVisibility(View.VISIBLE);
+                    changeStatusButton.setText(log.wasRejected()?"Approve":"Reject");
+                }
+                else{
+                    approveButton.setVisibility(View.VISIBLE);
+                    rejectButton.setVisibility(View.VISIBLE);
+                }
+            }
+            if(isFromPersonalPointLog){
+                changeStatusButton.setVisibility(View.GONE);
+                approveButton.setVisibility(View.GONE);
+                rejectButton.setVisibility(View.GONE);
+            }
+            if(log.getResidentId().equals(cacheManager.getUserId())){
+                changeStatusButton.setVisibility(View.GONE);
+                rejectButton.setVisibility(View.GONE);
+                approveButton.setVisibility(View.GONE);
+            }
+        }
+        else{
+            sendMessageButton.setVisibility(View.GONE);
+            rejectButton.setVisibility(View.GONE);
+            approveButton.setVisibility(View.GONE);
+            changeStatusButton.setVisibility(View.GONE);
+            messageTextField.setVisibility(View.GONE);
+        }
+    }
 
 }

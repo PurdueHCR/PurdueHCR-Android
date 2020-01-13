@@ -10,6 +10,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -116,22 +117,20 @@ public class PointLogAdapter extends BaseAdapter  implements ListAdapter {
             @Override
             public void onClick(View view) {
                 boolean isHouseEnabled = cacheManager.getCachedSystemPreferences().isHouseEnabled();
-                if(isHouseEnabled) {
-                    Bundle args = new Bundle();
-                    args.putSerializable("POINTLOG", log);
+                Bundle args = new Bundle();
+                args.putSerializable("POINTLOG", log);
 
-                    //Create destination fragment
-                    Fragment fragment = new PointLogDetailsFragment();
-                    fragment.setArguments(args);
+                //Create destination fragment
+                Fragment fragment = new PointLogDetailsFragment();
+                fragment.setArguments(args);
 
-                    //Create Fragment manager
-                    FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_point_log_details));
-                    fragmentTransaction.addToBackStack(Integer.toString(idToUse));
-                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    fragmentTransaction.commit();
-                }
+                //Create Fragment manager
+                FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_point_log_details));
+                fragmentTransaction.addToBackStack(Integer.toString(idToUse));
+                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                fragmentTransaction.commit();
             }
         });
 

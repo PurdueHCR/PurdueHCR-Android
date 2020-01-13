@@ -391,13 +391,11 @@ public class AppInitializationActivity extends AppCompatActivity {
                 });
             }
             else{
-                Toast.makeText(AppInitializationActivity.this, "Invalid QR Code",
-                        Toast.LENGTH_SHORT).show();
+                couldNotFindLink(null);
                 launchNavigationActivity();
             }
         } else {
-            Toast.makeText(getApplicationContext(), "Invalid QR Code",
-                    Toast.LENGTH_SHORT).show();
+            couldNotFindLink(null);
             launchNavigationActivity();
         }
     }

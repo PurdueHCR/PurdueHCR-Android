@@ -431,10 +431,6 @@ public class FirebaseUtil {
      * @param fui firebaseutilInterface, implement onError, and onGetLinkWithIdSuccess
      */
     public void getLinkWithId(String id, final FirebaseUtilInterface fui) {
-        if(!CacheManager.getInstance(context).getCachedSystemPreferences().isHouseEnabled()){
-            fui.onError(new Exception(),context);
-            return;
-        }
         DocumentReference linkRef = this.db.collection(ROOT_LINKS_KEY).document(id);
         linkRef.get()
                 .addOnCompleteListener(task -> {
