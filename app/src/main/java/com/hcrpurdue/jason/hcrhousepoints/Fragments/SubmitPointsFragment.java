@@ -36,6 +36,9 @@ import java.util.GregorianCalendar;
 import java.util.Objects;
 
 public class SubmitPointsFragment extends Fragment implements ListenerCallbackInterface {
+    private static final int START_MONTH = Calendar.AUGUST;
+    private static final int START_DAY = 1;
+
     static private CacheManager cacheManager;
     private Context context;
     private AppCompatActivity activity;
@@ -47,6 +50,7 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
     private Button submitPointButton;
 
     private Calendar calendar;
+    private DatePicker dp;
 
     @Override
     public void onAttach(Context context) {
@@ -68,24 +72,26 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
         retrieveBundleData();
         cacheManager.getCachedData();
 
-        DatePicker dp = view.findViewById(R.id.date_button);
+        dp = view.findViewById(R.id.date_button);
+
         final Calendar c = Calendar.getInstance();
         int currentYear = c.get(Calendar.YEAR);
         int currentMonth = c.get(Calendar.MONTH);
         int currentDay = c.get(Calendar.DAY_OF_MONTH);
 
         c.set(Calendar.YEAR, currentYear - 1);
-        c.set(Calendar.MONTH, currentMonth);
-        c.set(Calendar.DAY_OF_MONTH, currentDay);
+        c.set(Calendar.MONTH, START_MONTH);
+        c.set(Calendar.DAY_OF_MONTH, START_DAY);
         dp.setMinDate(c.getTimeInMillis());
-        //setting the minimum Date that can be chosen
+        // setting the minimum Date that can be chosen
 
         final Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, currentYear);
         cal.set(Calendar.MONTH, currentMonth);
         cal.set(Calendar.DAY_OF_MONTH, currentDay);
         dp.setMaxDate(cal.getTimeInMillis());
-        //setting the maximum Date that can be chosen::wq
+        // setting the maximum Date that can be chosen
+
         pointTypeDescriptionTextView = view.findViewById(R.id.submit_point_type_description_text_view);
         descriptionEditText = view.findViewById(R.id.description_edit_text);
         pointTypeTextView = view.findViewById(R.id.submit_point_type_text_view);
@@ -105,6 +111,7 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
     }
 
     public void submitPoint() {
+        calendar.set(dp.getYear(), dp.getMonth(), dp.getDayOfMonth());
         InputMethodManager inputManager = (InputMethodManager)
                 getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (inputManager != null && getActivity().getCurrentFocus() != null) // Avoids null pointer exceptions
