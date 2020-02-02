@@ -74,18 +74,28 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
 
         dp = view.findViewById(R.id.date_button);
 
-        final Calendar c = Calendar.getInstance();
-        int currentYear = c.get(Calendar.YEAR);
+        final Calendar minDateCal = Calendar.getInstance();
+        int currentYear = minDateCal.get(Calendar.YEAR);
+        int currentMonth = minDateCal.get(Calendar.MONTH);
+        int currentDay = minDateCal.get(Calendar.DAY_OF_MONTH);
 
-        // set the minimum selectable date
-        c.set(Calendar.YEAR, currentYear - 1);
-        c.set(Calendar.MONTH, START_MONTH);
-        c.set(Calendar.DAY_OF_MONTH, START_DAY);
-        dp.setMinDate(c.getTimeInMillis());
+        // set min selectable date
+        minDateCal.set(Calendar.YEAR, currentYear - 1);
+        minDateCal.set(Calendar.MONTH, START_MONTH);
+        minDateCal.set(Calendar.DAY_OF_MONTH, START_DAY);
+        dp.setMinDate(minDateCal.getTimeInMillis());
 
-        // set the max selectable date
-        long currentDate = System.currentTimeMillis();
-        dp.setMaxDate(currentDate);
+        // set max selectable date
+        final Calendar maxDateCal = Calendar.getInstance();
+        maxDateCal.set(Calendar.YEAR, currentYear);
+        maxDateCal.set(Calendar.MONTH, currentMonth);
+        maxDateCal.set(Calendar.DAY_OF_MONTH, currentDay);
+        maxDateCal.set(Calendar.HOUR, 11);
+        maxDateCal.set(Calendar.MINUTE, 59);
+        maxDateCal.set(Calendar.SECOND, 59);
+        maxDateCal.set(Calendar.MILLISECOND, 59);
+        maxDateCal.set(Calendar.AM_PM, 1);
+        dp.setMaxDate(maxDateCal.getTimeInMillis());
 
         pointTypeDescriptionTextView = view.findViewById(R.id.submit_point_type_description_text_view);
         descriptionEditText = view.findViewById(R.id.description_edit_text);
