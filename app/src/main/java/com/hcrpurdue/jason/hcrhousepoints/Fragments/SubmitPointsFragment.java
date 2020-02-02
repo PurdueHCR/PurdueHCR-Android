@@ -76,21 +76,16 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
 
         final Calendar c = Calendar.getInstance();
         int currentYear = c.get(Calendar.YEAR);
-        int currentMonth = c.get(Calendar.MONTH);
-        int currentDay = c.get(Calendar.DAY_OF_MONTH);
 
+        // set the minimum selectable date
         c.set(Calendar.YEAR, currentYear - 1);
         c.set(Calendar.MONTH, START_MONTH);
         c.set(Calendar.DAY_OF_MONTH, START_DAY);
         dp.setMinDate(c.getTimeInMillis());
-        // setting the minimum Date that can be chosen
 
-        final Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, currentYear);
-        cal.set(Calendar.MONTH, currentMonth);
-        cal.set(Calendar.DAY_OF_MONTH, currentDay);
-        dp.setMaxDate(cal.getTimeInMillis());
-        // setting the maximum Date that can be chosen
+        // set the max selectable date
+        long currentDate = System.currentTimeMillis();
+        dp.setMaxDate(currentDate);
 
         pointTypeDescriptionTextView = view.findViewById(R.id.submit_point_type_description_text_view);
         descriptionEditText = view.findViewById(R.id.description_edit_text);
