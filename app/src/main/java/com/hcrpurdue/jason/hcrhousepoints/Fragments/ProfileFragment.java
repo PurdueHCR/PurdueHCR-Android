@@ -2,7 +2,9 @@ package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Paint;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -25,6 +27,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -35,6 +38,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
+import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
@@ -48,6 +52,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+
+import static com.github.mikephil.charting.charts.Chart.*;
 
 public class ProfileFragment extends Fragment implements ListenerCallbackInterface {
     private Context context;
@@ -80,7 +86,6 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     private boolean areViewsCreated = false;
 
 
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -91,7 +96,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         resources = getResources();
 
         //If the user can submit points, add a listener for when the user submits a new point
-        if(cacheManager.getPermissionLevel().canSubmitPoints()) {
+        if (cacheManager.getPermissionLevel().canSubmitPoints()) {
             flu.getUserPointLogListener().addCallback(PROFILE_FRAGMENT, new ListenerCallbackInterface() {
                 @Override
                 public void onUpdate() {
@@ -107,7 +112,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         }
 
         //If the user is an RHP,  add listener to handle residents making submissions
-        if(cacheManager.getPermissionLevel() == UserPermissionLevel.RHP){
+        if (cacheManager.getPermissionLevel() == UserPermissionLevel.RHP) {
             //When a new pointlog gets a message, change the notification icon
             flu.getRHPNotificationListener().addCallback(PROFILE_FRAGMENT, new ListenerCallbackInterface() {
                 @Override
@@ -153,7 +158,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
      *
      * @param view
      */
-    private void connectViews(View view){
+    private void connectViews(View view) {
         houseChart = view.findViewById(R.id.statistics_point_chart);
         houseNameTextView = view.findViewById(R.id.house_name_text_view);
         recentSubmissionListView = view.findViewById(R.id.recent_submission_list_view);
@@ -181,13 +186,13 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
             fragmentTransaction.commit();
         });
 
-        scrollView.smoothScrollTo(0,0);
+        scrollView.smoothScrollTo(0, 0);
     }
 
     /**
      * Set the values for the class views
      */
-    private void setValuesForViews(){
+    private void setValuesForViews() {
 
         setupGraph();
         populateTopBar();
@@ -204,7 +209,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     /**
      * Initialize the graph of the house points
      */
-    private void setupGraph(){
+    private void setupGraph() {
         houseChart.getAxisLeft().setAxisMinimum(0);
         houseChart.getAxisLeft().setEnabled(false);
         houseChart.getAxisRight().setEnabled(false);
@@ -214,6 +219,12 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         houseChart.setTouchEnabled(false);
         houseChart.setDrawBorders(false);
         houseChart.setNoDataText("Loading House Points...");
+        if (!cacheManager.getSystemPreferences().isCompetitionVisible()) {
+            houseChart.setNoDataText("Competition is hidden.");
+            houseChart.setNoDataTextColor(R.color.black);
+            Paint p = houseChart.getPaint(PAINT_INFO);
+            p.setTextSize(70);
+        }
         houseChart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
         houseChart.setAutoScaleMinMaxEnabled(true);
         houseChart.invalidate();
@@ -223,21 +234,25 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     /**
      * SEt text on top Bar
      */
-    private void populateTopBar(){
+    private void populateTopBar() {
         int drawableID = resources.getIdentifier(cacheManager.getHouseName().toLowerCase(), "drawable", packageName);
 
         houseImageView.setImageResource(drawableID);
         houseNameTextView.setText(cacheManager.getHouseAndPermissionName());
         String userPointsText = "" + cacheManager.getUser().getTotalPoints();
-        String houseRankText = (userRank != -1)? "# "+userRank: "";
+        String houseRankText = (userRank != -1) ? "# " + userRank : "";
         userPointTotalTextView.setText(userPointsText);
         userHouseRankTextView.setText(houseRankText);
+        if (!cacheManager.getSystemPreferences().isCompetitionVisible()) {
+            userPointTotalTextView.setText("Hidden");
+            userHouseRankTextView.setText("Hidden");
+        }
     }
 
     /**
      * refresh the data
      */
-    private void updateData(){
+    private void updateData() {
 
         refreshRank();
         cacheManager.getPointStatistics(new CacheManagementInterface() {
@@ -252,19 +267,19 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
                 Collections.sort(allHouses);
                 Collections.swap(allHouses, 0, 2);
                 Collections.swap(allHouses, 0, 3);
-                if(areViewsCreated){
+                if (areViewsCreated) {
                     setValuesForViews();
                 }
             }
         });
     }
 
-    private void handleUserUpdate(){
+    private void handleUserUpdate() {
         populateTopBar();
     }
 
 
-    private void refreshRank(){
+    private void refreshRank() {
 
         cacheManager.getUserRank(context, new CacheManagementInterface() {
             @Override
@@ -272,7 +287,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
                 System.out.println(e.getMessage());
                 userRank = -1;
 
-                if(areViewsCreated){
+                if (areViewsCreated) {
                     setValuesForViews();
                 }
             }
@@ -281,7 +296,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
             public void onGetRank(Integer rank) {
                 userRank = rank;
 
-                if(areViewsCreated){
+                if (areViewsCreated) {
                     setValuesForViews();
                 }
             }
@@ -290,7 +305,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
 
     }
 
-    private void populateRewardCard(){
+    private void populateRewardCard() {
         float requiredPPR = 0F;
         float previousPPR = 0F;
         float pointsPerResident = cacheManager.getUserHouse().getPointsPerResident();
@@ -304,8 +319,8 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
                 nextRewardPPRTextView.setText(String.format(Locale.getDefault(), "%.0f PPR", reward.getRequiredPointsPerResident()));
                 nextRewardImageView.setImageResource(reward.getImageResource());
                 nextRewardNameTextView.setText(reward.getName());
-                nextRewardProgressBar.setMax((int)(requiredPPR * numberOfResidents));
-                nextRewardProgressBar.setProgress((int)((pointsPerResident - previousPPR) * numberOfResidents));
+                nextRewardProgressBar.setMax((int) (requiredPPR * numberOfResidents));
+                nextRewardProgressBar.setProgress((int) ((pointsPerResident - previousPPR) * numberOfResidents));
                 break;
             }
         }
@@ -318,7 +333,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         }
     }
 
-    private void populateGraphCard(){
+    private void populateGraphCard() {
         List<IBarDataSet> dataSetList = new ArrayList<>();
         // So that things are in podium order (4, 2, 1, 3, 5)
 
@@ -341,25 +356,28 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         }
         BarData barData = new BarData(dataSetList);
 
+        if (!cacheManager.getSystemPreferences().isCompetitionVisible()) {
+            barData = null;
+        }
+
         houseChart.setData(barData);
         houseChart.notifyDataSetChanged();
         houseChart.invalidate();
     }
 
-    private void createAdapter(List<PointLog> logs){
+    private void createAdapter(List<PointLog> logs) {
         Collections.sort(logs);
-        if(logs == null || logs.size() == 0){
+        if (logs == null || logs.size() == 0) {
             emptyMessageTextView.setVisibility(View.VISIBLE);
             emptyMessageTextView.setText(R.string.empty_recent_submission);
             return;
-        }
-        else{
+        } else {
             emptyMessageTextView.setVisibility(View.GONE);
         }
-        if(logs.size() > 3){
-            logs = logs.subList(0,3);
+        if (logs.size() > 3) {
+            logs = logs.subList(0, 3);
         }
-        adapter = new PointLogAdapter(logs ,getContext(), R.id.nav_new_profile);
+        adapter = new PointLogAdapter(logs, getContext(), R.id.nav_new_profile);
         recentSubmissionListView.setAdapter(adapter);
 
     }
@@ -399,19 +417,19 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
 
     /**
      * This method will be called when the userPointLogListener gets activated by Firebase. This will
-     *  update the notifications Icon to show if there are new messages.
+     * update the notifications Icon to show if there are new messages.
      */
-    private void handleNotificationsUpdate(){
+    private void handleNotificationsUpdate() {
         setNotificationBarButtonIcon();
         createAdapter(cacheManager.getPersonalPointLogs());
     }
 
     /**
      * Check if there are any notifications on any of the Point Logs
-     *  and if so, set the notification icon to ic_notifications_active, else set to ic_notifications_none
+     * and if so, set the notification icon to ic_notifications_active, else set to ic_notifications_none
      */
-    private void setNotificationBarButtonIcon(){
-        if(notificationBarButton != null) {
+    private void setNotificationBarButtonIcon() {
+        if (notificationBarButton != null) {
             UserPermissionLevel userPermissionLevel = cacheManager.getPermissionLevel();
 
             //If the user has any notifications, set icon to active
