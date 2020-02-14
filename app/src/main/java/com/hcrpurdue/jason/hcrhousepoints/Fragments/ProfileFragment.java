@@ -61,6 +61,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
     private BarChart houseChart;
     private TextView userPointTotalTextView;
     private TextView userHouseRankTextView;
+    private TextView userSemesterRankTextView;
     private TextView houseNameTextView;
     private TextView nextRewardNameTextView;
     private TextView nextRewardPPRTextView;
@@ -161,6 +162,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         houseImageView = view.findViewById(R.id.profile_house_image_view);
         userPointTotalTextView = view.findViewById(R.id.your_points_text_view);
         userHouseRankTextView = view.findViewById(R.id.house_rank_text_view);
+        userSemesterRankTextView = view.findViewById(R.id.semester_rank_text_view);
         nextRewardImageView = view.findViewById(R.id.next_reward_image_view);
         nextRewardNameTextView = view.findViewById(R.id.next_reward_text_view);
         nextRewardPPRTextView = view.findViewById(R.id.ppr_requirement_label);
@@ -231,8 +233,10 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         houseNameTextView.setText(cacheManager.getHouseAndPermissionName());
         String userPointsText = "" + cacheManager.getUser().getTotalPoints();
         String houseRankText = (userRank != null)? "# "+userRank.getHouseRank(): "";
+        String semesterRankText = (userRank != null)? "# "+userRank.getSemesterRank(): "";
         userPointTotalTextView.setText(userPointsText);
         userHouseRankTextView.setText(houseRankText);
+        userSemesterRankTextView.setText((semesterRankText));
     }
 
     /**
