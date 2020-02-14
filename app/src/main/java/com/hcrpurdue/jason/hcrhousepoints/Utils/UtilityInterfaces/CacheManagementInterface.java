@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
@@ -65,5 +66,5 @@ public interface CacheManagementInterface {
     default void onGetHouseCodes(List<HouseCode> codes){}
 
 
-    default void onGetRank(Integer rank){}
+    default void onGetRank(AuthRank rank){}
 }

@@ -17,11 +17,16 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
+import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
@@ -77,8 +82,14 @@ public class AppInitializationActivity extends AppCompatActivity {
                 //Get the specific data from the Users collection
                 cacheManager.getUserData(new CacheManagementInterface() {
                     public void onSuccess() {
-                        //Once User data is cached, start initializing the competition data
-                        initializeCompetitionData();
+                        //Got the user data, now lets get the Firebase token to use with the API
+                        auth.getAccessToken(true).addOnCompleteListener(task -> {
+                            System.out.println("KEY!!!: "+ task.getResult().getToken());
+                            cacheManager.getUser().setFirebaseToken(task.getResult().getToken());
+                            //Once User data is cached, start initializing the competition data
+                            initializeCompetitionData();
+                        });
+
                     }
                     public void onError(Exception e, Context context){
                         if(e.getMessage().equals("User does not exist.")){
@@ -147,7 +158,7 @@ public class AppInitializationActivity extends AppCompatActivity {
                                     cacheManager.initPersonalPointLogs(new CacheManagementInterface() {
                                         @Override
                                         public void onGetPersonalPointLogs(List<PointLog> personalLogs) {
-                                            //Refresh the user rank
+                                            //Refresh the user rank and cache into cachemanager
                                             cacheManager.refreshUserRank(getBaseContext(), new CacheManagementInterface() {
                                                 @Override
                                                 public void onError(Exception e, Context context) {
@@ -155,7 +166,8 @@ public class AppInitializationActivity extends AppCompatActivity {
                                                 }
 
                                                 @Override
-                                                public void onGetRank(Integer rank) {
+                                                public void onGetRank(AuthRank rank) {
+                                                    System.out.println("RANK: "+rank.getHouseRank()+" sem: "+rank.getSemesterRank());
                                                     //Check the system preferences for app version, and if not in sync, post update message
                                                     if(!systemPreferences.isAppUpToDate()){
                                                         alertOutOfDateApp();

@@ -31,6 +31,7 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.PointLogAdapter;
+import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
@@ -74,7 +75,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
 
     private MenuItem notificationBarButton;
 
-    private int userRank;
+    private AuthRank userRank = null;
     private List<Reward> allRewards = new ArrayList<>();
     private List<House> allHouses = new ArrayList<>();
     private boolean areViewsCreated = false;
@@ -153,7 +154,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
      *
      * @param view
      */
-    private void connectViews(View view){
+       private void connectViews(View view){
         houseChart = view.findViewById(R.id.statistics_point_chart);
         houseNameTextView = view.findViewById(R.id.house_name_text_view);
         recentSubmissionListView = view.findViewById(R.id.recent_submission_list_view);
@@ -229,7 +230,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
         houseImageView.setImageResource(drawableID);
         houseNameTextView.setText(cacheManager.getHouseAndPermissionName());
         String userPointsText = "" + cacheManager.getUser().getTotalPoints();
-        String houseRankText = (userRank != -1)? "# "+userRank: "";
+        String houseRankText = (userRank != null)? "# "+userRank.getHouseRank(): "";
         userPointTotalTextView.setText(userPointsText);
         userHouseRankTextView.setText(houseRankText);
     }
@@ -270,7 +271,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
             @Override
             public void onError(Exception e, Context context) {
                 System.out.println(e.getMessage());
-                userRank = -1;
+                userRank = null;
 
                 if(areViewsCreated){
                     setValuesForViews();
@@ -278,7 +279,7 @@ public class ProfileFragment extends Fragment implements ListenerCallbackInterfa
             }
 
             @Override
-            public void onGetRank(Integer rank) {
+            public void onGetRank(AuthRank rank) {
                 userRank = rank;
 
                 if(areViewsCreated){
