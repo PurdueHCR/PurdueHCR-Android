@@ -15,8 +15,6 @@ import static androidx.constraintlayout.motion.widget.MotionScene.TAG;
 public class QRCodeUtil {
 
     public static Bitmap generateQRCodeFromString(Activity activity, String url){
-
-
         Bitmap bitmap = null;
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -26,6 +24,21 @@ public class QRCodeUtil {
 
         int smallerDimension = width < height ? width : height;
         smallerDimension = smallerDimension * 3 / 4;
+
+        QRGEncoder qrgEncoder = new QRGEncoder(url, null, QRGContents.Type.TEXT, smallerDimension);
+
+        try {
+            bitmap = qrgEncoder.encodeAsBitmap();
+        } catch (WriterException e) {
+            Log.v(TAG, e.toString());
+        }
+        return bitmap;
+    }
+
+    public static Bitmap generateQRCode(int width, int height, String url) {
+        Bitmap bitmap = null;
+
+        int smallerDimension = width < height ? width : height;
 
         QRGEncoder qrgEncoder = new QRGEncoder(url, null, QRGContents.Type.TEXT, smallerDimension);
 

@@ -1,11 +1,13 @@
 package com.hcrpurdue.jason.hcrhousepoints.ListAdapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -24,6 +26,7 @@ import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.QRCodeUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
@@ -61,12 +64,21 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
             view = inflater.inflate(R.layout.list_item_qr_code, parent, false);
         }
 
-        TextView titleTextView = view.findViewById(R.id.title);
+        TextView titleTextView = view.findViewById(R.id.largeTextView);
         titleTextView.setText(qrCode.getDescription());
 
-        TextView typeTextView = view.findViewById(R.id.type);
+        ImageView qrCodeImage = view.findViewById(R.id.qrCodeImageView);
+        Bitmap qrCodeBitmap = QRCodeUtil.generateQRCode(qrCodeImage.getWidth(), qrCodeImage.getHeight(), qrCode.getAddress());
+        if(qrCodeBitmap != null){
+            qrCodeImage.setImageBitmap(qrCodeBitmap);
+        }
+        else{
+            Toast.makeText(context,"Could not create QR Code",Toast.LENGTH_LONG).show();
+        }
+
+        /*TextView typeTextView = view.findViewById(R.id.smallTextView);
         typeTextView.setText(qrCode.getPointType(context).getName());
-        Switch codeActiveSwitch = view.findViewById(R.id.qr_code_switch);
+        Switch codeActiveSwitch = view.findViewById(R.id.qrSwitch);
         codeActiveSwitch.setChecked(qrCode.isEnabled());
 
         codeActiveSwitch.setOnClickListener(new View.OnClickListener() {
@@ -92,7 +104,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
                     }
                 });
             }
-        });
+        });*/
 
 
 
