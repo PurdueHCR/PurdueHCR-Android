@@ -1,6 +1,7 @@
 package com.hcrpurdue.jason.hcrhousepoints.ListAdapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.hcrpurdue.jason.hcrhousepoints.Activities.NavigationActivity;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QrCodeDetailsFragment;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
@@ -105,17 +107,21 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
                 Bundle args = new Bundle();
                 args.putSerializable("QRCODE", qrCode);
 
-                //Create destination fragment
-                Fragment fragment = new QrCodeDetailsFragment();
-                fragment.setArguments(args);
+                Intent intent = new Intent(context, QrCodeDetailsFragment.class );
+                intent.putExtra("QRCODE", args);
+                context.startActivity(intent);
 
-                //Create Fragment manager
-                FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_qr_code_display));
-                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_qr_code_list));
-                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                fragmentTransaction.commit();
+//                //Create destination fragment
+//                Fragment fragment = new QrCodeDetailsFragment();
+//                fragment.setArguments(args);
+//
+//                //Create Fragment manager
+//                FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
+//                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//                fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_qr_code_display));
+//                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_qr_code_list));
+//                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//                fragmentTransaction.commit();
             }
         });
 

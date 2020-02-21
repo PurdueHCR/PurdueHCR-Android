@@ -165,17 +165,17 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
                     Bundle args = new Bundle();
                     args.putSerializable("QRCODE", link);
 
-                    //Create destination fragment
-                    Fragment fragment = new QrCodeDetailsFragment();
-                    fragment.setArguments(args);
-
-                    //Create Fragment manager
-                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_qr_code_display));
-                    fragmentTransaction.addToBackStack(Integer.toString(R.id.generateQRCode));
-                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    fragmentTransaction.commit();
+//                    //Create destination fragment
+//                    Fragment fragment = new QrCodeDetailsFragment();
+//                    fragment.setArguments(args);
+//
+//                    //Create Fragment manager
+//                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+//                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//                    fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_qr_code_display));
+//                    fragmentTransaction.addToBackStack(Integer.toString(R.id.generateQRCode));
+//                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//                    fragmentTransaction.commit();
                 }
                 @Override
                 public void onError(Exception e, Context context) {
