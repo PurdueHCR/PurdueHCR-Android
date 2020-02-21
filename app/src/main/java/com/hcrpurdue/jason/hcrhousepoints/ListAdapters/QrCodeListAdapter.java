@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -63,6 +64,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
 
         TextView titleTextView = view.findViewById(R.id.title);
         titleTextView.setText(qrCode.getDescription());
+
 
         TextView typeTextView = view.findViewById(R.id.type);
         typeTextView.setText(qrCode.getPointType(context).getName());

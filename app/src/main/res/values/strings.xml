@@ -27,4 +27,7 @@
     <string name="house_overview_alert">House Point History ⚠️</string>
     <string name="alert_icon">⚠️</string>
     <string name="empty_recent_submission">You don\'t have any recent submissions. Go to Submit Points on the side menu to help your house!</string>
+    <string name="invalid_point_type_selection">Please Select a Point Type</string>
+    <string name="invalid_empty_description">Please Enter a Description</string>
+    <string name="invalid_length_description">Max Length is 64 Characters</string>
 </resources>

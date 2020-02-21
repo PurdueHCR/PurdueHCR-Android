@@ -65,16 +65,19 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
 
         qrCodeCreateFab.setOnClickListener(view1 -> {
 
-            //Create destination fragment
-            Fragment fragment = new QRCreationFragment();
+//            //Create destination fragment
+////            Fragment fragment = new QRCreationFragment();
+////
+////            //Create Fragment manager
+////            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+////            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+////            fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.generateQRCode));
+////            fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_qr_code_display));
+////            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+////            fragmentTransaction.commit();
 
-            //Create Fragment manager
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.generateQRCode));
-            fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_qr_code_display));
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragmentTransaction.commit();
+            QRCodeCEFragment createFragment = new QRCodeCEFragment(context);
+            createFragment.show(getFragmentManager(), "Create QR Code");
         });
 
         return view;

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/CONSTANT_TITLE"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Create A QR Code"
+        android:textColor="@color/text_main"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:typeface="normal" />
+
+    <View
+        android:id="@+id/CONSTANT_UNDERLINE"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/light_underline" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/spinner_background_with_border">
+
+        <Spinner
+            android:id="@+id/point_type_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/invalid_point_type_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:text="@string/invalid_point_type_selection"
+        android:textColor="@color/reject_color" />
+
+    <EditText
+        android:id="@+id/qr_code_description_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/spinner_background_with_border"
+        android:ems="10"
+        android:gravity="start|top"
+        android:hint="Description for the Code"
+        android:inputType="textMultiLine"
+        android:paddingStart="8dp"
+        android:paddingTop="8dp" />
+
+    <TextView
+        android:id="@+id/invalid_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/invalid_empty_description"
+        android:textColor="@color/reject_color" />
+
+    <Switch
+        android:id="@+id/multi_use_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:paddingStart="8dp"
+        android:text="Allow Multiple Scans" />
+
+    <Button
+        android:id="@+id/create_button"
+        style="@style/QRTheme.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="Create"
+        android:backgroundTint="@color/colorPrimary"
+        android:textAlignment="center" />
+
+</LinearLayout>
