@@ -1,50 +1,40 @@
 package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
-import java.util.Objects;
-
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.CapturePhotoUtils;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.QRCodeUtil;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 public class QrCodeDetailsFragment extends AppCompatActivity{
-    AppCompatActivity activity;
-    Context context;
-//    TextView pointTypeLabel;
+    TextView pointTypeLabel;
     ImageView qrCodeImageView;
 //    TextView qrCodeIOSURLLabel;
 //    TextView qrCodeAndroidURLLabel;
-//    TextView pointDescriptionLabel;
-//    Button saveToPhotosButton;
-//    Switch isEnabledSwitch;
+    TextView pointDescriptionLabel;
+    ImageButton editButton;
+    Switch isEnabledSwitch;
 //    Switch isArchivedSwitch;
 
+//    View editThingy;
+
+    private BottomSheetBehavior mBottomSheetBehaviour;
     Link qrCodeModel;
 
     /**
@@ -53,14 +43,27 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
      */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(savedInstanceState != null){
-            qrCodeModel = (Link) savedInstanceState.getSerializable("QRCODE");
-            if(qrCodeModel == null){
-                qrCodeModel = new Link("B8hlX08pQyJFk2mdqAYI", "Test Code", true, 1, true, true);
-            }
+        setContentView(R.layout.fragment_qr_code_expanded);
+
+        qrCodeModel = (Link) getIntent().getExtras().getBundle("QRCODE").getSerializable("QRCODE");
+        if(qrCodeModel == null){
+            qrCodeModel = new Link("B8hlX08pQyJFk2mdqAYI", "Test Code", true, 1, true, true);
         }
 
-        setContentView(R.layout.fragment_qr_code_expanded);
+        View gestureView = findViewById(R.id.gesture_recognizer_view);
+        gestureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(mBottomSheetBehaviour.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                    finish();
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                }
+                else {
+                    mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+            }
+        });
+
         initializeUIElements();
         View decorView = getWindow().getDecorView();
         decorView.setSystemUiVisibility(
@@ -74,9 +77,15 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
+        View editView = findViewById(R.id.info_edit_bottom_sheet);
+        mBottomSheetBehaviour = BottomSheetBehavior.from(editView);
+
+
     }
 
-//    @Override
+
+
+    //    @Override
 //    public void onCreate(Bundle savedInstanceState) {
 //        super.onCreate(savedInstanceState);
 //
@@ -127,7 +136,10 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         qrCodeImageView = findViewById(R.id.qr_code_image_view);
 
 
-//        pointTypeLabel = view.findViewById(R.id.pointTypeDescriptionLabel);
+        pointDescriptionLabel = findViewById(R.id.qr_code_collapsed_point_description_label);
+        pointTypeLabel = findViewById(R.id.qr_code_collapsed_point_type_label);
+        isEnabledSwitch = findViewById(R.id.qr_code_collapsed_enabled_switch);
+        editButton = findViewById(R.id.qr_code_collapsed_edit_button);
 //        qrCodeIOSURLLabel = view.findViewById(R.id.ios_url);
 //        qrCodeAndroidURLLabel = view.findViewById(R.id.android_url);
 //        pointDescriptionLabel = view.findViewById(R.id.pointLogDescriptionLabel);
@@ -159,7 +171,16 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
 //        });
 //
 //
-//        pointTypeLabel.setText(qrCodeModel.getPointType(context).getName());
+
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                editThingy.setVisibility(View.VISIBLE);
+                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
+        });
+
+        pointTypeLabel.setText(qrCodeModel.getPointType(getApplicationContext()).getName());
 //
 //        qrCodeIOSURLLabel.setOnClickListener(view12 -> {
 //            ClipboardManager cm = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -175,8 +196,8 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
 //            Toast.makeText(context, "Android Link Copied", Toast.LENGTH_SHORT).show();
 //        });
 //
-//        pointDescriptionLabel.setText(qrCodeModel.getDescription());
-//        isEnabledSwitch.setChecked(qrCodeModel.isEnabled());
+        pointDescriptionLabel.setText(qrCodeModel.getDescription());
+        isEnabledSwitch.setChecked(qrCodeModel.isEnabled());
 //        isArchivedSwitch.setChecked(qrCodeModel.isArchived());
 //
         Bitmap qrCode = QRCodeUtil.generateQRCodeFromString(this,qrCodeModel.getAddress());
@@ -184,7 +205,7 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
             qrCodeImageView.setImageBitmap(qrCode);
         }
         else{
-            Toast.makeText(context,"Could not create QR Code",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),"Could not create QR Code",Toast.LENGTH_LONG).show();
         }
     }
 

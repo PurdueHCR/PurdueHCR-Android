@@ -13,6 +13,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -104,24 +105,15 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Bundle args = new Bundle();
-                args.putSerializable("QRCODE", qrCode);
+
 
                 Intent intent = new Intent(context, QrCodeDetailsFragment.class );
-                intent.putExtra("QRCODE", args);
+                Bundle args = new Bundle();
+                args.putSerializable("QRCODE", qrCode);
+                intent.putExtra("QRCODE",args);
                 context.startActivity(intent);
+                ((AppCompatActivity) context).overridePendingTransition(R.anim.fade_in,R.anim.fade_out);
 
-//                //Create destination fragment
-//                Fragment fragment = new QrCodeDetailsFragment();
-//                fragment.setArguments(args);
-//
-//                //Create Fragment manager
-//                FragmentManager fragmentManager = ((FragmentActivity) context).getSupportFragmentManager();
-//                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//                fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_qr_code_display));
-//                fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_qr_code_list));
-//                fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//                fragmentTransaction.commit();
             }
         });
 

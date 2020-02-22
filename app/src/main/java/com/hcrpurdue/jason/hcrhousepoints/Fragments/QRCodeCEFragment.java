@@ -61,6 +61,7 @@ public class QRCodeCEFragment extends BottomSheetDialogFragment {
     public QRCodeCEFragment(Context context) {
         this.context = context;
         this.cacheManager = CacheManager.getInstance(context);
+
     }
 
     public QRCodeCEFragment(Context context, Link code) {
@@ -83,8 +84,8 @@ public class QRCodeCEFragment extends BottomSheetDialogFragment {
         invalidPointType =  view.findViewById(R.id.invalid_point_type_label);
         invalidDescription = view.findViewById(R.id.invalid_description);
 
-        invalidPointType.setVisibility(View.GONE);
-        invalidDescription.setVisibility(View.GONE);
+        invalidPointType.setVisibility(View.INVISIBLE);
+        invalidDescription.setVisibility(View.INVISIBLE);
 
         multipleUseSwitch.setOnClickListener(v -> flipSwitch(view));
         createButton.setOnClickListener(v -> generateQRCode(view));
