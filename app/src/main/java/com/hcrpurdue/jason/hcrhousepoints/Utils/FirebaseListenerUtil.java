@@ -20,8 +20,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
+import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirebaseCollectionListener;
@@ -43,6 +45,9 @@ public class FirebaseListenerUtil {
     private FirebaseCollectionListener userPointLogListener;
     private FirebaseCollectionListener rhpNotificationListener;
     private FirebaseCollectionListener pointTypeListener;
+    private FirebaseCollectionListener houseListener;
+    private FirebaseCollectionListener rewardsListener;
+
     private FirestoreDocumentListener pointLogListener;
     private FirestoreDocumentListener systemPreferenceListener;
     private FirestoreDocumentListener userAccountListener;
@@ -84,6 +89,8 @@ public class FirebaseListenerUtil {
             //Create RHP only listeners
             createRHPNotificationListener();
         }
+        createHouseListener();
+        createRewardsListener();
     }
 
     public void removeCallbacks(String key){
@@ -105,6 +112,12 @@ public class FirebaseListenerUtil {
         if(userAccountListener != null){
             userAccountListener.removeCallback(key);
         }
+        if(houseListener != null){
+            houseListener.removeCallback(key);
+        }
+        if(rewardsListener != null){
+            rewardsListener.removeCallback(key);
+        }
     }
 
     public void resetFirebaseListeners(){
@@ -114,6 +127,8 @@ public class FirebaseListenerUtil {
         killUserPointLogListener();
         killSystemPreferencesListener();
         killPointTypeListener();
+        killHouseListener();
+        killRewardsListener();
         fluListener = null;
     }
 
@@ -319,6 +334,76 @@ public class FirebaseListenerUtil {
         if(pointTypeListener != null){
             pointTypeListener.killListener();
             pointTypeListener = null;
+        }
+    }
+
+    /*------------------------House LISTENER-------------------------------------------*/
+
+    private void createHouseListener(){
+        Query houseQuery = db.collection("House");
+        SnapshotInterface si = new SnapshotInterface() {
+            @Override
+            public void handleQuerySnapshots(QuerySnapshot queryDocumentSnapshots, Exception e) {
+                if( e == null){
+                    List<House> houses = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        House house = new House(doc.getId(), doc.getData());
+                        houses.add(house);
+                    }
+                    cacheManager.setHouseList(houses);
+                }
+
+            }
+        };
+        houseListener = new FirebaseCollectionListener(context,houseQuery,si);
+    }
+
+    public FirebaseCollectionListener getHouseListener(){
+        if(houseListener == null){
+            createHouseListener();
+        }
+        return this.houseListener;
+    }
+
+    private void killHouseListener(){
+        if(houseListener != null){
+            houseListener.killListener();
+            houseListener = null;
+        }
+    }
+
+    /*------------------------Rewards LISTENER-------------------------------------------*/
+
+    private void createRewardsListener(){
+        Query rewardsQuery = db.collection("Rewards");
+        SnapshotInterface si = new SnapshotInterface() {
+            @Override
+            public void handleQuerySnapshots(QuerySnapshot queryDocumentSnapshots, Exception e) {
+                if( e == null){
+                    List<Reward> rewards = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        Reward reward = new Reward(doc.getId(), doc.getData());
+                        rewards.add(reward);
+                    }
+                    cacheManager.setRewards(rewards);
+                }
+
+            }
+        };
+        rewardsListener = new FirebaseCollectionListener(context, rewardsQuery, si);
+    }
+
+    public FirebaseCollectionListener getRewardsListener(){
+        if(rewardsListener == null){
+            createRewardsListener();
+        }
+        return this.rewardsListener;
+    }
+
+    private void killRewardsListener(){
+        if(rewardsListener != null){
+            rewardsListener.killListener();
+            rewardsListener = null;
         }
     }
 }
