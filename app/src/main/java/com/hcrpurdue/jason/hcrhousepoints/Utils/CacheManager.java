@@ -40,7 +40,7 @@ public class CacheManager {
     private User user = null;
     private int notificationCount = 0;
     private List<House> houseList = null;
-    private List<Reward> rewardList = null;
+    private List<Reward> rewards = null;
     private ArrayList<Link> userCreatedQRCodes = null;
     private List<PointLog> personalPointLogs = null;
     private List<PointLog> rHPNotificationLogs = null;
@@ -384,20 +384,6 @@ public class CacheManager {
         });
     }
 
-    public void getPointStatistics(CacheManagementInterface si) {
-        boolean getRewards = rewardList == null;
-        fbutil.getPointStatistics(user.getUserId(), getRewards, new FirebaseUtilInterface() {
-            @Override
-            public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
-                houseList = houses;
-                user.setTotalPoints(userPoints);
-                if (getRewards)
-                    rewardList = rewards;
-                si.onGetPointStatisticsSuccess(houseList, user.getTotalPoints(), rewardList);
-            }
-        });
-    }
-
     public void clearUserData() {
         user = null;
         cacheUtil.deleteCache();
@@ -731,6 +717,26 @@ public class CacheManager {
         if(rHPNotificationLogs == null)
             rHPNotificationLogs = new ArrayList<>();
         return rHPNotificationLogs;
+    }
+
+    public void setHouseList(List<House> houses){
+        this.houseList = houses;
+    }
+
+    public List<House> getHouses(){
+        if(houseList == null)
+            houseList = new ArrayList<>();
+        return houseList;
+    }
+
+    public List<Reward> getRewards(){
+        if(rewards == null)
+            rewards = new ArrayList<>();
+        return rewards;
+    }
+
+    public void setRewards(List<Reward> rewards){
+        this.rewards = rewards;
     }
 
 }

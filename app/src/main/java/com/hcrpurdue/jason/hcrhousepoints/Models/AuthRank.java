@@ -16,4 +16,9 @@ public class AuthRank {
     public int getSemesterRank() {
         return semesterRank;
     }
+
+    public void setInvalid(){
+        this.semesterRank = -1;
+        this.houseRank = -1;
+    }
 }

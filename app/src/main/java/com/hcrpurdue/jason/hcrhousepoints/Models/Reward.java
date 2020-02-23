@@ -1,6 +1,11 @@
 package com.hcrpurdue.jason.hcrhousepoints.Models;
 
+import android.content.Context;
+import android.content.res.Resources;
+
 import androidx.annotation.NonNull;
+
+import java.util.Map;
 
 public class Reward implements Comparable<Reward>{
 
@@ -11,21 +16,31 @@ public class Reward implements Comparable<Reward>{
     private String name;
     private int requiredPoints;
     private float pointsPerResident;
-    private int imageResource;
+    private String fileName;
 
-    public Reward(String n, int points, float pointsPerResident, int resource){
-        name = n;
-        requiredPoints = points;
-        imageResource = resource;
-        this.pointsPerResident = pointsPerResident;
+//    public Reward(String n, int points, float pointsPerResident, int resource){
+//        name = n;
+//        requiredPoints = points;
+//        imageResource = resource;
+//        this.pointsPerResident = pointsPerResident;
+//    }
+//
+
+    public Reward(String name, Map<String, Object> data) {
+        this.name = name;
+        this.fileName = (String) data.get("FileName");
+        this.requiredPoints = ((Long) data.get("RequiredValue")).intValue();
+        this.pointsPerResident = ((Long) data.get(Reward.REQUIRED_PPR_KEY)).floatValue();
     }
 
     public String getName() {
         return name;
     }
 
-    public int getImageResource() {
-        return imageResource;
+
+    public int getIconResource(Context context){
+        String rewardIcon = fileName.replace(".png", "").toLowerCase();
+        return context.getResources().getIdentifier(rewardIcon, "drawable", context.getPackageName());
     }
 
     public int getRequiredPoints() {
