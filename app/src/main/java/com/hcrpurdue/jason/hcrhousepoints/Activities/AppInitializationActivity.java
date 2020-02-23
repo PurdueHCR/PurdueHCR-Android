@@ -140,40 +140,29 @@ public class AppInitializationActivity extends AppCompatActivity {
                         @Override
                         public void onGetSystemPreferencesSuccess(SystemPreferences systemPreferences) {
                             //Get the rewards for the house competition
-                            cacheManager.getPointStatistics(new CacheManagementInterface() {
+                            cacheManager.initPersonalPointLogs(new CacheManagementInterface() {
                                 @Override
-                                public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
-                                    //Initialize the list of this user's point logs records
-                                    cacheManager.initPersonalPointLogs(new CacheManagementInterface() {
-                                        @Override
-                                        public void onGetPersonalPointLogs(List<PointLog> personalLogs) {
-                                            //Refresh the user rank
-                                            cacheManager.refreshUserRank(getBaseContext(), new CacheManagementInterface() {
-                                                @Override
-                                                public void onError(Exception e, Context context) {
-                                                    handleDataInitializationError(e);
-                                                }
-
-                                                @Override
-                                                public void onGetRank(Integer rank) {
-                                                    //Check the system preferences for app version, and if not in sync, post update message
-                                                    if(!systemPreferences.isAppUpToDate()){
-                                                        alertOutOfDateApp();
-                                                    }
-                                                    else{
-                                                        //If everything checks out, transition to the main activity
-                                                        checkForLinks();
-                                                    }
-                                                }
-                                            });
-
-                                        }
-
+                                public void onGetPersonalPointLogs(List<PointLog> personalLogs) {
+                                    //Refresh the user rank
+                                    cacheManager.refreshUserRank(getBaseContext(), new CacheManagementInterface() {
                                         @Override
                                         public void onError(Exception e, Context context) {
                                             handleDataInitializationError(e);
                                         }
+
+                                        @Override
+                                        public void onGetRank(Integer rank) {
+                                            //Check the system preferences for app version, and if not in sync, post update message
+                                            if(!systemPreferences.isAppUpToDate()){
+                                                alertOutOfDateApp();
+                                            }
+                                            else{
+                                                //If everything checks out, transition to the main activity
+                                                checkForLinks();
+                                            }
+                                        }
                                     });
+
                                 }
 
                                 @Override
