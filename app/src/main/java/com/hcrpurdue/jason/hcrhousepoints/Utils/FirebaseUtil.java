@@ -558,12 +558,7 @@ public class FirebaseUtil {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     // Pull values from document and save them into an object
                     String id = document.getId();
-                    String description = ((String) document.get("Description"));
-                    boolean singleUse = ((boolean) document.get("SingleUse"));
-                    int pointTypeId = ((Long)document.get("PointID")).intValue();
-                    boolean isEnabled = ((boolean) document.get("Enabled"));
-                    boolean isArchived = ((boolean) document.get("Archived"));
-                    Link newCode = new Link(id, description, singleUse, pointTypeId, isEnabled,isArchived);
+                    Link newCode = new Link(id, document.getData());
                     //Add code to the list
                     qrCodes.add(newCode);
                 }
@@ -587,17 +582,8 @@ public class FirebaseUtil {
      * @param fui   Firebase Util Interface with methods onError and onSuccess.
      */
     public void createQRCode(Link link, FirebaseUtilInterface fui){
-        //turn the Link object into a Map with the Keys being the Firebase Keys
-        Map<String, Object> data = new HashMap<>();
-        data.put("Description", link.getDescription());
-        data.put("PointID", link.getPointTypeId());
-        data.put("SingleUse", link.isSingleUse());
-        data.put("CreatorID", CacheManager.getInstance(context).getUserId());
-        data.put("Enabled", link.isEnabled());
-        data.put("Archived", link.isArchived());
-
         //Call Firebase to add the data
-        db.collection(ROOT_LINKS_KEY).add(data).addOnCompleteListener(task -> {
+        db.collection(ROOT_LINKS_KEY).add(link.convertToDict()).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 System.out.println("Added Document to: "+task.getResult().getId());
                 //If successful, save the document ID as the LinkID so that the caller has a reference to it.
@@ -630,6 +616,28 @@ public class FirebaseUtil {
                 System.out.println("Link Update Success");
                 //Make sure local copy is updated
                 link.setEnabled(isEnabled);
+                fui.onSuccess();
+            }
+            else{
+                //Handle Errors
+                fui.onError(task.getException(),context);
+            }
+        });
+    }
+
+    /**
+     * Update a Link object in the database with a new Enabled Status
+     *
+     * @param link  Link object to be updated
+     * @param fui   FirebaseUtilInterface with method OnError and onSuccess implemented
+     */
+    public void updateQRCode(Link link, FirebaseUtilInterface fui){
+
+        //Tell the document with path Links/<LinkID> to update the values stored in the map
+        db.collection(ROOT_LINKS_KEY).document(link.getLinkId()).update(link.convertToDict()).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                System.out.println("Link Update Success");
+                //Make sure local copy is updated
                 fui.onSuccess();
             }
             else{

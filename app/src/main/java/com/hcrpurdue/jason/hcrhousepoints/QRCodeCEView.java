@@ -1,15 +1,10 @@
-package com.hcrpurdue.jason.hcrhousepoints.Fragments;
+package com.hcrpurdue.jason.hcrhousepoints;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.os.Bundle;
+import android.graphics.Point;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SimpleAdapter;
@@ -18,33 +13,18 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
-import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.content.Context.INPUT_METHOD_SERVICE;
 
-/**
- * The QR Code Create and Edit Fragment is the bottom sheet modal that will pop up and appear when
- * a QR code needs to be created or edited
- */
-public class QRCodeCEFragment extends BottomSheetDialogFragment {
 
+public class QRCodeCEView {
     private Link code;
     private Context context;
     private ArrayList<PointType> enabledTypes = new ArrayList<PointType>();
@@ -58,54 +38,38 @@ public class QRCodeCEFragment extends BottomSheetDialogFragment {
     TextView invalidPointType;
     TextView invalidDescription;
 
-    public QRCodeCEFragment(Context context) {
+    public QRCodeCEView(Context context, View parentView, Link link){
         this.context = context;
         this.cacheManager = CacheManager.getInstance(context);
+        this.code = link;
 
-    }
-
-    public QRCodeCEFragment(Context context, Link code) {
-        this(context);
-        this.code = code;
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-
-        View view = inflater.inflate(R.layout.modal_qr_create_and_edit, container,
-                false);
-        pointTypeSpinner = view.findViewById(R.id.point_type_spinner);
-        multipleUseSwitch = view.findViewById(R.id.multi_use_switch);
-        descriptionEditText = view.findViewById(R.id.qr_code_description_edit_text);
-        createButton = view.findViewById(R.id.create_button);
-        invalidPointType =  view.findViewById(R.id.invalid_point_type_label);
-        invalidDescription = view.findViewById(R.id.invalid_description);
+        pointTypeSpinner = parentView.findViewById(R.id.point_type_spinner);
+        multipleUseSwitch = parentView.findViewById(R.id.multi_use_switch);
+        descriptionEditText = parentView.findViewById(R.id.qr_code_description_edit_text);
+        createButton = parentView.findViewById(R.id.create_button);
+        invalidPointType =  parentView.findViewById(R.id.invalid_point_type_label);
+        invalidDescription = parentView.findViewById(R.id.invalid_description);
 
         invalidPointType.setVisibility(View.INVISIBLE);
         invalidDescription.setVisibility(View.INVISIBLE);
 
-        multipleUseSwitch.setOnClickListener(v -> flipSwitch(view));
-        createButton.setOnClickListener(v -> generateQRCode(view));
+        multipleUseSwitch.setOnClickListener(v -> flipSwitch(parentView));
+        createButton.setOnClickListener(v -> generateQRCode(parentView));
 
         loadSpinner(cacheManager.getPointTypeList());
 
-        return view;
+        if(code != null){
+            descriptionEditText.setText(code.getDescription());
+            createButton.setText("Update");
+            multipleUseSwitch.setChecked(!code.isSingleUse());
+        }
+    }
 
+    public QRCodeCEView(Context context, View parentView){
+        this(context, parentView, null);
     }
 
 
-    @Override
-    public int getTheme() {
-        return R.style.BottomSheetDialogTheme;
-    }
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new BottomSheetDialog(requireContext(), getTheme());
-    }
 
     /**
      * Puts the PointType list into the Spinner
@@ -113,6 +77,8 @@ public class QRCodeCEFragment extends BottomSheetDialogFragment {
      */
     private void loadSpinner(List<PointType> types){
         enabledTypes = new ArrayList<>();
+        PointType selectedPointType = null;
+
 
         List<Map<String, String>> formattedPointTypes = new ArrayList<>();
         Map<String, String> placeholder = new HashMap<>();
@@ -126,11 +92,17 @@ public class QRCodeCEFragment extends BottomSheetDialogFragment {
                 map.put("text", type.getName());
                 map.put("subText", type.getValue() + " point" + ((type.getValue() == 1)? "":"s"));
                 formattedPointTypes.add(map);
+                if(code != null && code.getPointTypeId() == type.getId()){
+                    selectedPointType = type;
+                }
             }
         }
         SimpleAdapter adapter = new SimpleAdapter(context, formattedPointTypes, android.R.layout.simple_list_item_2, new String[]{"text", "subText"}, new int[]{android.R.id.text1, android.R.id.text2});
         adapter.setDropDownViewResource(android.R.layout.simple_list_item_2);
         pointTypeSpinner.setAdapter(adapter);
+        if(selectedPointType != null){
+            pointTypeSpinner.setSelection(enabledTypes.indexOf(selectedPointType));
+        }
     }
 
     /**
@@ -139,7 +111,7 @@ public class QRCodeCEFragment extends BottomSheetDialogFragment {
      */
     private void flipSwitch(View view){
         if(multipleUseSwitch.isChecked()){
-            AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+            AlertDialog alertDialog = new AlertDialog.Builder(context).create();
             alertDialog.setTitle("Warning");
             alertDialog.setMessage("If you allow this code to be used multiple times, points submitted will have to be approved by an RHP.");
             alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
@@ -158,12 +130,6 @@ public class QRCodeCEFragment extends BottomSheetDialogFragment {
      * @param view view where button is
      */
     private void generateQRCode(View view) {
-        //Dismiss keyboard when generating
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
-
-        if(imm.isAcceptingText()) { // verify if the soft keyboard is open
-            imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0); // Hide keyboard
-        }
 
         //check conditions
         if(TextUtils.isEmpty(descriptionEditText.getText())){
@@ -179,25 +145,39 @@ public class QRCodeCEFragment extends BottomSheetDialogFragment {
             invalidPointType.setVisibility(View.VISIBLE);
         }
         else{
-            invalidPointType.setVisibility(View.INVISIBLE);
             invalidDescription.setVisibility(View.INVISIBLE);
+            invalidPointType.setVisibility(View.VISIBLE);
             //Create new Link object
-
-            Link link = new Link(cacheManager.getUser().getUserId(), descriptionEditText.getText().toString(),
+            /*
+            Link link = new Link(codeDescriptionLabel.getText().toString(),
                     (!multipleUseSwitch.isChecked()),
-                    enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()-1).getId());
+                    enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId());
             //Pass to CacheManager then Firebase to handle generation of Links in database
             cacheManager.createQRCode(link, new CacheManagementInterface() {
                 @Override
                 public void onSuccess() {
-                    dismiss();
+                    //Put the link into the Bundle
+                    Bundle args = new Bundle();
+                    args.putSerializable("QRCODE", link);
+
+                    //Create destination fragment
+                    Fragment fragment = new QrCodeDetailsFragment();
+                    fragment.setArguments(args);
+
+                    //Create Fragment manager
+                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_qr_code_display));
+                    fragmentTransaction.addToBackStack(Integer.toString(R.id.generateQRCode));
+                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    fragmentTransaction.commit();
                 }
                 @Override
                 public void onError(Exception e, Context context) {
                     Toast.makeText(context,"Could Not Create QR Code. Try Again",Toast.LENGTH_LONG).show();
                 }
             });
-
+             */
         }
     }
 }

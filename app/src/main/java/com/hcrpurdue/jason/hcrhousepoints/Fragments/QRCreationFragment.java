@@ -154,34 +154,34 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
         }
         else{
             //Create new Link object
-            Link link = new Link(codeDescriptionLabel.getText().toString(),
-                    (!multipleUseSwitch.isChecked()),
-                    enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId());
-            //Pass to CacheManager then Firebase to handle generation of Links in database
-            cacheManager.createQRCode(link, new CacheManagementInterface() {
-                @Override
-                public void onSuccess() {
-                    //Put the link into the Bundle
-                    Bundle args = new Bundle();
-                    args.putSerializable("QRCODE", link);
-
-//                    //Create destination fragment
-//                    Fragment fragment = new QrCodeDetailsFragment();
-//                    fragment.setArguments(args);
+//            Link link = new Link(codeDescriptionLabel.getText().toString(),
+//                    (!multipleUseSwitch.isChecked()),
+//                    enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId());
+//            //Pass to CacheManager then Firebase to handle generation of Links in database
+//            cacheManager.createQRCode(link, new CacheManagementInterface() {
+//                @Override
+//                public void onSuccess() {
+//                    //Put the link into the Bundle
+//                    Bundle args = new Bundle();
+//                    args.putSerializable("QRCODE", link);
 //
-//                    //Create Fragment manager
-//                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-//                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//                    fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_qr_code_display));
-//                    fragmentTransaction.addToBackStack(Integer.toString(R.id.generateQRCode));
-//                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//                    fragmentTransaction.commit();
-                }
-                @Override
-                public void onError(Exception e, Context context) {
-                    Toast.makeText(context,"Could Not Create QR Code. Try Again",Toast.LENGTH_LONG).show();
-                }
-            });
+////                    //Create destination fragment
+////                    Fragment fragment = new QrCodeDetailsFragment();
+////                    fragment.setArguments(args);
+////
+////                    //Create Fragment manager
+////                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+////                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+////                    fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_qr_code_display));
+////                    fragmentTransaction.addToBackStack(Integer.toString(R.id.generateQRCode));
+////                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+////                    fragmentTransaction.commit();
+//                }
+//                @Override
+//                public void onError(Exception e, Context context) {
+//                    Toast.makeText(context,"Could Not Create QR Code. Try Again",Toast.LENGTH_LONG).show();
+//                }
+//            });
         }
     }
 
