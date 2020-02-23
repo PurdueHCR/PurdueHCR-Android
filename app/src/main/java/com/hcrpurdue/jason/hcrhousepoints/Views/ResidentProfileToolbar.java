@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
@@ -13,6 +14,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagemen
 public class ResidentProfileToolbar {
     private TextView userPointTotalTextView;
     private TextView userHouseRankTextView;
+    private TextView semesterRankTextView;
     private TextView houseNameTextView;
     private ImageView houseImageView;
 
@@ -20,7 +22,7 @@ public class ResidentProfileToolbar {
     private Resources resources;
     private String packageName;
     private Context context;
-    private int userRank;
+    private AuthRank userRank;
 
 
     public ResidentProfileToolbar(Context context, View parentView){
@@ -28,6 +30,7 @@ public class ResidentProfileToolbar {
         userPointTotalTextView = parentView.findViewById(R.id.your_points_text_view);
         userHouseRankTextView = parentView.findViewById(R.id.house_rank_text_view);
         houseImageView = parentView.findViewById(R.id.profile_house_image_view);
+        semesterRankTextView = parentView.findViewById(R.id.semester_rank_text_view);
         this.context = context;
         this.cacheManager = CacheManager.getInstance(context);
         this.resources = context.getResources();
@@ -45,9 +48,11 @@ public class ResidentProfileToolbar {
         houseImageView.setImageResource(drawableID);
         houseNameTextView.setText(cacheManager.getHouseAndPermissionName());
         String userPointsText = "" + cacheManager.getUser().getTotalPoints();
-        String houseRankText = (userRank != -1)? "# "+userRank: "";
+        String houseRankText = (userRank.getHouseRank() != -1)? "# "+userRank.getHouseRank(): "";
+        String semesterRankText = (userRank.getSemesterRank() != -1)? "# "+userRank.getSemesterRank(): "";
         userPointTotalTextView.setText(userPointsText);
         userHouseRankTextView.setText(houseRankText);
+        semesterRankTextView.setText(semesterRankText);
 
     }
 
@@ -57,11 +62,11 @@ public class ResidentProfileToolbar {
             @Override
             public void onError(Exception e, Context context) {
                 System.out.println(e.getMessage());
-                userRank = -1;
+                userRank.setInvalid();
             }
 
             @Override
-            public void onGetRank(Integer rank) {
+            public void onGetRank(AuthRank rank) {
                 userRank = rank;
                 populateTopBar();
             }
