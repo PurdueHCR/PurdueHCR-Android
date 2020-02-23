@@ -142,44 +142,41 @@ public class AppInitializationActivity extends AppCompatActivity {
     private void initializeCompetitionData(){
 
         try {
+            System.out.println("RANK 1");
             //get point types from Firestore
             cacheManager.getUpdatedPointTypes(new CacheManagementInterface() {
-
                 public void onPointTypeComplete(List<PointType> data) {
+                    System.out.println("RANK 2");
                     //get System Preferences from Firestore
                     cacheManager.getSystemPreferences(new CacheManagementInterface() {
                         @Override
                         public void onGetSystemPreferencesSuccess(SystemPreferences systemPreferences) {
+                            System.out.println("RANK 3");
                             //Get the rewards for the house competition
                             cacheManager.initPersonalPointLogs(new CacheManagementInterface() {
                                 @Override
                                 public void onGetPersonalPointLogs(List<PointLog> personalLogs) {
+                                    System.out.println("RANK 4");
                                     //Refresh the user rank
                                     cacheManager.refreshUserRank(getBaseContext(), new CacheManagementInterface() {
                                         @Override
-                                        public void onGetPersonalPointLogs(List<PointLog> personalLogs) {
-                                            //Refresh the user rank and cache into cachemanager
-                                            cacheManager.refreshUserRank(getBaseContext(), new CacheManagementInterface() {
-                                                @Override
-                                                public void onError(Exception e, Context context) {
-                                                    handleDataInitializationError(e);
-                                                }
-
-                                                @Override
-                                                public void onGetRank(AuthRank rank) {
-                                                    System.out.println("RANK: "+rank.getHouseRank()+" sem: "+rank.getSemesterRank());
-                                                    //Check the system preferences for app version, and if not in sync, post update message
-                                                    if(!systemPreferences.isAppUpToDate()){
-                                                        alertOutOfDateApp();
-                                                    }
-                                                    else{
-                                                        //If everything checks out, transition to the main activity
-                                                        checkForLinks();
-                                                    }
-                                                }
-                                            });
+                                        public void onError(Exception e, Context context) {
+                                            System.out.println("RANK FAILED");
+                                            handleDataInitializationError(e);
                                         }
 
+                                        @Override
+                                        public void onGetRank(AuthRank rank) {
+                                            System.out.println("RANK: "+rank.getHouseRank()+" sem: "+rank.getSemesterRank());
+                                            //Check the system preferences for app version, and if not in sync, post update message
+                                            if(!systemPreferences.isAppUpToDate()){
+                                                alertOutOfDateApp();
+                                            }
+                                            else{
+                                                //If everything checks out, transition to the main activity
+                                                checkForLinks();
+                                            }
+                                        }
                                     });
 
                                 }

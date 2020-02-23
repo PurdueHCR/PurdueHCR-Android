@@ -45,12 +45,27 @@
             android:id="@+id/CONSTANT_TOTAL_POINTS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="Your Points"
             android:textColor="@color/text_main"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/your_points_text_view"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/house_name_text_view"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/CONSTANT_TOTAL_POINTS2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Ranking"
+            android:textColor="@color/text_main"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@+id/constraintLayout"
+            app:layout_constraintStart_toStartOf="@+id/constraintLayout"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/your_points_text_view"
@@ -59,59 +74,60 @@
             android:text="91"
             android:textColor="@color/text_main"
             android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/CONSTANT_TOTAL_POINTS"
             app:layout_constraintEnd_toEndOf="@+id/CONSTANT_TOTAL_POINTS"
-            app:layout_constraintStart_toStartOf="@+id/CONSTANT_TOTAL_POINTS"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="@+id/CONSTANT_TOTAL_POINTS"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
+            android:id="@+id/constraintLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
             android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/profile_house_image_view"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/house_name_text_view"
+            app:layout_constraintTop_toBottomOf="@+id/CONSTANT_TOTAL_POINTS2">
 
             <TextView
                 android:id="@+id/CONSTANT_HOUSE_RANK"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="House Rank"
+                android:text="House"
                 android:textAlignment="center"
                 android:textColor="@color/text_main"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toTopOf="@id/CONSTANT_SEMESTER_RANK"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="spread" />
 
             <TextView
                 android:id="@+id/semester_rank_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
                 android:text="#10"
                 android:textColor="@color/text_main"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/CONSTANT_SEMESTER_RANK"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintHorizontal_bias="0.99"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/CONSTANT_SEMESTER_RANK" />
 
             <TextView
                 android:id="@+id/CONSTANT_SEMESTER_RANK"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Semester Rank"
+                android:text="Semester"
                 android:textAlignment="center"
                 android:textColor="@color/text_main"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/semester_rank_text_view"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/CONSTANT_HOUSE_RANK"
+                app:layout_constraintVertical_chainStyle="spread" />
 
             <TextView
                 android:id="@+id/house_rank_text_view"
@@ -119,10 +135,10 @@
                 android:layout_height="wrap_content"
                 android:text="#10"
                 android:textColor="@color/text_main"
-                android:textSize="16sp"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/CONSTANT_HOUSE_RANK"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/CONSTANT_HOUSE_RANK" />
+                app:layout_constraintTop_toTopOf="@+id/CONSTANT_HOUSE_RANK" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
