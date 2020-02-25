@@ -190,10 +190,12 @@ public class QRCodeCEFragment extends BottomSheetDialogFragment {
             cacheManager.createQRCode(link, new CacheManagementInterface() {
                 @Override
                 public void onSuccess() {
+                    System.out.println("SUCCESS ON CREATE");
                     dismiss();
                 }
                 @Override
                 public void onError(Exception e, Context context) {
+                    System.out.println("FAILURE ON CREATE");
                     Toast.makeText(context,"Could Not Create QR Code. Try Again",Toast.LENGTH_LONG).show();
                 }
             });

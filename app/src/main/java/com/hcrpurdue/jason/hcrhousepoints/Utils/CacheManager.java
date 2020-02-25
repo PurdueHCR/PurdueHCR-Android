@@ -25,10 +25,12 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.FirebaseUtilInterface;
 
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 // Because non-global variables are for people who care about technical debt
@@ -46,12 +48,14 @@ public class CacheManager {
     private List<PointLog> rHPNotificationLogs = null;
     private SystemPreferences sysPrefs = null;
     private AuthRank userRank = null;
+    private Context context;
 
     private CacheManager() {
         // Exists only to defeat instantiation. Get rekt, instantiation
     }
 
     private void setApplicationContext(Context c) {
+        this.context = c;
         fbutil.setApplicationContext(c);
         cacheUtil.setApplicationContext(c);
     }
@@ -450,15 +454,24 @@ public class CacheManager {
      * @param si   CacheManagementInterface with methods onError and onSuccess
      */
     public void createQRCode(Link link, CacheManagementInterface si){
-        fbutil.createQRCode(link, new FirebaseUtilInterface() {
+        APIHelper.getInstance(context).createLink(link.getDescription(), link.getPointTypeId(), link.isSingleUse()).enqueue(new Callback<String>() {
             @Override
-            public void onSuccess() {
-                si.onSuccess();
+            public void onResponse(Call<String> call, Response<String> response) {
+                System.out.println("GOT RESPONSE: "+response.toString());
+                if(response.isSuccessful()) {
+                    System.out.println("SUCCESS ");
+                    si.onSuccess();
+                }
+                else{
+                    System.out.println("ERNON SUCCsOR");
+                    si.onError(new Exception(response.message()), context);
+                }
             }
 
             @Override
-            public void onError(Exception e, Context context) {
-                si.onError(e,context);
+            public void onFailure(Call<String> call, Throwable t) {
+                System.out.println("GOT FAILTURE");
+                si.onError(new Exception(t.getMessage()), context);
             }
         });
     }
