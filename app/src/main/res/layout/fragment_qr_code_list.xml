@@ -2,8 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#AAAAAA"
+    android:orientation="vertical">
 
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -37,7 +39,6 @@
             android:layout_marginRight="16dp"
             android:layout_marginBottom="16dp"
             android:divider="@android:color/transparent"
-            android:dividerHeight="10.0sp"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
             android:paddingRight="10dp"
@@ -54,10 +55,10 @@
 
     <TextView
         android:id="@android:id/empty"
-        android:text="Loading"
-        android:gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="Loading" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

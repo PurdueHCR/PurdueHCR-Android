@@ -1,64 +1,86 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="wrap_content"
-    android:background="@drawable/border"
-    app:cardCornerRadius="20dp">
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:minHeight="?attr/listPreferredItemHeight"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:minHeight="?attr/listPreferredItemHeight">
+    <ImageView
+        android:id="@+id/qrCodeImageView"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/border" />
 
-        <View
-            android:id="@+id/grayBackgroundView"
-            android:layout_width="wrap_content"
-            android:layout_height="160dp"
-            android:background="#AAAAAA"
-            android:shadowColor="#000000"
-            android:shadowDx="1.5"
-            android:shadowDy="1.3"
-            android:shadowRadius="1.6"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/largeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Description of the QR code ..."
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@+id/qrCodeImageView"
+        app:layout_constraintTop_toTopOf="@+id/qrCodeImageView" />
 
-        <ImageView
-            android:id="@+id/qrCodeImageView"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            app:layout_constraintBottom_toBottomOf="@+id/grayBackgroundView"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/grayBackgroundView"
+    <TextView
+        android:id="@+id/smallTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Name of the point type this is related to."
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="@+id/qrCodeImageView"
+        app:layout_constraintStart_toEndOf="@+id/qrCodeImageView" />
+
+    <Switch
+        android:id="@+id/qrSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/qrCodeImageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/qrCodeImageView" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/smallTextView">
+
+        <ImageButton
+            android:id="@+id/editImageButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"
             app:srcCompat="@drawable/border" />
 
-        <View
-            android:id="@+id/whiteBackgroundView"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:background="#FFFFFF"
-            android:shadowColor="#000000"
-            android:shadowDx="1.5"
-            android:shadowDy="1.3"
-            android:shadowRadius="1.6"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/grayBackgroundView" />
-
-        <TextView
-            android:id="@+id/largeTextView"
-            android:layout_width="wrap_content"
+        <Space
+            android:layout_width="10dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="15dp"
-            android:text="Description of the QR code ..."
-            android:textColor="#000000"
-            android:textSize="20sp"
-            app:layout_constraintStart_toStartOf="@+id/whiteBackgroundView"
-            app:layout_constraintTop_toBottomOf="@+id/grayBackgroundView" />
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:id="@+id/shareImageButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"
+            app:srcCompat="@drawable/border" />
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+    </LinearLayout>
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

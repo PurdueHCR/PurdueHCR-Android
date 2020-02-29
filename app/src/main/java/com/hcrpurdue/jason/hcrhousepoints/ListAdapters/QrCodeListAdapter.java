@@ -76,7 +76,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
             Toast.makeText(context,"Could not create QR Code",Toast.LENGTH_LONG).show();
         }
 
-        /*TextView typeTextView = view.findViewById(R.id.smallTextView);
+        TextView typeTextView = view.findViewById(R.id.smallTextView);
         typeTextView.setText(qrCode.getPointType(context).getName());
         Switch codeActiveSwitch = view.findViewById(R.id.qrSwitch);
         codeActiveSwitch.setChecked(qrCode.isEnabled());
@@ -104,10 +104,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
                     }
                 });
             }
-        });*/
-
-
-
+        });
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override
