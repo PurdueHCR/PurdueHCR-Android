@@ -1,78 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/constraint_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/modal_bottom_round_corners"
-    android:orientation="vertical">
+    android:background="@drawable/modal_bottom_round_corners">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="133dp">
+        android:id="@+id/constraintLayout2"
+        android:layout_width="0dp"
+        android:layout_height="160dp"
+        android:background="@drawable/border_bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-
-        <TextView
-            android:id="@+id/qr_code_collapsed_point_type_label"
-            android:layout_width="match_parent"
+        <Spinner
+            android:id="@+id/qr_code_edit_point_type_spinner"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:text="Point Type Label"
-            android:textAlignment="viewStart"
-            android:textSize="24sp"
-            android:textStyle="bold"
+            android:backgroundTint="#FFFFFF"
+            android:entries="@array/share_options"
+            android:spinnerMode="dialog"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/qr_code_collapsed_point_description_label"
+        <EditText
+            android:id="@+id/qr_code_description_edit_text"
             android:layout_width="0dp"
             android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@color/opaque"
+            android:ems="10"
+            android:gravity="start|top"
+            android:hint="Description for the Code"
+            android:inputType="textImeMultiLine"
+            android:imeOptions="actionDone"
+            android:maxLength="150"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
-            android:text="Description Label"
+            android:paddingTop="8dp"
             app:layout_constraintBottom_toTopOf="@+id/qr_code_collapsed_share_button"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/qr_code_collapsed_point_type_label" />
+            app:layout_constraintTop_toBottomOf="@+id/qr_code_edit_point_type_spinner" />
 
         <ImageButton
             android:id="@+id/qr_code_collapsed_share_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/qr_code_collapsed_edit_button"
-            app:srcCompat="@drawable/ic_share_black_24dp" />
-
-        <ImageButton
-            android:id="@+id/qr_code_collapsed_edit_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/ic_share_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/ic_mode_edit_black_24dp" />
+            app:srcCompat="@drawable/ic_share_black_24dp" />
 
         <Switch
             android:id="@+id/qr_code_collapsed_enabled_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/qr_code_collapsed_share_button"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/qr_code_collapsed_share_button" />
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Additional Options"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
-    <include
-        android:id="@+id/edit_view"
-        layout="@layout/modal_qr_create_and_edit"
-        android:visibility="visible" />
+    <Switch
+        android:id="@+id/qr_code_edit_multi_use_switch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Allow Multiple Scans"
+        app:layout_constraintBottom_toTopOf="@+id/qr_code_edit_archive_switch"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
-</LinearLayout>
+    <Switch
+        android:id="@+id/qr_code_edit_archive_switch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="Archive QR Code"
+        app:layout_constraintBottom_toTopOf="@+id/qr_code_edit_update_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/qr_code_edit_multi_use_switch" />
+
+    <Button
+        android:id="@+id/qr_code_edit_update_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="Update"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/qr_code_edit_archive_switch" />
+
+    <ProgressBar
+        android:id="@+id/qr_code_edit_loading_symbol"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/qr_code_edit_update_button"
+        app:layout_constraintStart_toStartOf="@+id/qr_code_edit_archive_switch"
+        app:layout_constraintTop_toTopOf="@+id/qr_code_edit_update_button" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

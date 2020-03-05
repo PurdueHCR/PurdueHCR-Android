@@ -1,21 +1,16 @@
 package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 
-import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,7 +70,7 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
      * @param view View where elements are to be initialized
      */
     private void initializeUIElements(View view) {
-        pointTypeSpinner = view.findViewById(R.id.point_type_spinner);
+        pointTypeSpinner = view.findViewById(R.id.qr_code_edit_point_type_spinner);
         multipleUseSwitch = (Switch) view.findViewById(R.id.multi_use_switch);
         multipleUseSwitch.setOnClickListener(v -> flipSwitch(view));
         codeDescriptionLabel = (EditText) view.findViewById(R.id.generate_qrcode_description);

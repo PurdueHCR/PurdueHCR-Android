@@ -24,6 +24,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Fragments.QrCodeDetailsFragment;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
@@ -32,10 +33,10 @@ import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagemen
 
 public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
 
-    private ArrayList<Link> qrCodeList;
+    private List<Link> qrCodeList;
     private Context context;
 
-    public QrCodeListAdapter(ArrayList<Link> qrCodeList, Context context){
+    public QrCodeListAdapter(List<Link> qrCodeList, Context context){
         this.qrCodeList = qrCodeList;
         this.context = context;
     }

@@ -68,6 +68,24 @@ public class Link implements Serializable {
         return map;
     }
 
+    public void setHttpUpdates(Map<String, Object> data){
+        if(data.containsKey("is_enabled")){
+            setEnabled((boolean) data.get("is_enabled"));
+        }
+        if(data.containsKey("is_archived")){
+            setArchived((boolean) data.get("is_archived"));
+        }
+        if(data.containsKey("description")){
+            setDescription((String) data.get("description"));
+        }
+        if(data.containsKey("point_id")){
+            setPointTypeId((int) data.get("point_id"));
+        }
+        if(data.containsKey("single_use")){
+            setSingleUse((boolean) data.get("single_use"));
+        }
+    }
+
     public void setLinkId(String linkId) {
         this.linkId = linkId;
     }
@@ -100,12 +118,20 @@ public class Link implements Serializable {
         return pointTypeId;
     }
 
+    public void setPointTypeId(int id){
+        this.pointTypeId = id;
+    }
+
     public boolean isEnabled() {
         return isEnabled;
     }
 
     public boolean isArchived() {
         return isArchived;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     /**

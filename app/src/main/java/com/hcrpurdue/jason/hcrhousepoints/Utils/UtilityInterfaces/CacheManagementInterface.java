@@ -16,6 +16,8 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 
@@ -24,10 +26,14 @@ public interface CacheManagementInterface {
 
     default void onSuccess() { }
 
+    default void onHttpSuccess(ResponseCodeMessage responseCodeMessage) { }
+
     default void onError(Exception e, Context context) {
         Toast.makeText(context, "A CacheManager error occurred", Toast.LENGTH_LONG).show();
         Log.e("CacheManager", e.getMessage(), e);
     }
+
+    default void onHttpError(ResponseCodeMessage responseCodeMessage) { }
 
     default void onGetLinkWithIdSuccess(Link link) { }
 

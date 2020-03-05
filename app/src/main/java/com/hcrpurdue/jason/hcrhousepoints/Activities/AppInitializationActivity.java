@@ -150,7 +150,7 @@ public class AppInitializationActivity extends AppCompatActivity {
                     //get System Preferences from Firestore
                     cacheManager.getSystemPreferences(new CacheManagementInterface() {
                         @Override
-                        public void onGetSystemPreferencesSuccess(SystemPreferences systemPreferences) {
+                        public void onGetSystemPreferencesSuccess(SystemPreferences sp) {
                             System.out.println("RANK 3");
                             //Get the rewards for the house competition
                             cacheManager.initPersonalPointLogs(new CacheManagementInterface() {
@@ -161,7 +161,7 @@ public class AppInitializationActivity extends AppCompatActivity {
                                     cacheManager.refreshUserRank(getBaseContext(), new CacheManagementInterface() {
                                         @Override
                                         public void onError(Exception e, Context context) {
-                                            System.out.println("RANK FAILED");
+                                            System.out.println("RANK FAILED!!!!!!");
                                             handleDataInitializationError(e);
                                         }
 
@@ -169,7 +169,7 @@ public class AppInitializationActivity extends AppCompatActivity {
                                         public void onGetRank(AuthRank rank) {
                                             System.out.println("RANK: "+rank.getHouseRank()+" sem: "+rank.getSemesterRank());
                                             //Check the system preferences for app version, and if not in sync, post update message
-                                            if(!systemPreferences.isAppUpToDate()){
+                                            if(!sp.isAppUpToDate()){
                                                 alertOutOfDateApp();
                                             }
                                             else{

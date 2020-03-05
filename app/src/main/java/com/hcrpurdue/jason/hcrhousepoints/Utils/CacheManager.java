@@ -6,6 +6,7 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -20,6 +21,8 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.MessageType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
@@ -454,23 +457,61 @@ public class CacheManager {
      * @param si   CacheManagementInterface with methods onError and onSuccess
      */
     public void createQRCode(Link link, CacheManagementInterface si){
-        APIHelper.getInstance(context).createLink(link.getDescription(), link.getPointTypeId(), link.isSingleUse()).enqueue(new Callback<String>() {
+        APIHelper.getInstance(context).createLink(link.getDescription(), link.getPointTypeId(), link.isSingleUse()).enqueue(new Callback<ResponseMessage>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                System.out.println("GOT RESPONSE: "+response.toString());
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                System.out.println("GOT CODE: "+response.code());
                 if(response.isSuccessful()) {
-                    System.out.println("SUCCESS ");
-                    si.onSuccess();
+                    System.out.println("GOT RESPONSE: "+response.body().getMessage());
+                    si.onHttpSuccess(new ResponseCodeMessage(response.code(), response.body().getMessage()));
                 }
                 else{
-                    System.out.println("ERNON SUCCsOR");
-                    si.onError(new Exception(response.message()), context);
+                    try{
+                        System.out.println("GOT Error: "+response.errorBody().string());
+                        si.onHttpError(new ResponseCodeMessage(response.code(), response.errorBody().string()));
+                    }
+                    catch (IOException err){
+                        si.onError(err, context);
+                    }
+
+
                 }
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
-                System.out.println("GOT FAILTURE");
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                si.onError(new Exception(t.getMessage()), context);
+            }
+        });
+    }
+
+    /**
+     * Update a QRCode in the database. If the call is succesful, the new LinkId will be saved into the Link object
+     *
+     * @param si   CacheManagementInterface with methods onError and onSuccess
+     */
+    public void updateQRCode(String linkId ,Map<String, Object> data, CacheManagementInterface si){
+        APIHelper.getInstance(context).updateLink(linkId, data).enqueue(new Callback<ResponseMessage>() {
+            @Override
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                if(response.isSuccessful()) {
+                    System.out.println("GOT RESPONSE: "+response.body().getMessage());
+                    si.onHttpSuccess(new ResponseCodeMessage(response.code(), response.body().getMessage()));
+                }
+                else{
+                    try {
+                        System.out.println("ERROR CODE: " + response.code());
+                        System.out.println("GOT Error: " + response.errorBody().string());
+                        si.onHttpError(new ResponseCodeMessage(response.code(), "Failure"));
+                    }
+                    catch (IOException err){
+                        si.onError(err, context);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
                 si.onError(new Exception(t.getMessage()), context);
             }
         });
@@ -699,16 +740,20 @@ public class CacheManager {
         APIHelper.getInstance(context).getRank().enqueue(new retrofit2.Callback<AuthRank>() {
             @Override
             public void onResponse(Call<AuthRank> call, Response<AuthRank> response) {
+                System.out.println("GOT A RESPONSE FROM RANK");
                 if(response.isSuccessful()) {
                     userRank = response.body();
                     cmi.onGetRank(userRank);
                 }
-                else
-                    cmi.onError(new Exception(response.code()+": "+response.message()),context);
+                else {
+                    System.out.println(response.code() + ": " + response.message());
+                    cmi.onError(new Exception(response.code() + ": " + response.message()), context);
+                }
             }
 
             @Override
             public void onFailure(Call<AuthRank> call, Throwable t) {
+                System.out.println("ERROR ON GET RANK: "+t.getMessage());
                 cmi.onError(new Exception(t.getMessage()), context);
             }
         });

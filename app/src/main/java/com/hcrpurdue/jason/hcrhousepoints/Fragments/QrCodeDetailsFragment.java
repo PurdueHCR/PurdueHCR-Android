@@ -17,8 +17,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,34 +30,58 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
-import com.hcrpurdue.jason.hcrhousepoints.QRCodeCEView;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CapturePhotoUtils;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.QRCodeUtil;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.hcrpurdue.jason.hcrhousepoints.R;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class QrCodeDetailsFragment extends AppCompatActivity{
-    private TextView pointTypeLabel;
-    private ImageView qrCodeImageView;
-    private TextView pointDescriptionLabel;
-    private ImageButton editButton;
-    private ImageButton shareButton;
-    private Switch isEnabledSwitch;
-    boolean dialogIsVisible = false;
+    private CacheManager cacheManager;
+    private BottomSheetBehavior mBottomSheetBehaviour;
     private Dialog shareDialog;
     private Bitmap qrCodeMap;
-    private BottomSheetBehavior mBottomSheetBehaviour;
     private Link qrCodeModel;
 
-    private QRCodeCEView qrCodeCEView;
+
+    //Main QR Code View
+    private ImageView qrCodeImageView;
+
+    //Bottom Bar Views
+    private Spinner pointTypeSpinner;
+    private EditText pointDescriptionEditText;
+    private ImageButton shareButton;
+    private Switch isEnabledSwitch;
+
+    private Switch isMultiUseSwitch;
+    private Switch isArchivedSwitch;
+    private Button updateButton;
+    private ProgressBar loadingSymbol;
+
+    //Important Variables
+    private ArrayList<PointType> enabledTypes = new ArrayList<PointType>();
+    private boolean dialogIsVisible = false;
+
+
+
+
+
 
     /**
      * When the activity is created, run this code
@@ -61,6 +89,7 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
      */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        cacheManager = CacheManager.getInstance(this);
         setContentView(R.layout.fragment_qr_code_expanded);
 
         qrCodeModel = (Link) getIntent().getExtras().getBundle("QRCODE").getSerializable("QRCODE");
@@ -72,7 +101,6 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         gestureView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                hideBottomStatusBar(view);
                 InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
                 if(inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0)) {
 
@@ -92,12 +120,30 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         });
 
         initializeUIElements();
-        hideBottomStatusBar(getWindow().getDecorView());
 
         View editView = findViewById(R.id.info_edit_bottom_sheet);
         mBottomSheetBehaviour = BottomSheetBehavior.from(editView);
+        mBottomSheetBehaviour.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View view, int newState) {
+                if(newState == BottomSheetBehavior.STATE_EXPANDED){
+                    pointTypeSpinner.setEnabled(true);
+                    pointDescriptionEditText.setEnabled(true);
+                    pointTypeSpinner.setBackgroundTintList(getResources().getColorStateList(R.color.black));
+                }
+                else if(newState == BottomSheetBehavior.STATE_COLLAPSED){
+                    pointTypeSpinner.setEnabled(false);
+                    pointDescriptionEditText.setEnabled(false);
+                    pointTypeSpinner.setBackgroundTintList(getResources().getColorStateList(R.color.white));
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View view, float v) {
+
+            }
+        });
         shareDialog = createShareDialog();
-        qrCodeCEView = new QRCodeCEView(this, editView, qrCodeModel);
 
     }
 
@@ -124,16 +170,6 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
                 }
             });
         Dialog dialog = builder.create();
-        dialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
-        dialog.setCanceledOnTouchOutside(true);
-        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        dialog.getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         return dialog;
     }
 
@@ -147,18 +183,18 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         qrCodeImageView = findViewById(R.id.qr_code_image_view);
 
 
-        pointDescriptionLabel = findViewById(R.id.qr_code_collapsed_point_description_label);
-        pointTypeLabel = findViewById(R.id.qr_code_collapsed_point_type_label);
+        pointDescriptionEditText = findViewById(R.id.qr_code_description_edit_text);
+        pointTypeSpinner = findViewById(R.id.qr_code_edit_point_type_spinner);
         isEnabledSwitch = findViewById(R.id.qr_code_collapsed_enabled_switch);
-        editButton = findViewById(R.id.qr_code_collapsed_edit_button);
-        shareButton = findViewById(R.id.qr_code_collapsed_share_button);
 
-        editButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
-            }
-        });
+        isMultiUseSwitch = findViewById(R.id.qr_code_edit_multi_use_switch);
+        isArchivedSwitch = findViewById(R.id.qr_code_edit_archive_switch);
+        updateButton = findViewById(R.id.qr_code_edit_update_button);
+        shareButton = findViewById(R.id.qr_code_collapsed_share_button);
+        loadingSymbol = findViewById(R.id.qr_code_edit_loading_symbol);
+
+        pointTypeSpinner.setEnabled(false);
+        pointDescriptionEditText.setEnabled(false);
 
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,10 +204,13 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
             }
         });
 
-        pointTypeLabel.setText(qrCodeModel.getPointType(getApplicationContext()).getName());
+        loadSpinner(cacheManager.getPointTypeList());
 
-        pointDescriptionLabel.setText(qrCodeModel.getDescription());
+
+        pointDescriptionEditText.setText(qrCodeModel.getDescription());
         isEnabledSwitch.setChecked(qrCodeModel.isEnabled());
+        isMultiUseSwitch.setChecked(!qrCodeModel.isSingleUse());
+        isArchivedSwitch.setChecked(qrCodeModel.isArchived());
 
         qrCodeMap = QRCodeUtil.generateQRCodeFromString(this,qrCodeModel.getAddress());
         if(qrCodeMap != null){
@@ -180,6 +219,53 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         else{
             Toast.makeText(getApplicationContext(),"Could not create QR Code",Toast.LENGTH_LONG).show();
         }
+
+        isEnabledSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setEnabledStatus();
+            }
+        });
+
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                updateButton.setEnabled(false);
+                loadingSymbol.setVisibility(View.VISIBLE);
+                Map<String, Object> data = getUpdatedData();
+                if(data.keySet().size() > 0){
+                    cacheManager.updateQRCode(qrCodeModel.getLinkId(), data, new CacheManagementInterface() {
+                        @Override
+                        public void onHttpSuccess(ResponseCodeMessage responseCodeMessage) {
+                            updateButton.setEnabled(true);
+                            loadingSymbol.setVisibility(View.INVISIBLE);
+                            qrCodeModel.setHttpUpdates(data);
+                            mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                        }
+
+                        @Override
+                        public void onError(Exception e, Context context) {
+                            System.out.println("ERROR IN CREATING: "+e.getLocalizedMessage());
+                            Toast.makeText(context,"Could not create QR code",Toast.LENGTH_LONG).show();
+                            updateButton.setEnabled(true);
+                            loadingSymbol.setVisibility(View.INVISIBLE);
+                        }
+
+                        @Override
+                        public void onHttpError(ResponseCodeMessage responseCodeMessage) {
+                            System.out.println("HTTP ERROR: "+responseCodeMessage.getMessage());
+                            Toast.makeText(getApplicationContext(),"Could not create QR code",Toast.LENGTH_LONG).show();
+                            updateButton.setEnabled(true);
+                            loadingSymbol.setVisibility(View.INVISIBLE);
+                        }
+                    });
+                }
+                else{
+                    updateButton.setEnabled(true);
+                    loadingSymbol.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
     }
 
     private void copyIOSLink(){
@@ -211,7 +297,6 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
      * @return Uri of the saved file or null
      */
     private Uri saveImageToCache() {
-        //TODO - Should be processed in another thread
         File imagesFolder = new File(getCacheDir(), "images");
         Uri uri = null;
         try {
@@ -238,23 +323,88 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         startActivity(Intent.createChooser(shareIntent, "Share Image"));
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        hideBottomStatusBar(getWindow().getDecorView());
+    private void setEnabledStatus(){
+        if(!dialogIsVisible){
+            HashMap<String, Object> data = new HashMap<>();
+            data.put("is_enabled", isEnabledSwitch.isChecked());
+            cacheManager.updateQRCode(qrCodeModel.getLinkId(), data, new CacheManagementInterface() {
+                @Override
+                public void onHttpSuccess(ResponseCodeMessage responseCodeMessage) {
+                    qrCodeModel.setHttpUpdates(data);
+                }
+
+                @Override
+                public void onError(Exception e, Context context) {
+                    System.out.println("ERROR IN CREATING: "+e.getLocalizedMessage());
+                    Toast.makeText(context,"Could not create QR code",Toast.LENGTH_LONG).show();
+                    isEnabledSwitch.setChecked(!isEnabledSwitch.isChecked());
+                }
+
+                @Override
+                public void onHttpError(ResponseCodeMessage responseCodeMessage) {
+                    System.out.println("HTTP ERROR: "+responseCodeMessage.getMessage());
+                    Toast.makeText(getApplicationContext(),"Could not create QR code",Toast.LENGTH_LONG).show();
+                    isEnabledSwitch.setChecked(!isEnabledSwitch.isChecked());
+                }
+            });
+        }
     }
 
-    private void hideBottomStatusBar(View decorView){
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_IMMERSIVE
-                        // Set the content to appear under the system bars so that the
-                        // content doesn't resize when the system bars hide and show.
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        // Hide the nav bar and status bar
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
+
+    /**
+     * Puts the PointType list into the Spinner
+     * @param types List of PointType objects to put into the spinner
+     */
+    private void loadSpinner(List<PointType> types){
+        enabledTypes = new ArrayList<>();
+        PointType selectedPointType = null;
+
+
+        List<Map<String, String>> formattedPointTypes = new ArrayList<>();
+        Map<String, String> placeholder = new HashMap<>();
+        for (PointType type : types) {
+            if (type.getUserCanGenerateQRCodes(cacheManager.getPermissionLevel()) && type.isEnabled()) {
+                enabledTypes.add(type);
+                Map<String, String> map = new HashMap<>();
+                map.put("text", type.getName());
+                map.put("subText", type.getValue() + " point" + ((type.getValue() == 1)? "":"s"));
+                formattedPointTypes.add(map);
+                if(qrCodeModel != null && qrCodeModel.getPointTypeId() == type.getId()){
+                    selectedPointType = type;
+                }
+            }
+        }
+        SimpleAdapter adapter = new SimpleAdapter(this, formattedPointTypes, android.R.layout.simple_list_item_2, new String[]{"text", "subText"}, new int[]{android.R.id.text1, android.R.id.text2});
+        adapter.setDropDownViewResource(android.R.layout.simple_list_item_2);
+        pointTypeSpinner.setAdapter(adapter);
+        if(selectedPointType != null){
+            pointTypeSpinner.setSelection(enabledTypes.indexOf(selectedPointType));
+        }
+    }
+
+    private Map<String, Object> getUpdatedData(){
+        Map<String, Object> data = new HashMap<>();
+        if(enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId() != qrCodeModel.getPointTypeId()){
+            System.out.println("New Point Id");
+            data.put("point_id", enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId());
+        }
+        if(!pointDescriptionEditText.getText().toString().equals(qrCodeModel.getDescription())){
+            System.out.println("New description");
+            data.put("description", pointDescriptionEditText.getText().toString());
+        }
+        if(isEnabledSwitch.isChecked() != qrCodeModel.isEnabled()){
+            System.out.println("New eanabled");
+            data.put("is_enabled", isEnabledSwitch.isChecked());
+        }
+        if(isArchivedSwitch.isChecked() != qrCodeModel.isArchived()){
+            System.out.println("New archived");
+            data.put("is_archived" , isArchivedSwitch.isChecked() );
+        }
+        if(isMultiUseSwitch.isChecked() == qrCodeModel.isSingleUse()){
+            System.out.println("New single use");
+            data.put("single_use", !isMultiUseSwitch.isChecked());
+        }
+        return data;
     }
 
 }

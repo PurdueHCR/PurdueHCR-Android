@@ -5,9 +5,12 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -19,7 +22,8 @@ public class APIHelper {
     private static APIHelper instance;
     private static Context context;
     private static APIInterface apiInterface;
-    public static String domain = "https://us-central1-purdue-hcr-test.cloudfunctions.net/";
+    public static String domain = "http://10.0.2.2:5001/purdue-hcr-test/us-central1/";
+    //public static String domain = "https://us-central1-purdue-hcr-test.cloudfunctions.net/";
     //public static String domain = "https://us-central1-hcr-points.cloudfunctions.net/";
 
     APIHelper(Context context){
@@ -48,15 +52,21 @@ public class APIHelper {
     }
 
     public Call<AuthRank> getRank(){
+        System.out.println("CALLLING TO GET RANK");
         return apiInterface.getAuthRank(getFirebaseToken());
     }
 
-    public Call<String> createLink(String description, int pointTypeId, boolean isSingleUse){
+    public Call<ResponseMessage> createLink(String description, int pointTypeId, boolean isSingleUse){
         HashMap<String, Object> body = new HashMap<>();
         body.put("description", description);
         body.put("point_id", pointTypeId);
         body.put("single_use", isSingleUse);
         return apiInterface.createLink(getFirebaseToken(), body);
+    }
+
+    public Call<ResponseMessage> updateLink(String linkId, Map<String, Object> data){
+        data.put("link_id", linkId);
+        return apiInterface.updateLink(getFirebaseToken(), data);
     }
 
 }
