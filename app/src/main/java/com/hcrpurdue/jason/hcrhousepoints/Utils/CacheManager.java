@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
@@ -39,12 +40,12 @@ public class CacheManager {
     private User user = null;
     private int notificationCount = 0;
     private List<House> houseList = null;
-    private List<Reward> rewardList = null;
+    private List<Reward> rewards = null;
     private ArrayList<Link> userCreatedQRCodes = null;
     private List<PointLog> personalPointLogs = null;
     private List<PointLog> rHPNotificationLogs = null;
     private SystemPreferences sysPrefs = null;
-    private int userRank = -1;
+    private AuthRank userRank = null;
 
     private CacheManager() {
         // Exists only to defeat instantiation. Get rekt, instantiation
@@ -383,20 +384,6 @@ public class CacheManager {
         });
     }
 
-    public void getPointStatistics(CacheManagementInterface si) {
-        boolean getRewards = rewardList == null;
-        fbutil.getPointStatistics(user.getUserId(), getRewards, new FirebaseUtilInterface() {
-            @Override
-            public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
-                houseList = houses;
-                user.setTotalPoints(userPoints);
-                if (getRewards)
-                    rewardList = rewards;
-                si.onGetPointStatisticsSuccess(houseList, user.getTotalPoints(), rewardList);
-            }
-        });
-    }
-
     public void clearUserData() {
         user = null;
         cacheUtil.deleteCache();
@@ -681,7 +668,7 @@ public class CacheManager {
      * @param cmi
      */
     public void getUserRank(Context context, CacheManagementInterface cmi){
-        if(userRank == -1){
+        if(userRank == null){
             refreshUserRank(context,cmi);
         }
         else{
@@ -696,9 +683,9 @@ public class CacheManager {
      * @param cmi
      */
     public void refreshUserRank(Context context, CacheManagementInterface cmi){
-        APIHelper.getInstance().getUserRank(getUserId()).enqueue(new retrofit2.Callback<Integer>() {
+        APIHelper.getInstance(context).getRank().enqueue(new retrofit2.Callback<AuthRank>() {
             @Override
-            public void onResponse(Call<Integer> call, Response<Integer> response) {
+            public void onResponse(Call<AuthRank> call, Response<AuthRank> response) {
                 if(response.isSuccessful()) {
                     userRank = response.body();
                     cmi.onGetRank(userRank);
@@ -708,7 +695,7 @@ public class CacheManager {
             }
 
             @Override
-            public void onFailure(Call<Integer> call, Throwable t) {
+            public void onFailure(Call<AuthRank> call, Throwable t) {
                 cmi.onError(new Exception(t.getMessage()), context);
             }
         });
@@ -730,6 +717,26 @@ public class CacheManager {
         if(rHPNotificationLogs == null)
             rHPNotificationLogs = new ArrayList<>();
         return rHPNotificationLogs;
+    }
+
+    public void setHouseList(List<House> houses){
+        this.houseList = houses;
+    }
+
+    public List<House> getHouses(){
+        if(houseList == null)
+            houseList = new ArrayList<>();
+        return houseList;
+    }
+
+    public List<Reward> getRewards(){
+        if(rewards == null)
+            rewards = new ArrayList<>();
+        return rewards;
+    }
+
+    public void setRewards(List<Reward> rewards){
+        this.rewards = rewards;
     }
 
 }

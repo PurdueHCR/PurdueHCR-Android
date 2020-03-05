@@ -71,4 +71,5 @@ public interface FirebaseUtilInterface {
     default void onGetPersonalPointLogs(List<PointLog> personalLogs){}
 
     default void onGetHouseCodes(List<HouseCode> codes){}
+
 }

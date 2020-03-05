@@ -21,6 +21,7 @@ public class User {
     private UserPermissionLevel permissionLevel;
     private int totalPoints;
     private String id;
+    private String firebaseToken;
 
     public User(String firstName, String lastName, String floorId, String houseName,  UserPermissionLevel permissionLevel, int totalPoints){
         this.firstName = firstName;
@@ -93,5 +94,12 @@ public class User {
         this.totalPoints = totalPoints;
     }
 
+    public void setFirebaseToken(String token){
+        this.firebaseToken = token;
+    }
+
+    public String getFirebaseToken(){
+        return this.firebaseToken;
+    }
 
 }
