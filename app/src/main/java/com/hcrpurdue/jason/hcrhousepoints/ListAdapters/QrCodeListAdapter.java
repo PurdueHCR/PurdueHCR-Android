@@ -2,6 +2,7 @@ package com.hcrpurdue.jason.hcrhousepoints.ListAdapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,7 @@ import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.QRCodeUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
@@ -66,14 +68,22 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
             view = inflater.inflate(R.layout.list_item_qr_code, parent, false);
         }
 
-        TextView titleTextView = view.findViewById(R.id.title);
+        TextView titleTextView = view.findViewById(R.id.qr_code_cell_description_text_view);
         titleTextView.setText(qrCode.getDescription());
 
-
-        TextView typeTextView = view.findViewById(R.id.type);
+        TextView typeTextView = view.findViewById(R.id.qr_code_cell_point_type_name_text_view);
         typeTextView.setText(qrCode.getPointType(context).getName());
-        Switch codeActiveSwitch = view.findViewById(R.id.qr_code_switch);
+        Switch codeActiveSwitch = view.findViewById(R.id.qr_code_cell_enabled_switch);
         codeActiveSwitch.setChecked(qrCode.isEnabled());
+
+        ImageView qrImageView = view.findViewById(R.id.qr_code_cell_image_view);
+        Bitmap qrCodemap = QRCodeUtil.generateQRCodeFromString(qrImageView,qrCode.getAddress());
+        if(qrCodemap != null){
+            qrImageView.setImageBitmap(qrCodemap);
+        }
+        else{
+            Toast.makeText(context,"Could not create QR Code",Toast.LENGTH_LONG).show();
+        }
 
         codeActiveSwitch.setOnClickListener(new View.OnClickListener() {
             @Override

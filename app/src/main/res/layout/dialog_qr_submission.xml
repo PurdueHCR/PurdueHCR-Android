@@ -22,7 +22,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/point_type_name_text_view"
+        android:id="@+id/qr_code_cell_point_type_name_text_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -50,7 +50,7 @@
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/qr_submission_timestamp_view"
-        app:layout_constraintTop_toBottomOf="@+id/point_type_name_text_view" />
+        app:layout_constraintTop_toBottomOf="@+id/qr_code_cell_point_type_name_text_view" />
 
     <include
         android:id="@+id/qr_submission_timestamp_view"

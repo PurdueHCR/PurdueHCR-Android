@@ -117,7 +117,7 @@ class QRSubmissionDialog extends AlertDialog{
         // Pass null as the parent view because its going in the dialog layout
         View view = inflater.inflate(R.layout.dialog_qr_submission, null);
 
-        TextView nameTextView = view.findViewById(R.id.point_type_name_text_view);
+        TextView nameTextView = view.findViewById(R.id.qr_code_cell_point_type_name_text_view);
         TextView descriptionTextView = view.findViewById(R.id.description_text_view);
         TextView monthView = view.findViewById(R.id.month_text_view);
         TextView dateView = view.findViewById(R.id.month_date_view);

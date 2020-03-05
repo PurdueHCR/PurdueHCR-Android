@@ -47,6 +47,12 @@ public class ResidentProfileFragment extends BaseProfileFragment {
                 handleRewardUpdate();
             }
         });
+        flu.getSystemPreferenceListener().addCallback(PROFILE_FRAGMENT, new ListenerCallbackInterface() {
+            @Override
+            public void onUpdate() {
+                handleSystemPreferenceUpdate();
+            }
+        });
     }
 
 
@@ -96,4 +102,15 @@ public class ResidentProfileFragment extends BaseProfileFragment {
         if(rewardCard != null)
             rewardCard.handleRewardUpdate();
     }
+
+    private void handleSystemPreferenceUpdate(){
+        if(houseCompetitionCard != null){
+            houseCompetitionCard.handleSysPrefUpdate();
+        }
+        if(residentProfileToolbar != null){
+            residentProfileToolbar.handleSysPrefUpdate();
+        }
+    }
+
+
 }

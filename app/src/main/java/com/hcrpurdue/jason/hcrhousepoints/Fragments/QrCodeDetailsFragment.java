@@ -97,27 +97,7 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
             qrCodeModel = new Link("B8hlX08pQyJFk2mdqAYI", "Test Code", true, 1, true, true);
         }
 
-        View gestureView = findViewById(R.id.gesture_recognizer_view);
-        gestureView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
-                if(inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0)) {
 
-                }
-                else if(dialogIsVisible){
-                    shareDialog.dismiss();
-                    dialogIsVisible = false;
-                }
-                else if(mBottomSheetBehaviour.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-                    finish();
-                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                }
-                else {
-                    mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
-            }
-        });
 
         initializeUIElements();
 
@@ -196,6 +176,28 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         pointTypeSpinner.setEnabled(false);
         pointDescriptionEditText.setEnabled(false);
 
+        View gestureView = findViewById(R.id.gesture_recognizer_view);
+        gestureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
+                if(inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0)) {
+
+                }
+                else if(dialogIsVisible){
+                    shareDialog.dismiss();
+                    dialogIsVisible = false;
+                }
+                else if(mBottomSheetBehaviour.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                    finish();
+                    overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                }
+                else {
+                    mBottomSheetBehaviour.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+            }
+        });
+
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -212,9 +214,10 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         isMultiUseSwitch.setChecked(!qrCodeModel.isSingleUse());
         isArchivedSwitch.setChecked(qrCodeModel.isArchived());
 
-        qrCodeMap = QRCodeUtil.generateQRCodeFromString(this,qrCodeModel.getAddress());
-        if(qrCodeMap != null){
-            qrCodeImageView.setImageBitmap(qrCodeMap);
+
+        Bitmap qrCode = QRCodeUtil.generateQRCodeWithActivityFromString(this,qrCodeModel.getAddress());
+        if(qrCode != null){
+            qrCodeImageView.setImageBitmap(qrCode);
         }
         else{
             Toast.makeText(getApplicationContext(),"Could not create QR Code",Toast.LENGTH_LONG).show();
