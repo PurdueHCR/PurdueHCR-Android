@@ -150,7 +150,7 @@ public class QrCodeDetailsFragment extends Fragment implements ListenerCallbackI
         isEnabledSwitch.setChecked(qrCodeModel.isEnabled());
         isArchivedSwitch.setChecked(qrCodeModel.isArchived());
 
-        Bitmap qrCode = QRCodeUtil.generateQRCodeFromString(getActivity(),qrCodeModel.getAddress());
+        Bitmap qrCode = QRCodeUtil.generateQRCodeFromString(qrCodeImageView,qrCodeModel.getAddress());
         if(qrCode != null){
             qrCodeImageView.setImageBitmap(qrCode);
         }
