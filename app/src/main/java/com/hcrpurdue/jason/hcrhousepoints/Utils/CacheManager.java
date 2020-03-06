@@ -6,12 +6,14 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
@@ -19,15 +21,19 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.MessageType;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.FirebaseUtilInterface;
 
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 // Because non-global variables are for people who care about technical debt
@@ -39,18 +45,20 @@ public class CacheManager {
     private User user = null;
     private int notificationCount = 0;
     private List<House> houseList = null;
-    private List<Reward> rewardList = null;
+    private List<Reward> rewards = null;
     private ArrayList<Link> userCreatedQRCodes = null;
     private List<PointLog> personalPointLogs = null;
     private List<PointLog> rHPNotificationLogs = null;
     private SystemPreferences sysPrefs = null;
-    private int userRank = -1;
+    private AuthRank userRank = null;
+    private Context context;
 
     private CacheManager() {
         // Exists only to defeat instantiation. Get rekt, instantiation
     }
 
     private void setApplicationContext(Context c) {
+        this.context = c;
         fbutil.setApplicationContext(c);
         cacheUtil.setApplicationContext(c);
     }
@@ -383,20 +391,6 @@ public class CacheManager {
         });
     }
 
-    public void getPointStatistics(CacheManagementInterface si) {
-        boolean getRewards = rewardList == null;
-        fbutil.getPointStatistics(user.getUserId(), getRewards, new FirebaseUtilInterface() {
-            @Override
-            public void onGetPointStatisticsSuccess(List<House> houses, int userPoints, List<Reward> rewards) {
-                houseList = houses;
-                user.setTotalPoints(userPoints);
-                if (getRewards)
-                    rewardList = rewards;
-                si.onGetPointStatisticsSuccess(houseList, user.getTotalPoints(), rewardList);
-            }
-        });
-    }
-
     public void clearUserData() {
         user = null;
         cacheUtil.deleteCache();
@@ -463,15 +457,62 @@ public class CacheManager {
      * @param si   CacheManagementInterface with methods onError and onSuccess
      */
     public void createQRCode(Link link, CacheManagementInterface si){
-        fbutil.createQRCode(link, new FirebaseUtilInterface() {
+        APIHelper.getInstance(context).createLink(link.getDescription(), link.getPointTypeId(), link.isSingleUse()).enqueue(new Callback<ResponseMessage>() {
             @Override
-            public void onSuccess() {
-                si.onSuccess();
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                System.out.println("GOT CODE: "+response.code());
+                if(response.isSuccessful()) {
+                    System.out.println("GOT RESPONSE: "+response.body().getMessage());
+                    si.onHttpSuccess(new ResponseCodeMessage(response.code(), response.body().getMessage()));
+                }
+                else{
+                    try{
+                        System.out.println("GOT Error: "+response.errorBody().string());
+                        si.onHttpError(new ResponseCodeMessage(response.code(), response.errorBody().string()));
+                    }
+                    catch (IOException err){
+                        si.onError(err, context);
+                    }
+
+
+                }
             }
 
             @Override
-            public void onError(Exception e, Context context) {
-                si.onError(e,context);
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                si.onError(new Exception(t.getMessage()), context);
+            }
+        });
+    }
+
+    /**
+     * Update a QRCode in the database. If the call is succesful, the new LinkId will be saved into the Link object
+     *
+     * @param si   CacheManagementInterface with methods onError and onSuccess
+     */
+    public void updateQRCode(String linkId ,Map<String, Object> data, CacheManagementInterface si){
+        APIHelper.getInstance(context).updateLink(linkId, data).enqueue(new Callback<ResponseMessage>() {
+            @Override
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                if(response.isSuccessful()) {
+                    System.out.println("GOT RESPONSE: "+response.body().getMessage());
+                    si.onHttpSuccess(new ResponseCodeMessage(response.code(), response.body().getMessage()));
+                }
+                else{
+                    try {
+                        System.out.println("ERROR CODE: " + response.code());
+                        System.out.println("GOT Error: " + response.errorBody().string());
+                        si.onHttpError(new ResponseCodeMessage(response.code(), "Failure"));
+                    }
+                    catch (IOException err){
+                        si.onError(err, context);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                si.onError(new Exception(t.getMessage()), context);
             }
         });
     }
@@ -681,7 +722,7 @@ public class CacheManager {
      * @param cmi
      */
     public void getUserRank(Context context, CacheManagementInterface cmi){
-        if(userRank == -1){
+        if(userRank == null){
             refreshUserRank(context,cmi);
         }
         else{
@@ -696,19 +737,23 @@ public class CacheManager {
      * @param cmi
      */
     public void refreshUserRank(Context context, CacheManagementInterface cmi){
-        APIHelper.getInstance().getUserRank(getUserId()).enqueue(new retrofit2.Callback<Integer>() {
+        APIHelper.getInstance(context).getRank().enqueue(new retrofit2.Callback<AuthRank>() {
             @Override
-            public void onResponse(Call<Integer> call, Response<Integer> response) {
+            public void onResponse(Call<AuthRank> call, Response<AuthRank> response) {
+                System.out.println("GOT A RESPONSE FROM RANK");
                 if(response.isSuccessful()) {
                     userRank = response.body();
                     cmi.onGetRank(userRank);
                 }
-                else
-                    cmi.onError(new Exception(response.code()+": "+response.message()),context);
+                else {
+                    System.out.println(response.code() + ": " + response.message());
+                    cmi.onError(new Exception(response.code() + ": " + response.message()), context);
+                }
             }
 
             @Override
-            public void onFailure(Call<Integer> call, Throwable t) {
+            public void onFailure(Call<AuthRank> call, Throwable t) {
+                System.out.println("ERROR ON GET RANK: "+t.getMessage());
                 cmi.onError(new Exception(t.getMessage()), context);
             }
         });
@@ -730,6 +775,26 @@ public class CacheManager {
         if(rHPNotificationLogs == null)
             rHPNotificationLogs = new ArrayList<>();
         return rHPNotificationLogs;
+    }
+
+    public void setHouseList(List<House> houses){
+        this.houseList = houses;
+    }
+
+    public List<House> getHouses(){
+        if(houseList == null)
+            houseList = new ArrayList<>();
+        return houseList;
+    }
+
+    public List<Reward> getRewards(){
+        if(rewards == null)
+            rewards = new ArrayList<>();
+        return rewards;
+    }
+
+    public void setRewards(List<Reward> rewards){
+        this.rewards = rewards;
     }
 
 }

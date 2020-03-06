@@ -456,94 +456,6 @@ public class FirebaseUtil {
     }
 
     /**
-     * Get information to display on the PointStatistics page. Gets Total Points, get rewards, get houses
-     * TODO break this into 2 methods that get rewards and get houses
-     * @param userID
-     * @param getRewards
-     * @param fui
-     */
-    public void getPointStatistics(String userID, boolean getRewards, FirebaseUtilInterface fui) {
-        List<House> houseList = new ArrayList<>();
-        DocumentReference userRef = db.collection(ROOT_USERS_KEY).document(userID);
-        userRef.get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Map<String, Object> data = task.getResult().getData();
-                        if (data != null) {
-                            int userPoints = ((Long) data.get("TotalPoints")).intValue();
-                            db.collection(ROOT_HOUSE_KEY).get()
-                                    .addOnCompleteListener(houseTask -> {
-                                        if (houseTask.isSuccessful()) {
-                                            for (QueryDocumentSnapshot doc : houseTask.getResult()) {
-                                                House house = new House(doc.getId(), doc.getData());
-                                                houseList.add(house);
-                                            }
-                                            if (getRewards) // Rewards don't update often, don't make an extra query if not needed
-                                            {
-                                                db.collection(ROOT_REWARDS_KEY).get()
-                                                        .addOnCompleteListener(rewardTask -> {
-                                                            if (rewardTask.isSuccessful()) {
-                                                                List<Reward> rewardList = new ArrayList<>();
-                                                                Resources resources = context.getResources();
-                                                                String packageName = context.getPackageName();
-                                                                for (QueryDocumentSnapshot doc : rewardTask.getResult()) {
-                                                                    Map<String, Object> rewardData = doc.getData();
-                                                                    String fileName = (String) rewardData.get("FileName");
-                                                                    String rewardIcon = fileName.replace(".png", "").toLowerCase();
-                                                                    int rewardIconResource = resources.getIdentifier(rewardIcon, "drawable", packageName);
-                                                                    int rewardPoints = ((Long) rewardData.get("RequiredValue")).intValue();
-                                                                    float requiredPPR = ((Long) rewardData.get(Reward.REQUIRED_PPR_KEY)).floatValue();
-                                                                    Reward reward = new Reward(doc.getId(), rewardPoints, requiredPPR, rewardIconResource);
-                                                                    rewardList.add(reward);
-                                                                }
-                                                                fui.onGetPointStatisticsSuccess(houseList, userPoints, rewardList);
-                                                            } else
-                                                                fui.onError(rewardTask.getException(), context);
-                                                        })
-                                                        .addOnFailureListener(e -> fui.onError(e, context));
-                                            }
-                                            else{
-                                                fui.onGetPointStatisticsSuccess(houseList, userPoints, null);
-                                            }
-                                        } else {
-                                            fui.onError(houseTask.getException(), context);
-                                        }
-                                    })
-                                    .addOnFailureListener(e -> fui.onError(e, context));
-                        } else {
-                            fui.onError(new IllegalStateException("houseData is null"), context);
-                        }
-                    } else {
-                        fui.onError(task.getException(), context);
-                    }
-                })
-                .addOnFailureListener(e -> fui.onError(e, context));
-    }
-
-    /**
-     * Retrive all of the floor codes for the houses
-     * @param fui
-     */
-    public void getFloorCodes(FirebaseUtilInterface fui) {
-        db.collection(ROOT_HOUSE_KEY).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                HashMap<String, Pair<String, String>> floorCodes = new HashMap<>();
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    Map<String, Object> data = document.getData();
-                    for (Map.Entry<String, Object> entry : data.entrySet()) {
-                        if (entry.getKey().contains(":Code") && entry.getValue().getClass() == String.class) {
-                            floorCodes.put((String) entry.getValue(), new Pair<>(entry.getKey().replace(":Code", ""), document.getId()));
-                        }
-                    }
-                }
-                fui.onGetFloorCodesSuccess(floorCodes);
-            } else
-                fui.onError(task.getException(), context);
-        });
-    }
-
-
-    /**
      * Get the list of QRCodes that were created by the User with userId.
      *
      * @param userId    String that represents the Firebase ID of the User who is getting QR codes.
@@ -558,12 +470,7 @@ public class FirebaseUtil {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     // Pull values from document and save them into an object
                     String id = document.getId();
-                    String description = ((String) document.get("Description"));
-                    boolean singleUse = ((boolean) document.get("SingleUse"));
-                    int pointTypeId = ((Long)document.get("PointID")).intValue();
-                    boolean isEnabled = ((boolean) document.get("Enabled"));
-                    boolean isArchived = ((boolean) document.get("Archived"));
-                    Link newCode = new Link(id, description, singleUse, pointTypeId, isEnabled,isArchived);
+                    Link newCode = new Link(id, document.getData());
                     //Add code to the list
                     qrCodes.add(newCode);
                 }
@@ -587,17 +494,8 @@ public class FirebaseUtil {
      * @param fui   Firebase Util Interface with methods onError and onSuccess.
      */
     public void createQRCode(Link link, FirebaseUtilInterface fui){
-        //turn the Link object into a Map with the Keys being the Firebase Keys
-        Map<String, Object> data = new HashMap<>();
-        data.put("Description", link.getDescription());
-        data.put("PointID", link.getPointTypeId());
-        data.put("SingleUse", link.isSingleUse());
-        data.put("CreatorID", CacheManager.getInstance(context).getUserId());
-        data.put("Enabled", link.isEnabled());
-        data.put("Archived", link.isArchived());
-
         //Call Firebase to add the data
-        db.collection(ROOT_LINKS_KEY).add(data).addOnCompleteListener(task -> {
+        db.collection(ROOT_LINKS_KEY).add(link.convertToDict()).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 System.out.println("Added Document to: "+task.getResult().getId());
                 //If successful, save the document ID as the LinkID so that the caller has a reference to it.
@@ -630,6 +528,28 @@ public class FirebaseUtil {
                 System.out.println("Link Update Success");
                 //Make sure local copy is updated
                 link.setEnabled(isEnabled);
+                fui.onSuccess();
+            }
+            else{
+                //Handle Errors
+                fui.onError(task.getException(),context);
+            }
+        });
+    }
+
+    /**
+     * Update a Link object in the database with a new Enabled Status
+     *
+     * @param link  Link object to be updated
+     * @param fui   FirebaseUtilInterface with method OnError and onSuccess implemented
+     */
+    public void updateQRCode(Link link, FirebaseUtilInterface fui){
+
+        //Tell the document with path Links/<LinkID> to update the values stored in the map
+        db.collection(ROOT_LINKS_KEY).document(link.getLinkId()).update(link.convertToDict()).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                System.out.println("Link Update Success");
+                //Make sure local copy is updated
                 fui.onSuccess();
             }
             else{

@@ -25,13 +25,13 @@
                 android:text="Select the point category you would like to make a QR code for."
                 android:textAppearance="@style/TextAppearance.AppCompat.Headline"
                 android:textColor="@color/common_google_signin_btn_text_dark_focused"
-                app:layout_constraintBottom_toTopOf="@+id/point_type_spinner"
+                app:layout_constraintBottom_toTopOf="@+id/qr_code_edit_point_type_spinner"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Spinner
-                android:id="@+id/point_type_spinner"
+                android:id="@+id/qr_code_edit_point_type_spinner"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -60,7 +60,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/generate_qrcode_description"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/point_type_spinner" />
+                app:layout_constraintTop_toBottomOf="@+id/qr_code_edit_point_type_spinner" />
 
             <EditText
                 android:id="@+id/generate_qrcode_description"

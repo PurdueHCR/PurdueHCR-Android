@@ -48,7 +48,8 @@ import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointApprovalFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointTypeListFragment;
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.ProfileFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.RHPProfileFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.ResidentProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCodeListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCreationFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRScannerFragment;
@@ -56,6 +57,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRScannerFragment;
 import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.SubmitPointsFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
@@ -81,17 +83,7 @@ public class NavigationActivity extends AppCompatActivity {
         setupNavigationView();
 
         fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.getFragments().isEmpty()) {
-            try {
-                fragmentManager.beginTransaction().replace(R.id.content_frame, ProfileFragment.class.newInstance(), Integer.toString(R.id.nav_new_profile)).addToBackStack("BASE").commit();
-            } catch (Exception e) {
-                Toast.makeText(this, "Error loading Profile Frament", Toast.LENGTH_LONG).show();
-                Log.e("NavigationActivity", "Failed to load initial fragment", e);
-            }
-        }
-        else{
-            fragmentManager.popBackStackImmediate("BASE", FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        }
+        setDefaultFragment();
 
         //Look to see if the intent contains a qr code to submit
         Bundle extras = getIntent().getExtras();
@@ -139,8 +131,20 @@ public class NavigationActivity extends AppCompatActivity {
                             //If RHP taps approve option, display PointApproval list
                             fragmentClass = PointApprovalFragment.class;
                             break;
-                        case R.id.nav_new_profile:
-                            fragmentClass = ProfileFragment.class;
+                        case R.id.nav_profile:
+                            switch (cacheManager.getUser().getPermissionLevel()){
+                                case RESIDENT:
+                                    fragmentClass = ResidentProfileFragment.class;
+                                    break;
+                                case RHP:
+                                    fragmentClass = RHPProfileFragment.class;
+                                    break;
+                                case PRIVILEGED_RESIDENT:
+                                    fragmentClass = ResidentProfileFragment.class;
+                                    break;
+                                default:
+                                    throw new Error("UNIMPLEMENTED PERMISSION DEFAULT FRAGMENT");
+                            }
                             break;
                         case R.id.nav_scan_code:
                             //If the QR scanner is selected, check permission and display if approved
@@ -182,7 +186,7 @@ public class NavigationActivity extends AppCompatActivity {
                             break;
                         default:
                             //By default display the house overview
-                            fragmentClass = ProfileFragment.class;
+                            fragmentClass = ResidentProfileFragment.class;
                             break;
                     }
                     if (fragmentClass != null && currentItem != selectedItem ) {
@@ -379,4 +383,29 @@ public class NavigationActivity extends AppCompatActivity {
                 .show();
     }
 
+    private void setDefaultFragment(){
+        if (fragmentManager.getFragments().isEmpty()) {
+            try {
+                switch (cacheManager.getUser().getPermissionLevel()){
+                    case RESIDENT:
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, ResidentProfileFragment.class.newInstance(), Integer.toString(R.id.nav_profile)).addToBackStack("BASE").commit();
+                        break;
+                    case RHP:
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, RHPProfileFragment.class.newInstance(), Integer.toString(R.id.nav_profile)).addToBackStack("BASE").commit();
+                        break;
+                    case PRIVILEGED_RESIDENT:
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, ResidentProfileFragment.class.newInstance(), Integer.toString(R.id.nav_profile)).addToBackStack("BASE").commit();
+                        break;
+                    default:
+                            throw new Error("UNIMPLEMENTED PERMISSION DEFAULT FRAGMENT");
+                }
+            } catch (Exception e) {
+                Toast.makeText(this, "Error loading Profile Frament", Toast.LENGTH_LONG).show();
+                Log.e("NavigationActivity", "Failed to load initial fragment", e);
+            }
+        }
+        else{
+            fragmentManager.popBackStackImmediate("BASE", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+    }
 }

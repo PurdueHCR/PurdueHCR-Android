@@ -173,10 +173,8 @@ public class QRScannerFragment extends Fragment implements ListenerCallbackInter
                                                             ((NavigationView) activity.findViewById(R.id.nav_view)).getMenu().getItem(0).setChecked(true);
                                                             handler.post(() -> progressBar.setVisibility(View.GONE));
                                                             FragmentManager fragmentManager = activity.getSupportFragmentManager();
-                                                            Fragment fragment = fragmentManager.findFragmentByTag(Integer.toString(R.id.nav_new_profile));
-                                                            if (fragment == null)
-                                                                fragment = ProfileFragment.class.newInstance();
-                                                            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_new_profile)).addToBackStack(Integer.toString(R.id.nav_scan_code)).commit();
+                                                            Fragment fragment = fragmentManager.findFragmentByTag(Integer.toString(R.id.nav_profile));
+                                                            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_profile)).addToBackStack(Integer.toString(R.id.nav_scan_code)).commit();
                                                             fragmentManager.executePendingTransactions();
                                                             ((NavigationActivity) activity).animateSuccess();
                                                         } catch (Exception e) {
