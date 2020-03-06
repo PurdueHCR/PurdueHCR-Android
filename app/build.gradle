@@ -7,14 +7,28 @@ android {
         applicationId "com.hcrpurdue.jason.hcrhousepoints"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 41
-        versionName "2.0.1"
+        versionCode 43
+        versionName "2.0.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            release {
+                // Enables code shrinking, obfuscation, and optimization for only
+                // your project's release build type.
+                minifyEnabled true
+
+                // Enables resource shrinking, which is performed by the
+                // Android Gradle plugin.
+                shrinkResources true
+
+                // Includes the default ProGuard rules files that are packaged with
+                // the Android Gradle plugin. To learn more, go to the section about
+                // R8 configuration files.
+                proguardFiles getDefaultProguardFile(
+                        'proguard-android-optimize.txt'),
+                        'proguard-rules.pro'
+            }
         }
     }
     compileOptions {

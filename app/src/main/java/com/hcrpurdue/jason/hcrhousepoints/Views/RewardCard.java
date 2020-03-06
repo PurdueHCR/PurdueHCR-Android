@@ -11,6 +11,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
+import java.util.Collections;
 import java.util.Locale;
 
 public class RewardCard {
@@ -41,7 +42,7 @@ public class RewardCard {
             float pointsPerResident = cacheManager.getUserHouse().getPointsPerResident();
             int numberOfResidents = cacheManager.getUserHouse().getNumResidents();
 
-
+            Collections.sort(cacheManager.getRewards());
             for (Reward reward : cacheManager.getRewards()) {
                 requiredPPR = reward.getRequiredPointsPerResident();
                 if (pointsPerResident < requiredPPR) {

@@ -1,10 +1,11 @@
 package com.hcrpurdue.jason.hcrhousepoints.Models;
 
+import com.hcrpurdue.jason.hcrhousepoints.BuildConfig;
+
 import java.util.Map;
 
 public class SystemPreferences {
 
-    private static final String CURRENT_APP_VERSION = "2.0.0";
 
 
     private boolean isHouseEnabled;
@@ -38,7 +39,7 @@ public class SystemPreferences {
     }
 
     public boolean isAppUpToDate() {
-        return appVersion.equals(CURRENT_APP_VERSION);
+        return appVersion.equals(BuildConfig.VERSION_NAME);
     }
 
     public boolean isCompetitionVisible() {
