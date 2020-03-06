@@ -17,6 +17,7 @@
     <color name="reject_color">#FF0000</color>
     <color name="unhandled_color">#FFCC00</color>
     <color name="dark_gray">#3D3D3B</color>
+    <color name="light_gray">#B3B3AD</color>
     <color name="black">#000000</color>
     <color name="opaque">#00000000</color>
 </resources>

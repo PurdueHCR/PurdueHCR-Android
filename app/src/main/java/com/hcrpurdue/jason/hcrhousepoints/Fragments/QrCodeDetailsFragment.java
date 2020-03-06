@@ -215,9 +215,9 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         isArchivedSwitch.setChecked(qrCodeModel.isArchived());
 
 
-        Bitmap qrCode = QRCodeUtil.generateQRCodeWithActivityFromString(this,qrCodeModel.getAddress());
-        if(qrCode != null){
-            qrCodeImageView.setImageBitmap(qrCode);
+        qrCodeMap = QRCodeUtil.generateQRCodeWithActivityFromString(this,qrCodeModel.getAddress());
+        if(qrCodeMap != null){
+            qrCodeImageView.setImageBitmap(qrCodeMap);
         }
         else{
             Toast.makeText(getApplicationContext(),"Could not create QR Code",Toast.LENGTH_LONG).show();
