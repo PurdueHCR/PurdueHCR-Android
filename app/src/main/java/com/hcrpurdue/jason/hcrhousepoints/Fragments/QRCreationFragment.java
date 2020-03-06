@@ -1,21 +1,16 @@
 package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 
-import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,7 +70,7 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
      * @param view View where elements are to be initialized
      */
     private void initializeUIElements(View view) {
-        pointTypeSpinner = view.findViewById(R.id.point_type_spinner);
+        pointTypeSpinner = view.findViewById(R.id.qr_code_edit_point_type_spinner);
         multipleUseSwitch = (Switch) view.findViewById(R.id.multi_use_switch);
         multipleUseSwitch.setOnClickListener(v -> flipSwitch(view));
         codeDescriptionLabel = (EditText) view.findViewById(R.id.generate_qrcode_description);
@@ -154,34 +149,34 @@ public class QRCreationFragment extends Fragment implements ListenerCallbackInte
         }
         else{
             //Create new Link object
-            Link link = new Link(codeDescriptionLabel.getText().toString(),
-                    (!multipleUseSwitch.isChecked()),
-                    enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId());
-            //Pass to CacheManager then Firebase to handle generation of Links in database
-            cacheManager.createQRCode(link, new CacheManagementInterface() {
-                @Override
-                public void onSuccess() {
-                    //Put the link into the Bundle
-                    Bundle args = new Bundle();
-                    args.putSerializable("QRCODE", link);
-
-                    //Create destination fragment
-                    Fragment fragment = new QrCodeDetailsFragment();
-                    fragment.setArguments(args);
-
-                    //Create Fragment manager
-                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_qr_code_display));
-                    fragmentTransaction.addToBackStack(Integer.toString(R.id.generateQRCode));
-                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    fragmentTransaction.commit();
-                }
-                @Override
-                public void onError(Exception e, Context context) {
-                    Toast.makeText(context,"Could Not Create QR Code. Try Again",Toast.LENGTH_LONG).show();
-                }
-            });
+//            Link link = new Link(codeDescriptionLabel.getText().toString(),
+//                    (!multipleUseSwitch.isChecked()),
+//                    enabledTypes.get(pointTypeSpinner.getSelectedItemPosition()).getId());
+//            //Pass to CacheManager then Firebase to handle generation of Links in database
+//            cacheManager.createQRCode(link, new CacheManagementInterface() {
+//                @Override
+//                public void onSuccess() {
+//                    //Put the link into the Bundle
+//                    Bundle args = new Bundle();
+//                    args.putSerializable("QRCODE", link);
+//
+////                    //Create destination fragment
+////                    Fragment fragment = new QrCodeDetailsFragment();
+////                    fragment.setArguments(args);
+////
+////                    //Create Fragment manager
+////                    FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+////                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+////                    fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.nav_qr_code_display));
+////                    fragmentTransaction.addToBackStack(Integer.toString(R.id.generateQRCode));
+////                    fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+////                    fragmentTransaction.commit();
+//                }
+//                @Override
+//                public void onError(Exception e, Context context) {
+//                    Toast.makeText(context,"Could Not Create QR Code. Try Again",Toast.LENGTH_LONG).show();
+//                }
+//            });
         }
     }
 

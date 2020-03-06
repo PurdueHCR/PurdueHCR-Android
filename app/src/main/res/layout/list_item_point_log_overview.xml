@@ -67,42 +67,42 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Point Type"
-            android:textColor="@color/text_accent"
+            android:textColor="@color/black"
             android:textSize="10dp"/>
         <TextView
             android:id="@+id/message_log_type_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="This is the TExt of the point type."
-            android:textColor="@color/text_main"
+            android:textColor="@color/black"
             />
         <TextView
             android:id="@+id/description_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Description"
-            android:textColor="@color/text_accent"
+            android:textColor="@color/black"
             android:textSize="10dp"/>
         <TextView
             android:id="@+id/message_log_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="After spending several house in this really great tea place in Chicago, I have made this xml. Look, whoever reads this, I think you should go check out Argo Tea. It really is great. Good tea and a comfortable place to work. If you ever get the chance, you should check it out!"
-            android:textColor="@color/text_main"
+            android:textColor="@color/black"
             />
         <TextView
             android:id="@+id/date_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Date"
-            android:textColor="@color/text_accent"
+            android:textColor="@color/black"
             android:textSize="10dp"/>
         <TextView
             android:id="@+id/date_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="12/34/56 11:20 pm"
-            android:textColor="@color/text_main"
+            android:textColor="@color/black"
             />
     </LinearLayout>
 

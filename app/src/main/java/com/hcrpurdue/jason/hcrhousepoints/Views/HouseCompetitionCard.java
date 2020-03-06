@@ -55,9 +55,16 @@ public class HouseCompetitionCard {
         houseChart.setScaleEnabled(false);
         houseChart.setTouchEnabled(false);
         houseChart.setDrawBorders(false);
-        houseChart.setNoDataText("Loading House Points...");
         houseChart.getLegend().setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
         houseChart.setAutoScaleMinMaxEnabled(true);
+
+        if(cacheManager.getSystemPreferences().isCompetitionVisible()){
+            houseChart.setNoDataText("Loading House Points...");
+        }
+        else{
+            houseChart.setNoDataText("The Competition Standings Have Been Hidden");
+        }
+
         houseChart.invalidate();
     }
 
@@ -83,7 +90,14 @@ public class HouseCompetitionCard {
             dataSet.setValueTextSize(12);
             dataSetList.add(dataSet);
         }
-        BarData barData = new BarData(dataSetList);
+        BarData barData;
+
+        if(cacheManager.getSystemPreferences().isCompetitionVisible()){
+            barData = new BarData(dataSetList);
+        }
+        else{
+            barData = null;
+        }
 
         houseChart.setData(barData);
         houseChart.notifyDataSetChanged();
@@ -105,6 +119,14 @@ public class HouseCompetitionCard {
             populateGraphCard();
         }
 
+    }
+
+    /**
+     * Call this when the system preference update is called
+     */
+    public void handleSysPrefUpdate(){
+        setupGraph();
+        populateGraphCard();
     }
 
 }

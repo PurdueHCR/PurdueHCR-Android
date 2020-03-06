@@ -13,9 +13,5 @@
         android:color="@color/black" >
     </stroke>
 
-    <!-- The radius makes the corners rounded -->
-    <corners
-        android:radius="15dp"   >
-    </corners>
 
 </shape>

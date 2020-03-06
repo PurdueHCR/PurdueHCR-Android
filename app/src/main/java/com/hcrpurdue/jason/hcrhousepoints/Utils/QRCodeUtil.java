@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
 
 import com.google.zxing.WriterException;
 
@@ -14,7 +15,28 @@ import static androidx.constraintlayout.motion.widget.MotionScene.TAG;
 
 public class QRCodeUtil {
 
-    public static Bitmap generateQRCodeFromString(Activity activity, String url){
+    public static Bitmap generateSmallQRCodeFromString(String url){
+
+
+        Bitmap bitmap = null;
+
+        int height = 50;
+        int width = 50;
+
+        int smallerDimension = Math.min(width, height);
+        smallerDimension = smallerDimension * 3 / 4;
+
+        QRGEncoder qrgEncoder = new QRGEncoder(url, null, QRGContents.Type.TEXT, smallerDimension);
+
+        try {
+            bitmap = qrgEncoder.encodeAsBitmap();
+        } catch (WriterException e) {
+            Log.v(TAG, e.toString());
+        }
+        return bitmap;
+    }
+
+    public static Bitmap generateQRCodeWithActivityFromString(Activity activity, String url){
 
 
         Bitmap bitmap = null;
@@ -24,7 +46,7 @@ public class QRCodeUtil {
         int height = displayMetrics.heightPixels;
         int width = displayMetrics.widthPixels;
 
-        int smallerDimension = width < height ? width : height;
+        int smallerDimension = Math.min(width, height);
         smallerDimension = smallerDimension * 3 / 4;
 
         QRGEncoder qrgEncoder = new QRGEncoder(url, null, QRGContents.Type.TEXT, smallerDimension);

@@ -81,4 +81,16 @@ public class ResidentProfileToolbar {
         populateTopBar();
     }
 
+    public void handleSysPrefUpdate() {
+        if(cacheManager.getSystemPreferences().isCompetitionVisible()){
+            userHouseRankTextView.setVisibility(View.VISIBLE);
+            semesterRankTextView.setVisibility(View.VISIBLE);
+        }
+        else {
+            userHouseRankTextView.setVisibility(View.INVISIBLE);
+            semesterRankTextView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+
 }

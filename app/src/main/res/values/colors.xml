@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#000000</color>
     <color name="secondary">#97B2C8</color>
+    <color name="light_underline">#696765</color>
     <color name="copper">#F8971C</color>
     <color name="palladium">#A7AAAB</color>
     <color name="platinum">#5AC0C7</color>
@@ -15,4 +16,8 @@
     <color name="approve_color">#00FF00</color>
     <color name="reject_color">#FF0000</color>
     <color name="unhandled_color">#FFCC00</color>
+    <color name="dark_gray">#3D3D3B</color>
+    <color name="light_gray">#B3B3AD</color>
+    <color name="black">#000000</color>
+    <color name="opaque">#00000000</color>
 </resources>

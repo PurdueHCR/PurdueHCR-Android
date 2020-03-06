@@ -14,9 +14,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.fragment.app.ListFragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -24,12 +21,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.QrCodeListAdapter;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 public class QRCodeListFragment extends ListFragment implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
@@ -38,7 +35,9 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
     private ProgressBar progressBar;
     private ListView qrCodeListView;
     private FloatingActionButton qrCodeCreateFab;
+    private SwipeRefreshLayout swipeRefresh;
     private TextView messageTextView;
+    private List<Link> links;
 
     @Override
     public void onAttach(Context context) {
@@ -53,6 +52,13 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        getQRCodesFromServer(swipeRefresh);
+    }
+
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         View view = inflater.inflate(R.layout.fragment_qr_code_list, container, false);
@@ -60,21 +66,13 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
         qrCodeListView = view.findViewById(android.R.id.list);
         messageTextView = view.findViewById(android.R.id.empty);
         qrCodeCreateFab = view.findViewById(R.id.qr_code_create_fab);
-        SwipeRefreshLayout swipeRefresh = view.findViewById(R.id.qr_code_list_swipe_refresh);
+        swipeRefresh = view.findViewById(R.id.qr_code_list_swipe_refresh);
         swipeRefresh.setOnRefreshListener(() -> getQRCodesFromServer(swipeRefresh));
 
         qrCodeCreateFab.setOnClickListener(view1 -> {
 
-            //Create destination fragment
-            Fragment fragment = new QRCreationFragment();
-
-            //Create Fragment manager
-            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.replace(R.id.content_frame, fragment, Integer.toString(R.id.generateQRCode));
-            fragmentTransaction.addToBackStack(Integer.toString(R.id.nav_qr_code_display));
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            fragmentTransaction.commit();
+            QrCodeCreateBottomDialogFragment createFragment = new QrCodeCreateBottomDialogFragment(context);
+            createFragment.show(getFragmentManager(), "Create QR Code");
         });
 
         return view;
@@ -86,9 +84,6 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
         AppCompatActivity activity = (AppCompatActivity) Objects.requireNonNull(getActivity());
         progressBar = activity.findViewById(R.id.navigationProgressBar);
 
-
-
-        getQRCodesFromServer(null);
         progressBar.setVisibility(View.VISIBLE);
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("QR Codes");
 
@@ -109,21 +104,25 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
                 if(swipeRefresh != null){
                     swipeRefresh.setRefreshing(false);
                 }
-
-                if(qrCodes != null && qrCodes.size() != 0){
-                    QrCodeListAdapter adapter = new QrCodeListAdapter(qrCodes,context);
-                    qrCodeListView.setVisibility(View.VISIBLE);
-                    qrCodeListView.setAdapter(adapter);
-                    messageTextView.setVisibility(View.GONE);
-                }
-                else{
-                    qrCodeListView.setVisibility(View.INVISIBLE);
-                    messageTextView.setVisibility(View.VISIBLE);
-                    messageTextView.setText("You haven't made any QR Codes.");
-                }
+                links = qrCodes;
+                redrawQRCodes();
 
             }
         });
+    }
+
+    public void redrawQRCodes(){
+        if(links != null && links.size() != 0){
+            QrCodeListAdapter adapter = new QrCodeListAdapter(links,context);
+            qrCodeListView.setVisibility(View.VISIBLE);
+            qrCodeListView.setAdapter(adapter);
+            messageTextView.setVisibility(View.GONE);
+        }
+        else{
+            qrCodeListView.setVisibility(View.INVISIBLE);
+            messageTextView.setVisibility(View.VISIBLE);
+            messageTextView.setText("You haven't made any QR Codes.");
+        }
     }
 
     @Override
