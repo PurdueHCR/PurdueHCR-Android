@@ -10,6 +10,7 @@ package com.hcrpurdue.jason.hcrhousepoints.Activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -22,6 +23,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -247,7 +249,25 @@ public class AppInitializationActivity extends AppCompatActivity {
     private void checkForLinks(){
         Intent intent = getIntent();
         if (intent != null && intent.getData() != null && intent.getData().getHost() != null) {
-            handleLinks(intent);
+            FirebaseDynamicLinks.getInstance()
+                    .getDynamicLink(getIntent())
+                    .addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
+                        @Override
+                        public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                            // Get deep link from result (may be null if no link is found)
+                            Uri deepLink = null;
+                            if (pendingDynamicLinkData != null) {
+                                deepLink = pendingDynamicLinkData.getLink();
+                                handleDeepLinks(deepLink);
+                            }
+                        }
+                    })
+                    .addOnFailureListener(this, new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            handleLinks(intent);
+                        }
+                    });
         }
         else{
             launchNavigationActivity();
@@ -344,6 +364,9 @@ public class AppInitializationActivity extends AppCompatActivity {
                     }).show();
     }
 
+    private void handleDeepLinks(Uri deepLink) {
+        handleLinks(new Intent("", deepLink));
+    }
 
     private void handleLinks(Intent intent) {
         String host = intent.getData().getHost();
