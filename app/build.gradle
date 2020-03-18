@@ -57,13 +57,14 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
 
-    implementation 'com.google.firebase:firebase-core:16.0.3'
-    implementation 'com.google.firebase:firebase-firestore:17.1.0'
-    implementation 'com.google.firebase:firebase-auth:16.0.3'
+    implementation 'com.google.firebase:firebase-core:17.2.3'
+    implementation 'com.google.firebase:firebase-firestore:21.4.1'
+    implementation 'com.google.firebase:firebase-auth:19.3.0'
+    implementation 'com.google.firebase:firebase-invites:17.0.0'
 
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 
-    implementation 'com.google.android.gms:play-services-vision:15.0.2'
+    implementation 'com.google.android.gms:play-services-vision:19.0.0'
 
     implementation 'androidmads.library.qrgenearator:QRGenearator:1.0.3'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
@@ -74,7 +75,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
-    implementation 'com.google.firebase:firebase-invites:17.0.0'
+
 
 }
 
