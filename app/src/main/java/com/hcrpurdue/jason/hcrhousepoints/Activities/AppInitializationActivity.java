@@ -247,7 +247,7 @@ public class AppInitializationActivity extends AppCompatActivity {
     }
 
     /**
-     * Check for links and transition to naviagtion
+     * Check for links and transition to navigation
      */
     private void checkForLinks(){
         Intent intent = getIntent();
@@ -262,6 +262,8 @@ public class AppInitializationActivity extends AppCompatActivity {
                             if (pendingDynamicLinkData != null) {
                                 deepLink = pendingDynamicLinkData.getLink();
                                 handleDeepLinks(deepLink);
+                            } else {
+                                launchNavigationActivity();
                             }
                         }
                     })
