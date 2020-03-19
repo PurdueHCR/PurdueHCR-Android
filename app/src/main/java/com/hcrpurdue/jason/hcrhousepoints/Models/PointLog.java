@@ -5,12 +5,14 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.firebase.Timestamp;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 public class PointLog implements Comparable<PointLog>, Serializable {
@@ -121,10 +123,19 @@ public class PointLog implements Comparable<PointLog>, Serializable {
         this.residentFirstName = (String) document.get(FIRST_NAME_KEY);
         this.residentLastName = (String) document.get(LAST_NAME_KEY);
         this.approvedBy = (String) document.get(APPROVED_BY_KEY);
-        this.dateSubmitted = (Date) document.get(DATE_SUBMITTED_KEY);
-        this.approvedOn = (Date) document.get(APPROVED_ON_KEY);
+        Timestamp timestampSubmitted = (Timestamp) document.get(DATE_SUBMITTED_KEY);
+        if (timestampSubmitted != null) {
+            this.dateSubmitted = timestampSubmitted.toDate();
+        }
+        Timestamp timestampApprovedOn = (Timestamp) document.get(APPROVED_ON_KEY);
+        if (timestampApprovedOn != null) {
+            this.approvedOn = timestampApprovedOn.toDate();
+        }
         this.residentId = (String) document.get(RESIDENT_ID_KEY);
-        this.dateOccurred = (Date) document.get(DATE_OCCURRED_KEY);
+        Timestamp timestampOccurred = (Timestamp) document.get(DATE_OCCURRED_KEY);
+        if (timestampOccurred != null) {
+            dateOccurred = timestampOccurred.toDate();
+        }
         Long resNotifs = ((Long) document.get(RESIDENT_NOTIF_KEY));
         Long rhpNotifs = ((Long) document.get(RHP_NOTIF_KEY));
         if(resNotifs != null){
