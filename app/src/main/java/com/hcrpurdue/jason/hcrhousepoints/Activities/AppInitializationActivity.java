@@ -77,58 +77,66 @@ public class AppInitializationActivity extends AppCompatActivity {
     private void initializeUserData(){
         //Is the user logged in with Firestore
         if(isLoggedIn()){
-            //Check if the User information is cached on the
-            if (cacheManager.cacheFileExists()) {
-                //Get the specific data from the Users collection
-                cacheManager.getUserData(new CacheManagementInterface() {
-                    public void onSuccess() {
-                        //Got the user data, now lets get the Firebase token to use with the API
-                        auth.getAccessToken(true).addOnCompleteListener(task -> {
-                            System.out.println("KEY!!!: "+ task.getResult().getToken());
-                            cacheManager.getUser().setFirebaseToken(task.getResult().getToken());
+            //Get the firebase auth token to allow for API calls
+            auth.getAccessToken(false).addOnCompleteListener(task -> {
+                System.out.println("KEY!!!: "+ task.getResult().getToken());
+                cacheManager.setAuthToken(task.getResult().getToken());
+                //Once token is found, do this
+
+                //Check if the User information is cached on the
+                if (cacheManager.cacheFileExists()) {
+                    //Get the specific data from the Users collection
+                    cacheManager.getUserData(new CacheManagementInterface() {
+                        public void onSuccess() {
+                            //Got the user data, now lets get the Firebase token to use with the API
+                            initializeCompetitionData();
+                        }
+                        public void onError(Exception e, Context context){
+                            if(e.getMessage().equals("User does not exist.")){
+                                //If the user does not exist, then they have a Firestore account but are not
+                                // registered with a house for this year. Transition to house sign up
+                                handleMissingUserInformation();
+                            }
+                            else{
+                                //If there is another error, make a toast
+                                Toast.makeText(AppInitializationActivity.this,
+                                        e.getLocalizedMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                                launchSignInActivity();
+                            }
+                        }
+                    });
+                } else {
+                    // Get the specific data from the Users collection
+                    cacheManager.getUserDataNoCache(new CacheManagementInterface() {
+                        public void onSuccess() {
                             //Once User data is cached, start initializing the competition data
                             initializeCompetitionData();
-                        });
+                        }
+                        public void onError(Exception e, Context context){
+                            if(e.getMessage().equals("User does not exist.")){
+                                //If the user does not exist, then they have a Firestore account but are not
+                                // registered with a house for this year. Transition to house sign up
+                                handleMissingUserInformation();
+                            }
+                            else{
+                                //If there is another error, make a toast
+                                Toast.makeText(AppInitializationActivity.this,
+                                        e.getLocalizedMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                                launchSignInActivity();
+                            }
+                        }
+                    });
+                }
 
-                    }
-                    public void onError(Exception e, Context context){
-                        if(e.getMessage().equals("User does not exist.")){
-                            //If the user does not exist, then they have a Firestore account but are not
-                            // registered with a house for this year. Transition to house sign up
-                            handleMissingUserInformation();
-                        }
-                        else{
-                            //If there is another error, make a toast
-                            Toast.makeText(AppInitializationActivity.this,
-                                    e.getLocalizedMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                            launchSignInActivity();
-                        }
-                    }
-                });
-            } else {
-                // Get the specific data from the Users collection
-                cacheManager.getUserDataNoCache(new CacheManagementInterface() {
-                    public void onSuccess() {
-                        //Once User data is cached, start initializing the competition data
-                        initializeCompetitionData();
-                    }
-                    public void onError(Exception e, Context context){
-                        if(e.getMessage().equals("User does not exist.")){
-                            //If the user does not exist, then they have a Firestore account but are not
-                            // registered with a house for this year. Transition to house sign up
-                            handleMissingUserInformation();
-                        }
-                        else{
-                            //If there is another error, make a toast
-                            Toast.makeText(AppInitializationActivity.this,
-                                    e.getLocalizedMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                            launchSignInActivity();
-                        }
-                    }
-                });
-            }
+            }).addOnFailureListener(failure -> {
+                System.out.println("AUTH TOKEN ERROR: There was an error getting the auth token: "+failure.getLocalizedMessage());
+                Toast.makeText(AppInitializationActivity.this,
+                        "There was a problem confirming you are logged in.",
+                        Toast.LENGTH_SHORT).show();
+                launchSignInActivity();
+            });
         }
         else{
             //If the user is not logged into a Firestore account, transition to the sign in activity

@@ -5,6 +5,7 @@
 
 package com.hcrpurdue.jason.hcrhousepoints.Activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +23,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
@@ -149,24 +151,44 @@ public class HouseSignUpActivity extends AppCompatActivity {
         String houseName = houseCode.getHouseName();
         String firstName = firstNameEditText.getText().toString();
         String lastName = lastNameEditText.getText().toString();
-        UserPermissionLevel permissionLevel = houseCode.getPermissionLevel();
-
-        User user = new User(firstName, lastName, floorId, houseName, permissionLevel, 0);
-
-
-        Map<String, Object> userData = user.convertToDict();
+//        UserPermissionLevel permissionLevel = houseCode.getPermissionLevel();
+//
+//        User user = new User(firstName, lastName, floorId, houseName, permissionLevel, 0);
+//
+//
+//        Map<String, Object> userData = user.convertToDict();
 
         if (firebaseUser != null) {
             String id = firebaseUser.getUid();
-            db.collection("Users").document(id).set(userData)
-                    .addOnSuccessListener(aVoid -> {
-                        cacheManager.setUserAndCache(user, id);
-                        launchInitializationActivity();
-                    })
-                    .addOnFailureListener(e -> {
-                            stopLoading();
-                            Toast.makeText(this, "Could not create user. Please try again.", Toast.LENGTH_LONG).show();
-                    });
+            cacheManager.createUser(firstName, lastName, houseCode.getCode(), new CacheManagementInterface() {
+                @Override
+                public void onHttpCreateUserSuccess(User user) {
+                    cacheManager.setUserAndCache(user, id);
+                    launchInitializationActivity();
+                }
+
+                @Override
+                public void onError(Exception e, Context context) {
+                    stopLoading();
+                    Toast.makeText(context, "Could not create user. Please try again.", Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onHttpError(ResponseCodeMessage responseCodeMessage) {
+                    stopLoading();
+                    System.out.println("HTTP ERROR: "+responseCodeMessage.getMessage());
+//                    Toast.makeText(this, "Could not create user. Please try again.", Toast.LENGTH_LONG).show();
+                }
+            });
+//            db.collection("Users").document(id).set(userData)
+//                    .addOnSuccessListener(aVoid -> {
+//                        cacheManager.setUserAndCache(user, id);
+//                        launchInitializationActivity();
+//                    })
+//                    .addOnFailureListener(e -> {
+//                            stopLoading();
+//                            Toast.makeText(this, "Could not create user. Please try again.", Toast.LENGTH_LONG).show();
+//                    });
         } else {
             Toast.makeText(this, "Error loading user after authentication, please try logging in", Toast.LENGTH_LONG).show();
             launchSignInActivity();

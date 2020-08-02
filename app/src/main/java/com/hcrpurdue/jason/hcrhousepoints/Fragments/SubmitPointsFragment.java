@@ -25,6 +25,7 @@ import androidx.fragment.app.Fragment;
 
 import com.hcrpurdue.jason.hcrhousepoints.Activities.NavigationActivity;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
@@ -129,16 +130,28 @@ public class SubmitPointsFragment extends Fragment implements ListenerCallbackIn
         } else {
             progressBar.setVisibility(View.VISIBLE);
 
-            cacheManager.submitPoints(descriptionEditText.getText().toString(), calendar.getTime(),
-                    pointType,
-                    new CacheManagementInterface() {
-                        @Override
-                        public void onSuccess() {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            ((NavigationActivity) activity).animateSuccess();
-                            getFragmentManager().popBackStackImmediate();
-                        }
-                    });
+            cacheManager.submitPoints(descriptionEditText.getText().toString(), calendar.getTime(), pointType, new CacheManagementInterface() {
+                @Override
+                public void onSuccess() {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    ((NavigationActivity) activity).animateSuccess();
+                    getFragmentManager().popBackStackImmediate();
+                }
+
+                @Override
+                public void onHttpError(ResponseCodeMessage responseCodeMessage) {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    System.out.println("API ERROR in submitting point: "+responseCodeMessage.getMessage());
+                    Toast.makeText(context, "Sorry. There was an error submitting your point. Please Try again.", Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onError(Exception e, Context context) {
+                    progressBar.setVisibility(View.INVISIBLE);
+                    System.out.println(" ERROR in submitting point: "+e.getLocalizedMessage());
+                    Toast.makeText(context, "Sorry. There was an error submitting your point. Please Try again.", Toast.LENGTH_LONG).show();
+                }
+            });
         }
     }
 

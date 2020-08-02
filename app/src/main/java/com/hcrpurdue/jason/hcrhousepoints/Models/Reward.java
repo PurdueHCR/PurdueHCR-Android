@@ -11,41 +11,40 @@ public class Reward implements Comparable<Reward>{
 
     public static final String FILE_NAME_KEY = "FileName";
     public static final String REQUIRED_PPR_KEY = "RequiredPPR";
-    public static final String REQUIRED_VALUE_KEY = "RequiredValue";
+    public static final String NAME_KEY = "Name";
+    public static final String DOWNLOAD_URL_KEY = "DownloadURL";
 
+
+
+    private String id;
     private String name;
-    private int requiredPoints;
     private float pointsPerResident;
     private String fileName;
+    private String downloadURL;
 
-//    public Reward(String n, int points, float pointsPerResident, int resource){
-//        name = n;
-//        requiredPoints = points;
-//        imageResource = resource;
-//        this.pointsPerResident = pointsPerResident;
-//    }
-//
 
-    public Reward(String name, Map<String, Object> data) {
-        this.name = name;
-        this.fileName = (String) data.get("FileName");
-        this.requiredPoints = ((Long) data.get("RequiredValue")).intValue();
+    public Reward(String id, Map<String, Object> data) {
+        this.id = id;
+        this.name = (String) data.get(Reward.NAME_KEY);
+        this.fileName = (String) data.get(Reward.FILE_NAME_KEY);
         this.pointsPerResident = ((Long) data.get(Reward.REQUIRED_PPR_KEY)).floatValue();
+        this.downloadURL = (String) data.get(Reward.DOWNLOAD_URL_KEY);
     }
 
     public String getName() {
         return name;
     }
 
-
+    //TODO Delete this and replace with usage of downloadURL
     public int getIconResource(Context context){
         String rewardIcon = fileName.replace(".png", "").toLowerCase();
         return context.getResources().getIdentifier(rewardIcon, "drawable", context.getPackageName());
     }
 
-    public int getRequiredPoints() {
-        return requiredPoints;
+    public String getDownloadURL(){
+        return this.downloadURL;
     }
+
 
     public float getRequiredPointsPerResident() {
         return pointsPerResident;
@@ -53,6 +52,6 @@ public class Reward implements Comparable<Reward>{
 
     @Override
     public int compareTo(@NonNull Reward reward) {
-        return requiredPoints - reward.requiredPoints;
+        return (int) (pointsPerResident - reward.getRequiredPointsPerResident());
     }
 }

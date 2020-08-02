@@ -9,13 +9,18 @@ import java.util.Map;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 public class Link implements Serializable {
-    private String linkId;
-    private String description;
-    private String creatorId;
-    private boolean singleUse;
-    private int pointTypeId;
-    private boolean isEnabled;
     private boolean isArchived;
+    private int claimedCount;
+    private String creatorId;
+    private String description;
+    private String dynamicLink;
+    private boolean isEnabled;
+    private int pointTypeId;
+    private String linkId;
+    private boolean singleUse;
+
+
+
 
     public Link(String linkId, String description, boolean singleUse, int pointTypeId, boolean isEnabled, boolean isArchived) {
         this.linkId = linkId;
@@ -34,8 +39,17 @@ public class Link implements Serializable {
         this.pointTypeId = ((Long)document.get("PointID")).intValue();
         this.isEnabled = ((boolean) document.get("Enabled"));
         this.isArchived = ((boolean) document.get("Archived"));
+        this.claimedCount = ((Long) document.get("ClaimedCount")).intValue();
+        this.dynamicLink = (String) document.get("DynamicLink");
     }
 
+    /**
+     * Constructor for links when being created
+     * @param userId
+     * @param description
+     * @param singleUse
+     * @param pointTypeId
+     */
     public Link(String userId, String description, boolean singleUse, int pointTypeId) {
         this.creatorId = userId;
         this.description = description;
@@ -57,17 +71,6 @@ public class Link implements Serializable {
                 '}';
     }
 
-    public Map<String, Object> convertToDict() {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("Description", getDescription());
-        map.put("PointID", getPointTypeId());
-        map.put("SingleUse", isSingleUse());
-        map.put("CreatorID", creatorId);
-        map.put("Enabled", isEnabled());
-        map.put("Archived", isArchived());
-        return map;
-    }
-
     public void setHttpUpdates(Map<String, Object> data){
         if(data.containsKey("is_enabled")){
             setEnabled((boolean) data.get("is_enabled"));
@@ -86,9 +89,6 @@ public class Link implements Serializable {
         }
     }
 
-    public void setLinkId(String linkId) {
-        this.linkId = linkId;
-    }
 
     public void setSingleUse(boolean singleUse) {
         this.singleUse = singleUse;
@@ -134,17 +134,7 @@ public class Link implements Serializable {
         this.description = description;
     }
 
-    /**
-     *
-     * @return the address that should be represented with this QR code
-     */
-    public String getAddress(){
-        return "hcrpoint://addpoints/"+this.linkId;
-    }
-
-    public String getAndroidDeepLinkAddress(){
-        return "intent://addpoints/"+this.linkId+"#Intent;scheme=hcrpoint;package=com.hcrpurdue.jason.hcrhousepoints;end";
-    }
+    public String getDynamicLink(){ return this.dynamicLink; }
 
     public PointType getPointType(Context context){
         return CacheManager.getInstance(context).getPointTypeWithID(pointTypeId);

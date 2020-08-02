@@ -20,6 +20,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
+import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 
 public interface CacheManagementInterface {
     default void onPointTypeComplete(List<PointType> data) { }
@@ -27,6 +28,7 @@ public interface CacheManagementInterface {
     default void onSuccess() { }
 
     default void onHttpSuccess(ResponseCodeMessage responseCodeMessage) { }
+    default void onHttpCreateUserSuccess(User user) { }
 
     default void onError(Exception e, Context context) {
         Toast.makeText(context, "A CacheManager error occurred", Toast.LENGTH_LONG).show();
