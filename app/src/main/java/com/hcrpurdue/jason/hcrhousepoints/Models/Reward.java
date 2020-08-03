@@ -35,12 +35,6 @@ public class Reward implements Comparable<Reward>{
         return name;
     }
 
-    //TODO Delete this and replace with usage of downloadURL
-    public int getIconResource(Context context){
-        String rewardIcon = fileName.replace(".png", "").toLowerCase();
-        return context.getResources().getIdentifier(rewardIcon, "drawable", context.getPackageName());
-    }
-
     public String getDownloadURL(){
         return this.downloadURL;
     }

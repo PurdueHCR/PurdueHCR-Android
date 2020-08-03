@@ -65,7 +65,7 @@ public class ResidentProfileFragment extends BaseProfileFragment {
     protected void setupCards(View view) {
         residentProfileToolbar = new ResidentProfileToolbar(context, view);
         houseCompetitionCard = new HouseCompetitionCard(context, view);
-        rewardCard = new RewardCard(context, view);
+        rewardCard = new RewardCard(context, view.findViewById(R.id.profile_reward_card), cacheManager.getSystemPreferences().shouldShowRewards());
         recentPointSubmissionCard = new RecentPointSubmissionCard(context, view);
     }
 
@@ -96,6 +96,9 @@ public class ResidentProfileFragment extends BaseProfileFragment {
     private void handleHouseUpdate() {
         if(houseCompetitionCard != null)
             houseCompetitionCard.handleHouseUpdate();
+        if(residentProfileToolbar != null){
+            residentProfileToolbar.handleHousesUpdated();
+        }
     }
 
     private void handleRewardUpdate() {
@@ -109,6 +112,9 @@ public class ResidentProfileFragment extends BaseProfileFragment {
         }
         if(residentProfileToolbar != null){
             residentProfileToolbar.handleSysPrefUpdate();
+        }
+        if(rewardCard != null){
+            rewardCard.handleSystemPreferencesUpdate();
         }
     }
 

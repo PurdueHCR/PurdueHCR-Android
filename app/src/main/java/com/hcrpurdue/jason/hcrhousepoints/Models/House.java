@@ -9,11 +9,13 @@ public class House implements Comparable<House> {
     public static String COLOR_KEY = "Color";
     public static String NUMBER_OF_RESIDENTS_KEY = "NumberOfResidents";
     public static String TOTAL_POINTS_KEY = "TotalPoints";
+    public static String DOWNLOAD_URL_KEY = "DownloadURL";
 
 
     private int numResidents;
     private int totalPoints;
     private String name;
+    private String downloadURL;
 
     public House(String n, int residents, int points) {
         name = n;
@@ -25,6 +27,7 @@ public class House implements Comparable<House> {
         this.numResidents = ((Long) firestoreData.get(NUMBER_OF_RESIDENTS_KEY)).intValue();
         this.name = houseName;
         this.totalPoints = ((Long) firestoreData.get(TOTAL_POINTS_KEY)).intValue();
+        this.downloadURL = (String) firestoreData.get(DOWNLOAD_URL_KEY);
     }
 
     public String getName() {
@@ -37,6 +40,10 @@ public class House implements Comparable<House> {
 
     public int getTotalPoints() {
         return totalPoints;
+    }
+
+    public String getDownloadURL(){
+        return downloadURL;
     }
 
     public float getPointsPerResident(){

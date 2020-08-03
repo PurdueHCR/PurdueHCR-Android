@@ -286,7 +286,7 @@ public class CacheManager {
     }
 
     public House getUserHouse(){
-        for(House house: houseList){
+        for(House house: getHouses()){
             if(house.getName().equals(user.getHouseName()))
                 return house;
         }
