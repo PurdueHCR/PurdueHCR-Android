@@ -10,6 +10,7 @@ package com.hcrpurdue.jason.hcrhousepoints.Activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -22,10 +23,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
@@ -77,58 +82,66 @@ public class AppInitializationActivity extends AppCompatActivity {
     private void initializeUserData(){
         //Is the user logged in with Firestore
         if(isLoggedIn()){
-            //Check if the User information is cached on the
-            if (cacheManager.cacheFileExists()) {
-                //Get the specific data from the Users collection
-                cacheManager.getUserData(new CacheManagementInterface() {
-                    public void onSuccess() {
-                        //Got the user data, now lets get the Firebase token to use with the API
-                        auth.getAccessToken(true).addOnCompleteListener(task -> {
-                            System.out.println("KEY!!!: "+ task.getResult().getToken());
-                            cacheManager.getUser().setFirebaseToken(task.getResult().getToken());
+            //Get the firebase auth token to allow for API calls
+            auth.getAccessToken(false).addOnCompleteListener(task -> {
+                System.out.println("KEY!!!: "+ task.getResult().getToken());
+                cacheManager.setAuthToken(task.getResult().getToken());
+                //Once token is found, do this
+
+                //Check if the User information is cached on the
+                if (cacheManager.cacheFileExists()) {
+                    //Get the specific data from the Users collection
+                    cacheManager.getUserData(new CacheManagementInterface() {
+                        public void onSuccess() {
+                            //Got the user data, now lets get the Firebase token to use with the API
+                            initializeCompetitionData();
+                        }
+                        public void onError(Exception e, Context context){
+                            if(e.getMessage().equals("User does not exist.")){
+                                //If the user does not exist, then they have a Firestore account but are not
+                                // registered with a house for this year. Transition to house sign up
+                                handleMissingUserInformation();
+                            }
+                            else{
+                                //If there is another error, make a toast
+                                Toast.makeText(AppInitializationActivity.this,
+                                        e.getLocalizedMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                                launchSignInActivity();
+                            }
+                        }
+                    });
+                } else {
+                    // Get the specific data from the Users collection
+                    cacheManager.getUserDataNoCache(new CacheManagementInterface() {
+                        public void onSuccess() {
                             //Once User data is cached, start initializing the competition data
                             initializeCompetitionData();
-                        });
+                        }
+                        public void onError(Exception e, Context context){
+                            if(e.getMessage().equals("User does not exist.")){
+                                //If the user does not exist, then they have a Firestore account but are not
+                                // registered with a house for this year. Transition to house sign up
+                                handleMissingUserInformation();
+                            }
+                            else{
+                                //If there is another error, make a toast
+                                Toast.makeText(AppInitializationActivity.this,
+                                        e.getLocalizedMessage(),
+                                        Toast.LENGTH_SHORT).show();
+                                launchSignInActivity();
+                            }
+                        }
+                    });
+                }
 
-                    }
-                    public void onError(Exception e, Context context){
-                        if(e.getMessage().equals("User does not exist.")){
-                            //If the user does not exist, then they have a Firestore account but are not
-                            // registered with a house for this year. Transition to house sign up
-                            handleMissingUserInformation();
-                        }
-                        else{
-                            //If there is another error, make a toast
-                            Toast.makeText(AppInitializationActivity.this,
-                                    e.getLocalizedMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                            launchSignInActivity();
-                        }
-                    }
-                });
-            } else {
-                // Get the specific data from the Users collection
-                cacheManager.getUserDataNoCache(new CacheManagementInterface() {
-                    public void onSuccess() {
-                        //Once User data is cached, start initializing the competition data
-                        initializeCompetitionData();
-                    }
-                    public void onError(Exception e, Context context){
-                        if(e.getMessage().equals("User does not exist.")){
-                            //If the user does not exist, then they have a Firestore account but are not
-                            // registered with a house for this year. Transition to house sign up
-                            handleMissingUserInformation();
-                        }
-                        else{
-                            //If there is another error, make a toast
-                            Toast.makeText(AppInitializationActivity.this,
-                                    e.getLocalizedMessage(),
-                                    Toast.LENGTH_SHORT).show();
-                            launchSignInActivity();
-                        }
-                    }
-                });
-            }
+            }).addOnFailureListener(failure -> {
+                System.out.println("AUTH TOKEN ERROR: There was an error getting the auth token: "+failure.getLocalizedMessage());
+                Toast.makeText(AppInitializationActivity.this,
+                        "There was a problem confirming you are logged in.",
+                        Toast.LENGTH_SHORT).show();
+                launchSignInActivity();
+            });
         }
         else{
             //If the user is not logged into a Firestore account, transition to the sign in activity
@@ -246,10 +259,13 @@ public class AppInitializationActivity extends AppCompatActivity {
      */
     private void checkForLinks(){
         Intent intent = getIntent();
-        if (intent != null && intent.getData() != null && intent.getData().getHost() != null) {
+
+        if (getIntent().hasExtra("com.google.firebase.dynamiclinks.DYNAMIC_LINK_DATA") || getIntent().getData() != null) {
+            System.out.println("HAS LINK");
             handleLinks(intent);
         }
         else{
+            System.out.println("NO LINK");
             launchNavigationActivity();
         }
     }
@@ -346,63 +362,94 @@ public class AppInitializationActivity extends AppCompatActivity {
 
 
     private void handleLinks(Intent intent) {
-        String host = intent.getData().getHost();
-        String path = intent.getData().getPath();
 
-        if (host.equals("addpoints")) {
-            String[] parts = path.split("/");
-            if (parts.length == 2) {
-                String linkId = parts[1].replace("/", "");
-                cacheManager.getLinkWithLinkId(linkId, new CacheManagementInterface() {
+        FirebaseDynamicLinks.getInstance()
+                .getDynamicLink(getIntent())
+                .addOnSuccessListener(new OnSuccessListener<PendingDynamicLinkData>() {
                     @Override
-                    public void onError(Exception e, Context context) {
-                        couldNotFindLink(new AlertDialogInterface() {
-                            @Override
-                            public void onPositiveButtonListener() {
-                                launchNavigationActivity();
+                    public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                        System.out.println("Should handle link");
+                        Uri deepLink = null;
+                        if(pendingDynamicLinkData != null && pendingDynamicLinkData.getLink() != null){
+                            System.out.println("Got deepLink: "+pendingDynamicLinkData.getLink());
+                            deepLink = pendingDynamicLinkData.getLink();
+                            String url = deepLink.toString();
+                            url = url.replace("https://purdue-hcr-test.web.app/#/", "");
+                            if(url.split("/").length == 2){
+                                String command = url.split("/")[0];
+                                String data = url.split("/")[1];
+                                if (command.contains("addpoints")) {
+                                    String linkId = data.replace("/", "");
+                                    cacheManager.getLinkWithLinkId(linkId, new CacheManagementInterface() {
+                                        @Override
+                                        public void onError(Exception e, Context context) {
+                                            couldNotFindLink(new AlertDialogInterface() {
+                                                @Override
+                                                public void onPositiveButtonListener() {
+                                                    launchNavigationActivity();
+                                                }
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onGetLinkWithIdSuccess(Link link) {
+                                            foundQrCode(link, new AlertDialogInterface() {
+                                                @Override
+                                                public void onPositiveButtonListener() {
+                                                    cacheManager.submitPointWithLink(link, new CacheManagementInterface() {
+                                                        @Override
+                                                        public void onSuccess() {
+                                                            launchNaviationActivity(true);
+                                                        }
+
+                                                        @Override
+                                                        public void onError(Exception e, Context context) {
+                                                            failedToSubmitPoints(e, new AlertDialogInterface() {
+                                                                @Override
+                                                                public void onPositiveButtonListener() {
+                                                                    launchNavigationActivity();
+                                                                }
+                                                            });
+                                                        }
+                                                    });
+                                                }
+
+                                                @Override
+                                                public void onNegativeButtonListener() {
+                                                    launchNavigationActivity();
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    System.out.println("We don't handle the path: "+command+" in the initialization activity.");
+                                    //The link's path is not one we care about here
+                                    launchNavigationActivity();
+                                }
                             }
-                        });
-                    }
-
-                    @Override
-                    public void onGetLinkWithIdSuccess(Link link) {
-                        foundQrCode(link, new AlertDialogInterface() {
-                            @Override
-                            public void onPositiveButtonListener() {
-                                cacheManager.submitPointWithLink(link, new CacheManagementInterface() {
+                            else {
+                                couldNotFindLink(new AlertDialogInterface() {
                                     @Override
-                                    public void onSuccess() {
-                                        launchNaviationActivity(true);
-                                    }
-
-                                    @Override
-                                    public void onError(Exception e, Context context) {
-                                        failedToSubmitPoints(e, new AlertDialogInterface() {
-                                            @Override
-                                            public void onPositiveButtonListener() {
-                                                launchNavigationActivity();
-                                            }
-                                        });
+                                    public void onPositiveButtonListener() {
+                                        launchNavigationActivity();
                                     }
                                 });
                             }
 
-                            @Override
-                            public void onNegativeButtonListener() {
-                                launchNavigationActivity();
-                            }
-                        });
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                couldNotFindLink(new AlertDialogInterface() {
+                    @Override
+                    public void onPositiveButtonListener() {
+                        launchNavigationActivity();
                     }
                 });
+
             }
-            else{
-                couldNotFindLink(null);
-                launchNavigationActivity();
-            }
-        } else {
-            couldNotFindLink(null);
-            launchNavigationActivity();
-        }
+        });
     }
 
     private void couldNotFindLink(AlertDialogInterface alertDialogInterface){

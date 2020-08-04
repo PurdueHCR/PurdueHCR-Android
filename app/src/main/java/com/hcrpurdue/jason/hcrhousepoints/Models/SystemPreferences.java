@@ -12,6 +12,8 @@ public class SystemPreferences {
     private String houseIsEnabledMsg;
     private String appVersion;
     private boolean isCompetitionVisible;
+    private String competitionHiddenMessage;
+    private boolean showRewards;
 
 
     public void setHouseEnabled(boolean houseEnabled) {
@@ -19,10 +21,7 @@ public class SystemPreferences {
     }
 
     public SystemPreferences(Map<String, Object> data) {
-        this.isHouseEnabled = (boolean) data.get("isHouseEnabled");
-        this.houseIsEnabledMsg = (String) data.get("houseEnabledMessage");
-        this.appVersion = (String) data.get("Android_Version");
-        this.isCompetitionVisible = (boolean) data.get("isCompetitionVisible");
+        updateValues(data);
     }
 
     public String getHouseIsEnabledMsg() {
@@ -46,10 +45,16 @@ public class SystemPreferences {
         return isCompetitionVisible;
     }
 
+    public boolean shouldShowRewards() { return showRewards; }
+
+    public String getCompetitionHiddenMessage() { return competitionHiddenMessage; }
+
     public void updateValues(Map<String, Object> data) {
         this.isHouseEnabled = (boolean) data.get("isHouseEnabled");
         this.houseIsEnabledMsg = (String) data.get("houseEnabledMessage");
-        this.appVersion = (String) data.get("Version");
+        this.appVersion = (String) data.get("Android_Version");
         this.isCompetitionVisible = (boolean) data.get("isCompetitionVisible");
+        this.showRewards = (boolean) data.get("ShowRewards");
+        this.competitionHiddenMessage = (String) data.get("competitionHiddenMessage");
     }
 }

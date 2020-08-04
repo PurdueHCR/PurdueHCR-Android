@@ -72,7 +72,6 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constant_next_reward_label"
-            app:srcCompat="@drawable/bag" />
+            app:layout_constraintTop_toBottomOf="@+id/constant_next_reward_label" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -5,7 +5,9 @@
 
 package com.hcrpurdue.jason.hcrhousepoints.Activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Pair;
@@ -15,16 +17,25 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.R;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.AlertDialogInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 import java.util.HashMap;
@@ -55,6 +66,13 @@ public class HouseSignUpActivity extends AppCompatActivity {
         cacheManager = CacheManager.getInstance(getApplicationContext());
         getFloorCodes();
         initializeViews();
+        handleJoinHouseLink(this);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        handleJoinHouseLink(this);
     }
 
     private void initializeViews(){
@@ -149,24 +167,34 @@ public class HouseSignUpActivity extends AppCompatActivity {
         String houseName = houseCode.getHouseName();
         String firstName = firstNameEditText.getText().toString();
         String lastName = lastNameEditText.getText().toString();
-        UserPermissionLevel permissionLevel = houseCode.getPermissionLevel();
-
-        User user = new User(firstName, lastName, floorId, houseName, permissionLevel, 0);
-
-
-        Map<String, Object> userData = user.convertToDict();
+//        UserPermissionLevel permissionLevel = houseCode.getPermissionLevel();
+//
+//        User user = new User(firstName, lastName, floorId, houseName, permissionLevel, 0);
+//
+//
+//        Map<String, Object> userData = user.convertToDict();
 
         if (firebaseUser != null) {
             String id = firebaseUser.getUid();
-            db.collection("Users").document(id).set(userData)
-                    .addOnSuccessListener(aVoid -> {
-                        cacheManager.setUserAndCache(user, id);
-                        launchInitializationActivity();
-                    })
-                    .addOnFailureListener(e -> {
-                            stopLoading();
-                            Toast.makeText(this, "Could not create user. Please try again.", Toast.LENGTH_LONG).show();
-                    });
+            cacheManager.createUser(firstName, lastName, houseCode.getCode(), new CacheManagementInterface() {
+                @Override
+                public void onHttpCreateUserSuccess(User user) {
+                    cacheManager.setUserAndCache(user, id);
+                    launchInitializationActivity();
+                }
+
+                @Override
+                public void onError(Exception e, Context context) {
+                    stopLoading();
+                    Toast.makeText(context, "Could not create user. Please try again.", Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onHttpError(ResponseCodeMessage responseCodeMessage) {
+                    stopLoading();
+                    System.out.println("HTTP ERROR: "+responseCodeMessage.getMessage());
+                }
+            });
         } else {
             Toast.makeText(this, "Error loading user after authentication, please try logging in", Toast.LENGTH_LONG).show();
             launchSignInActivity();
@@ -218,6 +246,49 @@ public class HouseSignUpActivity extends AppCompatActivity {
     private void stopLoading(){
         loadingBar.setVisibility(View.INVISIBLE);
         joinButton.setEnabled(true);
+    }
+
+    private void handleJoinHouseLink(AppCompatActivity activity) {
+
+        FirebaseDynamicLinks.getInstance()
+                .getDynamicLink(getIntent())
+                .addOnSuccessListener(new OnSuccessListener<PendingDynamicLinkData>() {
+                    @Override
+                    public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                        System.out.println("Should handle link in house signup");
+                        Uri deepLink = null;
+                        if(pendingDynamicLinkData != null && pendingDynamicLinkData.getLink() != null){
+                            System.out.println("Got deepLink: "+pendingDynamicLinkData.getLink());
+                            deepLink = pendingDynamicLinkData.getLink();
+                            String url = deepLink.toString();
+                            url = url.replace("https://purdue-hcr-test.web.app/#/", "");
+                            if(url.split("/").length == 2){
+                                String command = url.split("/")[0];
+                                String data = url.split("/")[1];
+                                if (command.contains("createaccount")) {
+                                    String houseCode = data.replace("/", "");
+                                    houseCodeEditText.setText(houseCode);
+                                    houseCodeEditText.setEnabled(false);
+                                } else {
+                                    System.out.println("We don't handle the path: "+command+" in the initialization activity.");
+                                }
+                            }
+                            else {
+                                AlertDialogHelper.showSingleButtonDialog(activity, "Could Not Find House Code",
+                                        "Sorry. We were unable to find that house code. Please let whoever gave you this link know that it is out of date.",
+                                        "Ok",null);
+                            }
+
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                AlertDialogHelper.showSingleButtonDialog(activity, "Could Not Find House Code",
+                        "Sorry. We were unable to find that house code. Please let whoever gave you this link know that it is out of date.",
+                        "Ok",null);
+            }
+        });
     }
 
 }

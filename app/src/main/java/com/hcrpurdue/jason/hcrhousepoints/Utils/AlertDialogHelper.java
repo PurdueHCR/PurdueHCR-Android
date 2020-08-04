@@ -7,6 +7,7 @@ import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 
@@ -34,6 +35,11 @@ public class AlertDialogHelper {
     public static Dialog showDoubleButtonDialog(Activity activity, String title, String message, String positiveText, String negativeText, AlertDialogInterface alertDialogInterface){
 
         return new DoubleButtonDialog(activity, title, message, positiveText, negativeText, alertDialogInterface);
+    }
+
+    public static Dialog showDoubleButtonWithEditTextDialog(Activity activity, String title, String message, String positiveText, String negativeText, AlertDialogInterface alertDialogInterface){
+
+        return new DoubleButtonWithEditTextDialog(activity, title, message, positiveText, negativeText, alertDialogInterface);
     }
 
     public static Dialog showQRSubmissionDialog(Activity activity, Link link, AlertDialogInterface alertDialogInterface){
@@ -104,6 +110,55 @@ class DoubleButtonDialog extends AlertDialog{
         });
 
         setCancelable(false);
+        setView(view);
+    }
+}
+
+class DoubleButtonWithEditTextDialog extends AlertDialog{
+    DoubleButtonWithEditTextDialog(Activity activity, String title, String message, String positiveButtonText, String negativeButtonText, AlertDialogInterface alertDialogInterface){
+        super(activity);
+        LayoutInflater inflater = activity.getLayoutInflater();
+
+        // Inflate and set the layout for the dialog
+        // Pass null as the parent view because its going in the dialog layout
+        View view = inflater.inflate(R.layout.dialog_double_button_with_text_field, null);
+
+        TextView titleTextView = view.findViewById(R.id.title);
+        TextView messageTextView = view.findViewById(R.id.description_text_view);
+        EditText reasoning = view.findViewById(R.id.editTextRejectionReasoning);
+        TextView errorMessage = view.findViewById(R.id.reject_dialog_error_message);
+        Button positiveButton = view.findViewById(R.id.positive_button);
+        Button negativeButton = view.findViewById(R.id.negative_button);
+
+        titleTextView.setText(title);
+        messageTextView.setText(message);
+        positiveButton.setText(positiveButtonText);
+        negativeButton.setText(negativeButtonText);
+        errorMessage.setVisibility(View.INVISIBLE);
+
+        reasoning.setOnFocusChangeListener((item, item2 )-> {
+            errorMessage.setVisibility(View.INVISIBLE);
+        });
+
+
+        positiveButton.setOnClickListener(view1 -> {
+            if(reasoning.getText().toString().isEmpty()){
+                errorMessage.setVisibility(View.VISIBLE);
+            }
+            else{
+                if(alertDialogInterface != null)
+                    alertDialogInterface.onPositiveButtonWithTextListener(reasoning.getText().toString());
+                dismiss();
+            }
+        });
+
+        negativeButton.setOnClickListener(view1 -> {
+            if(alertDialogInterface != null)
+                alertDialogInterface.onNegativeButtonListener();
+            dismiss();
+        });
+
+        setCancelable(true);
         setView(view);
     }
 }

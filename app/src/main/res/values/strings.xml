@@ -32,8 +32,7 @@
     <string name="invalid_length_description">Max Length is 64 Characters</string>
 
     <string-array name="share_options">
-        <item>Copy Android Link</item>
-        <item>Copy iOS Link</item>
+        <item>Copy Sharing Link</item>
         <item>Save Image</item>
         <item>Share Image</item>
     </string-array>

@@ -52,9 +52,18 @@ public class CacheManager {
     private SystemPreferences sysPrefs = null;
     private AuthRank userRank = null;
     private Context context;
+    private String authToken;
 
     private CacheManager() {
         // Exists only to defeat instantiation. Get rekt, instantiation
+    }
+
+    public String getAuthToken(){
+        return this.authToken;
+    }
+
+    public void setAuthToken(String authToken){
+        this.authToken = authToken;
     }
 
     private void setApplicationContext(Context c) {
@@ -277,7 +286,7 @@ public class CacheManager {
     }
 
     public House getUserHouse(){
-        for(House house: houseList){
+        for(House house: getHouses()){
             if(house.getName().equals(user.getHouseName()))
                 return house;
         }
@@ -293,78 +302,61 @@ public class CacheManager {
         }
     }
 
-    public void submitPoints(String description, Date dateOccurred, PointType type, CacheManagementInterface sui) {
-        PointLog log = new PointLog(description, type, dateOccurred, user);
-        boolean preApproved = user.getPermissionLevel() == UserPermissionLevel.RHP; // preaproved only RHP
-        fbutil.submitPointLog(log, null, user.getHouseName(), user.getUserId(), preApproved, sysPrefs, new FirebaseUtilInterface() {
-            @Override
-            public void onSuccess() {
-                if(preApproved){
-                    PointLogMessage plm = new PointLogMessage("Preapproved", "PurdueHCR", "",user.getPermissionLevel(), MessageType.APPROVE);
-                    fbutil.postMessageToPointLog(log, getHouseName(), plm, false, new FirebaseUtilInterface() {
-                        @Override
-                        public void onSuccess() {
-                            sui.onSuccess();
-                        }
+    public void submitPoints(String description, Date dateOccurred, PointType type, CacheManagementInterface cacheManagementInterface) {
 
-                        @Override
-                        public void onError(Exception e, Context context) {
-                            sui.onError(e,context);
-                        }
-                    });
+        APIHelper.getInstance(context).submitPoint(description,type.getId(), dateOccurred).enqueue(new Callback<ResponseMessage>() {
+            @Override
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                if(response.isSuccessful()){
+                    System.out.println("Success submitted point");
+                    cacheManagementInterface.onSuccess();
                 }
                 else{
-                    sui.onSuccess();
+                    try{
+                        System.out.println("GOT Error: "+response.errorBody().string());
+                        cacheManagementInterface.onHttpError(new ResponseCodeMessage(response.code(), response.errorBody().string()));
+                    }
+                    catch (IOException err){
+                        cacheManagementInterface.onError(err, context);
+                    }
                 }
+            }
 
+            @Override
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                cacheManagementInterface.onError(new Exception(t.getMessage()), context);
             }
         });
+
     }
 
-    public void submitPointWithLink(Link link, CacheManagementInterface sui) {
+    public void submitPointWithLink(Link link, CacheManagementInterface cacheManagementInterface) {
         if (link.isEnabled()) {
-              PointType type = null;
-              for (PointType pointType : pointTypeList) {
-                  if (pointType.getId() == link.getPointTypeId()) {
-                      type = pointType;
-                  }
-              }
-              PointLog log = new PointLog(link.getDescription(), type, user);
-              fbutil.submitPointLog(log, (link.isSingleUse()) ? link.getLinkId() : null, user.getHouseName(), user.getUserId(), link.isSingleUse() || user.getPermissionLevel() == UserPermissionLevel.RHP, sysPrefs, new FirebaseUtilInterface() {
-                  @Override
-                  public void onSuccess() {
-                      if(link.isSingleUse()){
-                          PointLogMessage plm = new PointLogMessage("Preapproved", "PurdueHCR", "",getPermissionLevel(), MessageType.APPROVE);
-                          fbutil.postMessageToPointLog(log, getHouseName(), plm,false, new FirebaseUtilInterface() {
-                              @Override
-                              public void onSuccess() {
+            APIHelper.getInstance(context).submitLink(link.getLinkId()).enqueue(new Callback<ResponseMessage>() {
+                @Override
+                public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                    if(response.isSuccessful()){
+                        System.out.println("Success submitted point");
+                        cacheManagementInterface.onSuccess();
+                    }
+                    else{
+                        try{
+                            System.out.println("GOT Error: "+response.errorBody().string());
+                            cacheManagementInterface.onError(new Exception("Sorry. There was an error submitting the points. Please Try again."),context);
+                        }
+                        catch (IOException err){
+                            cacheManagementInterface.onError(err, context);
+                        }
+                    }
+                }
 
-                                  sui.onSuccess();
-                              }
-
-                              @Override
-                              public void onError(Exception e, Context context) {
-                                  sui.onError(e,context);
-                              }
-                          });
-                      }
-                      else{
-                          sui.onSuccess();
-                      }
-                  }
-
-                  @Override
-                  public void onError(Exception e, Context c) {
-                      if (e.getLocalizedMessage().equals("Code was already submitted")) {
-                          Toast.makeText(c, "You have already submitted this code.",
-                                  Toast.LENGTH_SHORT).show();
-                      }
-                      sui.onError(e, c);
-
-                  }
-              });
+                @Override
+                public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                    cacheManagementInterface.onError(new Exception(t.getMessage()), context);
+                }
+            });
         } else {
-            sui.onError(new Exception("This QR code is not enabled."), fbutil.getContext());
+            cacheManagementInterface.onError(new Exception("This QR code is not enabled."), fbutil.getContext());
         }
     }
 
@@ -448,6 +440,32 @@ public class CacheManager {
         this.userCreatedQRCodes = codes;
     }
 
+    public void createUser(String firstName, String lastName, String houseCode, CacheManagementInterface si){
+        APIHelper.getInstance(context).createUser(firstName,lastName, houseCode).enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                System.out.println("RESPONSE BODY: "+response.raw().toString());
+                if(response.isSuccessful()){
+                    System.out.println("Success created user");
+                    si.onHttpCreateUserSuccess(response.body());
+                }
+                else{
+                    try{
+                        System.out.println("GOT Error: "+response.errorBody().string());
+                        si.onHttpError(new ResponseCodeMessage(response.code(), response.errorBody().string()));
+                    }
+                    catch (IOException err){
+                        si.onError(err, context);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                si.onError(new Exception(t.getMessage()), context);
+            }
+        });
+    }
 
 
     /**
@@ -517,50 +535,6 @@ public class CacheManager {
         });
     }
 
-    /**
-     * Update a Link object in the database with a new Enabled Status
-     *
-     * @param link  Link object to be updated
-     * @param si   CacheManagementInterface with method OnError and onSuccess implemented
-     *
-     * @Note    If it is easier to just give the link id, then this method can be changed to handle that instead.
-     */
-    public void setQRCodeEnabledStatus(Link link, boolean isEnabled, CacheManagementInterface si){
-        fbutil.setQRCodeEnabledStatus(link, isEnabled, new FirebaseUtilInterface() {
-            @Override
-            public void onSuccess() {
-                si.onSuccess();
-            }
-
-            @Override
-            public void onError(Exception e, Context context) {
-                si.onError(e,context);
-            }
-        });
-    }
-
-    /**
-     * Update a Link object in the database with a new Archived Status
-     *
-     * @param link  Link object to be updated
-     * @param si   CacheManagementInterface with method OnError and onSuccess implemented
-     *
-     * @Note    If it is easier to just give the link id, then this method can be changed to handle that instead.
-     */
-    public void setQRCodeArchivedStatus(Link link, boolean isArchived, CacheManagementInterface si){
-        fbutil.setQRCodeArchivedStatus(link, isArchived, new FirebaseUtilInterface() {
-            @Override
-            public void onSuccess() {
-                si.onSuccess();
-            }
-
-            @Override
-            public void onError(Exception e, Context context) {
-                si.onError(e,context);
-            }
-        });
-    }
-
     public void getAllHousePoints(CacheManagementInterface si) {
         fbutil.getAllHousePoints(user.getHouseName(), user.getFloorId(), new FirebaseUtilInterface() {
 
@@ -571,41 +545,54 @@ public class CacheManager {
         });
     }
 
-    /**
-     * Handles the updating the database for approving or denying points. It will update the point in the house and the TotalPoints for both user and house
-     *
-     * @param log                    PointLog:   The PointLog that is to be either approved or denied
-     * @paramad approved               boolean:    Was the log approved?
-     * @param sui                    FirebaseUtilInterface: Implement the OnError and onSuccess methods
-     */
-    public void handlePointLog(PointLog log, boolean approved, boolean updating, CacheManagementInterface sui){
-        fbutil.updatePointLogStatus(log, approved, getHouseName(),updating,false, new FirebaseUtilInterface() {
+    public void approvePointLog(PointLog log, CacheManagementInterface cacheManagementInterface){
+        APIHelper.getInstance(context).approvePointLog(log.getLogID()).enqueue(new Callback<ResponseMessage>() {
             @Override
-            public void onSuccess() {
-                MessageType mt = MessageType.REJECT;
-                String msg = getName()+" rejected the point request.";
-                if(approved){
-                    msg = getName()+" approved the point request.";
-                    mt = MessageType.APPROVE;
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                if(response.isSuccessful()) {
+                    cacheManagementInterface.onSuccess();
                 }
-                PointLogMessage plm = new PointLogMessage(msg, user.getFirstName(), user.getLastName(), user.getPermissionLevel(), mt);
-                fbutil.postMessageToPointLog(log, getHouseName(), plm, new FirebaseUtilInterface() {
-                    @Override
-                    public void onSuccess() {
-
-                        sui.onSuccess();
+                else{
+                    try {
+                        System.out.println("ERROR CODE: " + response.code());
+                        System.out.println("GOT Error: " + response.errorBody().string());
+                        cacheManagementInterface.onHttpError(new ResponseCodeMessage(response.code(), "Failure"));
                     }
-
-                    @Override
-                    public void onError(Exception e, Context context) {
-                        sui.onError(e,context);
+                    catch (IOException err){
+                        cacheManagementInterface.onError(err, context);
                     }
-                });
+                }
             }
 
             @Override
-            public void onError(Exception e, Context context) {
-                sui.onError(e,context);
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                cacheManagementInterface.onError(new Exception(t.getMessage()), context);
+            }
+        });
+    }
+
+    public void rejectPointLog(PointLog log, String reason, CacheManagementInterface cacheManagementInterface){
+        APIHelper.getInstance(context).rejectPointLog(log.getLogID(), reason).enqueue(new Callback<ResponseMessage>() {
+            @Override
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                if(response.isSuccessful()) {
+                    cacheManagementInterface.onSuccess();
+                }
+                else{
+                    try {
+                        System.out.println("ERROR CODE: " + response.code());
+                        System.out.println("GOT Error: " + response.errorBody().string());
+                        cacheManagementInterface.onHttpError(new ResponseCodeMessage(response.code(), "Failure"));
+                    }
+                    catch (IOException err){
+                        cacheManagementInterface.onError(err, context);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                cacheManagementInterface.onError(new Exception(t.getMessage()), context);
             }
         });
     }
@@ -629,35 +616,38 @@ public class CacheManager {
         });
     }
 
-    /**
-     * Add a message to the point log
-     * @param log   Log to which the message should be posted
-     * @param plm   PointLogMessage to post
-     * @param sui   CacheManagementInterface with onSuccess and onError
-     */
-    public void postMessageToPointLog(PointLog log, PointLogMessage plm, CacheManagementInterface sui){
-        fbutil.postMessageToPointLog(log, getHouseName(), plm, new FirebaseUtilInterface() {
-            @Override
-            public void onSuccess() {
-                sui.onSuccess();
-            }
-
-            @Override
-            public void onError(Exception e, Context context) {
-                sui.onError(e,context);
-            }
-        });
-    }
 
     /**
      * Add a message to the point log
      * @param log   Log to which the message should be posted
      * @param message   message to post
-     * @param sui   CacheManagementInterface with onSuccess and onError
+     * @param cacheManagementInterface   CacheManagementInterface with onSuccess and onError
      */
-    public void postMessageToPointLog(PointLog log, String message, CacheManagementInterface sui){
-        PointLogMessage plm = new PointLogMessage(message, user.getFirstName(), user.getLastName(), getPermissionLevel(), MessageType.COMMENT);
-        postMessageToPointLog(log,plm,sui);
+    public void postMessageToPointLog(PointLog log, String message, CacheManagementInterface cacheManagementInterface){
+        APIHelper.getInstance(context).postPointLogMessage(log.getLogID(), message).enqueue(new Callback<ResponseMessage>() {
+            @Override
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                if(response.isSuccessful()) {
+                    System.out.println("GOT RESPONSE: "+response.body().getMessage());
+                    cacheManagementInterface.onSuccess();
+                }
+                else{
+                    try {
+                        System.out.println("ERROR CODE: " + response.code());
+                        System.out.println("GOT Error: " + response.errorBody().string());
+                        cacheManagementInterface.onError(new Exception(response.errorBody().string()), context);
+                    }
+                    catch (IOException err){
+                        cacheManagementInterface.onError(err, context);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                cacheManagementInterface.onError(new Exception(t.getMessage()), context);
+            }
+        });
     }
 
     /**
@@ -690,10 +680,24 @@ public class CacheManager {
     /**
      * Reset the notifications for the point log and user.
      * @param log   Point log for which to reset Pointlog
-     * @param resetResident FALSE: reset RHP notification count. TRUE: Reset resident count
      */
-    public void resetPointLogNotificationCount(PointLog log, boolean resetResident){
-        fbutil.updatePointLogNotificationCount(log, getHouseName(), resetResident, true, new FirebaseUtilInterface() {});
+    public void resetPointLogNotificationCount(PointLog log){
+        APIHelper.getInstance(context).viewMessages(log.getLogID()).enqueue(new Callback<ResponseMessage>() {
+            @Override
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                if(response.isSuccessful()){
+                    System.out.println("Did delete messages?");
+                }
+                else{
+                    System.out.println(response.body().toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                System.err.println("Did not read messages");
+            }
+        });
     }
 
     /**
