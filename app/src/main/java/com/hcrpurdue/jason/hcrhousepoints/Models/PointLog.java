@@ -2,15 +2,14 @@ package com.hcrpurdue.jason.hcrhousepoints.Models;
 
 import android.content.Context;
 
-import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.firebase.Timestamp;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 public class PointLog implements Comparable<PointLog>, Serializable {
@@ -38,15 +37,15 @@ public class PointLog implements Comparable<PointLog>, Serializable {
     //Variable names from Firestore
 
     private String approvedBy;
-    private Date approvedOn;
+    private Timestamp approvedOn;
     private String pointDescription;
     private String floorID;
     private PointType type;
     private String residentFirstName;
     private String residentLastName;
     private String residentId;
-    private Date dateSubmitted;
-    private Date dateOccurred;
+    private Timestamp dateSubmitted;
+    private Timestamp dateOccurred;
     private String logID;
     private int residentNotifications;
     private int rhpNotifications;
@@ -67,7 +66,7 @@ public class PointLog implements Comparable<PointLog>, Serializable {
      * @param residentId      - Firebase id for the user
      */
     public PointLog(String pointDescription, String first, String last, PointType type, String floorID, String residentId) {
-        this(pointDescription,first,last,type,floorID,residentId, new Date());
+        this(pointDescription,first,last,type,floorID,residentId, Timestamp.now());
     }
 
     public PointLog(String pointDescription, PointType type, User user){
@@ -84,15 +83,15 @@ public class PointLog implements Comparable<PointLog>, Serializable {
      * @param type             - Type of point for log
      * @param floorID          - ID of the floor on which the user lives (e.g. 2N)
      * @param residentId      - Firebase id for the user
-     * @param dateOccurred    - Date which the user reported that the thing for the point log occurred
+     * @param dateOccurred    - Timestamp which the user reported that the thing for the point log occurred
      */
-    public PointLog(String pointDescription, String first, String last, PointType type, String floorID, String residentId, Date dateOccurred) {
+    public PointLog(String pointDescription, String first, String last, PointType type, String floorID, String residentId, Timestamp dateOccurred) {
         this.pointDescription = pointDescription;
         this.type = type;
         this.residentLastName = last;
         this.residentFirstName = first;
         this.floorID = floorID;
-        this.dateSubmitted = new Date();
+        this.dateSubmitted = Timestamp.now();
         this.wasHandled = false;
         this.messages = new ArrayList<>();
         this.residentId = residentId;
@@ -101,7 +100,7 @@ public class PointLog implements Comparable<PointLog>, Serializable {
         this.rhpNotifications = 0;
     }
 
-    public PointLog(String pointDescription, PointType type, Date dateOccurred, User user){
+    public PointLog(String pointDescription, PointType type, Timestamp dateOccurred, User user){
         this(pointDescription, user.getFirstName(), user.getLastName(), type, user.getFloorId(), user.getUserId(), dateOccurred);
     }
 
@@ -121,10 +120,10 @@ public class PointLog implements Comparable<PointLog>, Serializable {
         this.residentFirstName = (String) document.get(FIRST_NAME_KEY);
         this.residentLastName = (String) document.get(LAST_NAME_KEY);
         this.approvedBy = (String) document.get(APPROVED_BY_KEY);
-        this.dateSubmitted = (Date) document.get(DATE_SUBMITTED_KEY);
-        this.approvedOn = (Date) document.get(APPROVED_ON_KEY);
+        this.dateSubmitted = (Timestamp) document.get(DATE_SUBMITTED_KEY);
+        this.approvedOn = (Timestamp) document.get(APPROVED_ON_KEY);
         this.residentId = (String) document.get(RESIDENT_ID_KEY);
-        this.dateOccurred = (Date) document.get(DATE_OCCURRED_KEY);
+        this.dateOccurred = (Timestamp) document.get(DATE_OCCURRED_KEY);
         Long resNotifs = ((Long) document.get(RESIDENT_NOTIF_KEY));
         Long rhpNotifs = ((Long) document.get(RHP_NOTIF_KEY));
         if(resNotifs != null){
@@ -225,7 +224,7 @@ public class PointLog implements Comparable<PointLog>, Serializable {
                 this.approvedBy = CacheManager.getInstance(context).getName();
             }
 
-            this.approvedOn = new Date();
+            this.approvedOn = Timestamp.now();
         }
 
         else {
@@ -233,7 +232,7 @@ public class PointLog implements Comparable<PointLog>, Serializable {
             if(!wasRejected()) {
                 this.pointDescription = REJECTED_STRING + pointDescription;
                 this.approvedBy = CacheManager.getInstance(context).getName();
-                this.approvedOn = new Date();
+                this.approvedOn = Timestamp.now();
             }
         }
     }
@@ -309,15 +308,15 @@ public class PointLog implements Comparable<PointLog>, Serializable {
         return approvedBy;
     }
 
-    public Date getApprovedOn() {
+    public Timestamp getApprovedOn() {
         return approvedOn;
     }
 
-    public Date getDateOccurred(){
+    public Timestamp getDateOccurred(){
         return dateOccurred;
     }
 
-    public Date getDateSubmitted() { return dateSubmitted;}
+    public Timestamp getDateSubmitted() { return dateSubmitted;}
 
     /**
      * This static method is used to create the map to update the number of notifications.

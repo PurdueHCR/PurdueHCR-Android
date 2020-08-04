@@ -93,8 +93,8 @@ public class PointLogAdapter extends BaseAdapter  implements ListAdapter {
             alertView.setVisibility(View.GONE);
         }
 
-        monthView.setText(DateFormat.format("MMM",log.getDateOccurred()));
-        dateView.setText(DateFormat.format("dd",log.getDateOccurred()));
+        monthView.setText(DateFormat.format("MMM",log.getDateOccurred().toDate()));
+        dateView.setText(DateFormat.format("dd",log.getDateOccurred().toDate()));
         pointTypeLabel.setText(log.getPointType().getName());
         nameLabel.setText(log.getResidentFirstName());
         pointDescriptionLabel.setText(log.getPointDescription());

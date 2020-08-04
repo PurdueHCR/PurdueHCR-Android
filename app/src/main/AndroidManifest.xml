@@ -30,8 +30,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="addpoints"
-                    android:scheme="hcrpoint" />
+                    android:host="hcrpoint.page.link"
+                    android:scheme="https" />
+                <data
+                    android:host="purduehcr.page.link"
+                    android:scheme="https" />
                 <!-- note that the leading "/" is required for pathPrefix -->
             </intent-filter>
         </activity>
@@ -66,6 +69,20 @@
             android:name=".Activities.HouseSignUpActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="hcrpoint.page.link"
+                    android:scheme="https" />
+                <data
+                    android:host="purduehcr.page.link"
+                    android:scheme="https" />
+                <!-- note that the leading "/" is required for pathPrefix -->
+            </intent-filter>
 
         </activity>
 

@@ -10,6 +10,7 @@ package com.hcrpurdue.jason.hcrhousepoints.Activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -22,10 +23,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
@@ -254,10 +259,13 @@ public class AppInitializationActivity extends AppCompatActivity {
      */
     private void checkForLinks(){
         Intent intent = getIntent();
-        if (intent != null && intent.getData() != null && intent.getData().getHost() != null) {
+
+        if (getIntent().hasExtra("com.google.firebase.dynamiclinks.DYNAMIC_LINK_DATA") || getIntent().getData() != null) {
+            System.out.println("HAS LINK");
             handleLinks(intent);
         }
         else{
+            System.out.println("NO LINK");
             launchNavigationActivity();
         }
     }
@@ -354,63 +362,94 @@ public class AppInitializationActivity extends AppCompatActivity {
 
 
     private void handleLinks(Intent intent) {
-        String host = intent.getData().getHost();
-        String path = intent.getData().getPath();
 
-        if (host.equals("addpoints")) {
-            String[] parts = path.split("/");
-            if (parts.length == 2) {
-                String linkId = parts[1].replace("/", "");
-                cacheManager.getLinkWithLinkId(linkId, new CacheManagementInterface() {
+        FirebaseDynamicLinks.getInstance()
+                .getDynamicLink(getIntent())
+                .addOnSuccessListener(new OnSuccessListener<PendingDynamicLinkData>() {
                     @Override
-                    public void onError(Exception e, Context context) {
-                        couldNotFindLink(new AlertDialogInterface() {
-                            @Override
-                            public void onPositiveButtonListener() {
-                                launchNavigationActivity();
+                    public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
+                        System.out.println("Should handle link");
+                        Uri deepLink = null;
+                        if(pendingDynamicLinkData != null && pendingDynamicLinkData.getLink() != null){
+                            System.out.println("Got deepLink: "+pendingDynamicLinkData.getLink());
+                            deepLink = pendingDynamicLinkData.getLink();
+                            String url = deepLink.toString();
+                            url = url.replace("https://purdue-hcr-test.web.app/#/", "");
+                            if(url.split("/").length == 2){
+                                String command = url.split("/")[0];
+                                String data = url.split("/")[1];
+                                if (command.contains("addpoints")) {
+                                    String linkId = data.replace("/", "");
+                                    cacheManager.getLinkWithLinkId(linkId, new CacheManagementInterface() {
+                                        @Override
+                                        public void onError(Exception e, Context context) {
+                                            couldNotFindLink(new AlertDialogInterface() {
+                                                @Override
+                                                public void onPositiveButtonListener() {
+                                                    launchNavigationActivity();
+                                                }
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onGetLinkWithIdSuccess(Link link) {
+                                            foundQrCode(link, new AlertDialogInterface() {
+                                                @Override
+                                                public void onPositiveButtonListener() {
+                                                    cacheManager.submitPointWithLink(link, new CacheManagementInterface() {
+                                                        @Override
+                                                        public void onSuccess() {
+                                                            launchNaviationActivity(true);
+                                                        }
+
+                                                        @Override
+                                                        public void onError(Exception e, Context context) {
+                                                            failedToSubmitPoints(e, new AlertDialogInterface() {
+                                                                @Override
+                                                                public void onPositiveButtonListener() {
+                                                                    launchNavigationActivity();
+                                                                }
+                                                            });
+                                                        }
+                                                    });
+                                                }
+
+                                                @Override
+                                                public void onNegativeButtonListener() {
+                                                    launchNavigationActivity();
+                                                }
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    System.out.println("We don't handle the path: "+command+" in the initialization activity.");
+                                    //The link's path is not one we care about here
+                                    launchNavigationActivity();
+                                }
                             }
-                        });
-                    }
-
-                    @Override
-                    public void onGetLinkWithIdSuccess(Link link) {
-                        foundQrCode(link, new AlertDialogInterface() {
-                            @Override
-                            public void onPositiveButtonListener() {
-                                cacheManager.submitPointWithLink(link, new CacheManagementInterface() {
+                            else {
+                                couldNotFindLink(new AlertDialogInterface() {
                                     @Override
-                                    public void onSuccess() {
-                                        launchNaviationActivity(true);
-                                    }
-
-                                    @Override
-                                    public void onError(Exception e, Context context) {
-                                        failedToSubmitPoints(e, new AlertDialogInterface() {
-                                            @Override
-                                            public void onPositiveButtonListener() {
-                                                launchNavigationActivity();
-                                            }
-                                        });
+                                    public void onPositiveButtonListener() {
+                                        launchNavigationActivity();
                                     }
                                 });
                             }
 
-                            @Override
-                            public void onNegativeButtonListener() {
-                                launchNavigationActivity();
-                            }
-                        });
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                couldNotFindLink(new AlertDialogInterface() {
+                    @Override
+                    public void onPositiveButtonListener() {
+                        launchNavigationActivity();
                     }
                 });
+
             }
-            else{
-                couldNotFindLink(null);
-                launchNavigationActivity();
-            }
-        } else {
-            couldNotFindLink(null);
-            launchNavigationActivity();
-        }
+        });
     }
 
     private void couldNotFindLink(AlertDialogInterface alertDialogInterface){
