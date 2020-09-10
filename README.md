@@ -25,7 +25,7 @@ To run the app, you will need to download this repository and open it in android
 
 
 
-How to upload the app to the Google Play Store.
+## How to upload the app to the Google Play Store.
 
 1. Run through all of the tests to ensure the app does what you want it to do.
 2. Go to Utils/HttpNetworking/APIHelper.java and uncomment the domain that has the link the Production and comment the link to the test database
