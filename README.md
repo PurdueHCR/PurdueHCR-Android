@@ -1,7 +1,28 @@
 # PurdueHCR-Android
 Open Source repository for the PurdueHCR app
 
+
+## Setup Work Environment
+
+1. Install Android Studio
+2. Get access to a Git client
+    - CLI Options
+        - Mac, Linux: Use terminal
+        - PC: activate the developer bash terminal or download [Git Bash](https://git-scm.com/downloads)
+    - Graphical Options
+        - [Git GUI](https://git-scm.com/downloads/guis)
+        - [Sourcetree](https://www.sourcetreeapp.com/) *Recomended GUI*
+3. Clone the repository from the github account
+    - Once you have the code repository cloned, make sure that you check out the dev branch. This is were the most up to date code will be.
+4. In Android studio, download an emulator for an android phone or plug your Android phone into your computer
+5. Ask a PurdueHCR Exec board member for the google-service.json file and drop it into the app folder
+6. Click the green run button and see if you can run the app
+
+
 To run the app, you will need to download this repository and open it in android studio. You will also need the google-services.json file for the firebase project, which you can find on the google drive. Put that file under the app/ subfolder, and the app will run.
+
+
+
 
 
 How to upload the app to the Google Play Store.
