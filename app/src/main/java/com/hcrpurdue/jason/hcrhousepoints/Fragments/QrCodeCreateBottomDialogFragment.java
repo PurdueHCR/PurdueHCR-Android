@@ -155,7 +155,7 @@ public class QrCodeCreateBottomDialogFragment extends BottomSheetDialogFragment 
         //Dismiss keyboard when generating
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
 
-        if(imm.isAcceptingText()) { // verify if the soft keyboard is open
+        if(imm.isAcceptingText() && getActivity().getCurrentFocus() != null) { // verify if the soft keyboard is open
             imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0); // Hide keyboard
         }
 

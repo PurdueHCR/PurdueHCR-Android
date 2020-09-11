@@ -10,11 +10,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.method.LinkMovementMethod;
 import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -47,6 +50,7 @@ public class HouseSignUpActivity extends AppCompatActivity {
     private EditText firstNameEditText;
     private EditText lastNameEditText;
     private EditText houseCodeEditText;
+    private CheckBox privacyCheckBox;
     private Button joinButton;
     private ProgressBar loadingBar;
 
@@ -82,6 +86,9 @@ public class HouseSignUpActivity extends AppCompatActivity {
         joinButton = findViewById(R.id.join_button);
         loadingBar = findViewById(R.id.initialization_progress_bar);
         loadingBar.setVisibility(View.INVISIBLE);
+        privacyCheckBox = findViewById(R.id.privacy_and_terms_checkbox);
+
+        privacyCheckBox.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     // Fills floorCodes with key:value pairs in the form of {floorCode}:({floorName}:{houseName})
@@ -104,7 +111,7 @@ public class HouseSignUpActivity extends AppCompatActivity {
         String first = firstNameEditText.getText().toString();
         String last = lastNameEditText.getText().toString();
         String code = houseCodeEditText.getText().toString();
-        if(areFieldsValid(first,last,code)){
+        if(areFieldsValid(first,last,code, privacyCheckBox.isChecked())){
             HouseCode houseCode = getHouseCode(code);
             if(houseCode != null) {
                 createUser(houseCode);
@@ -127,13 +134,17 @@ public class HouseSignUpActivity extends AppCompatActivity {
      * @param code
      * @return
      */
-    private boolean areFieldsValid(String first, String last, String code){
+    private boolean areFieldsValid(String first, String last, String code, Boolean checkedBox){
         if(first == null || last == null || code == null){
             Toast.makeText(getApplicationContext(), "Please make sure that no fields are empty.", Toast.LENGTH_SHORT).show();
             return false;
         }
         else if(first.isEmpty() || last.isEmpty() || code.isEmpty()){
             Toast.makeText(getApplicationContext(), "Please make sure that no fields are empty.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        else if(!checkedBox){
+            Toast.makeText(getApplicationContext(), "Please agree to the privacy and the terms and conditions.", Toast.LENGTH_SHORT).show();
             return false;
         }
         else{
@@ -167,12 +178,6 @@ public class HouseSignUpActivity extends AppCompatActivity {
         String houseName = houseCode.getHouseName();
         String firstName = firstNameEditText.getText().toString();
         String lastName = lastNameEditText.getText().toString();
-//        UserPermissionLevel permissionLevel = houseCode.getPermissionLevel();
-//
-//        User user = new User(firstName, lastName, floorId, houseName, permissionLevel, 0);
-//
-//
-//        Map<String, Object> userData = user.convertToDict();
 
         if (firebaseUser != null) {
             String id = firebaseUser.getUid();
@@ -262,6 +267,7 @@ public class HouseSignUpActivity extends AppCompatActivity {
                             deepLink = pendingDynamicLinkData.getLink();
                             String url = deepLink.toString();
                             url = url.replace("https://purdue-hcr-test.web.app/#/", "");
+                            url = url.replace("https://purduehcr.web.app/#/", "");
                             if(url.split("/").length == 2){
                                 String command = url.split("/")[0];
                                 String data = url.split("/")[1];

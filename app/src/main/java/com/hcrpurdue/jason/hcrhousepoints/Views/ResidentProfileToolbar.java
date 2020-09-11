@@ -61,7 +61,7 @@ public class ResidentProfileToolbar {
         semesterRankTextView.setText(semesterRankText);
 
 
-        if(cacheManager.getUserHouse() != null ){
+        if(cacheManager.getUserHouse() != null && cacheManager.getUserHouse().getDownloadURL() != null){
             imageCacheManager.setImageViewFromDownloadURL(cacheManager.getUserHouse().getDownloadURL(), houseImageView);
         }
 

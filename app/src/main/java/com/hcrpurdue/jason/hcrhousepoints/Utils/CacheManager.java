@@ -689,7 +689,7 @@ public class CacheManager {
                     System.out.println("Did delete messages?");
                 }
                 else{
-                    System.out.println(response.body().toString());
+                    System.out.println("ERROR Deleting messages");
                 }
             }
 

@@ -375,6 +375,7 @@ public class AppInitializationActivity extends AppCompatActivity {
                             deepLink = pendingDynamicLinkData.getLink();
                             String url = deepLink.toString();
                             url = url.replace("https://purdue-hcr-test.web.app/#/", "");
+                            url = url.replace("https://purduehcr.web.app/#/", "");
                             if(url.split("/").length == 2){
                                 String command = url.split("/")[0];
                                 String data = url.split("/")[1];
