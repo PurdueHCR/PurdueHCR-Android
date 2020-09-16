@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.Timestamp;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
@@ -73,7 +74,8 @@ public class PointLogMessageAdapter extends RecyclerView.Adapter<PointLogMessage
             holder.imageView.setImageResource(drawableID);
             holder.pointTypeView.setText(log.getPointType().getName());
             holder.descriptionView.setText(log.getPointDescription());
-            holder.dateView.setText(DateFormat.format("M/d/yy",log.getDateOccurred()));
+
+            holder.dateView.setText(DateFormat.format("M/d/yy",log.getDateOccurred().toDate()));
         }
         else{
             holder.descriptionLabel.setVisibility(View.GONE);

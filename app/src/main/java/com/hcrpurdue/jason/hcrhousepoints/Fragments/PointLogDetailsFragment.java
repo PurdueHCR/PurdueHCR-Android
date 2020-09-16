@@ -21,6 +21,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.util.List;
@@ -29,8 +31,10 @@ import java.util.Objects;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 
 import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.PointLogMessageAdapter;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.AlertDialogInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
 
@@ -192,66 +196,18 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
             }
         });
         rejectButton = activity.findViewById(R.id.log_detail_reject_button);
-        rejectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                progressBar.setVisibility(View.VISIBLE);
-                cacheManager.handlePointLog(log, false,false, new CacheManagementInterface() {
-                    @Override
-                    public void onSuccess() {
-                        progressBar.setVisibility(View.INVISIBLE);
-                        rejectButton.setVisibility(View.GONE);
-                        approveButton.setVisibility(View.GONE);
-                        changeStatusButton.setVisibility(View.VISIBLE);
-                        changeStatusButton.setText("Approve");
-                    }
-                    @Override
-                    public void onError(Exception e, Context context){
-                        Toast.makeText(context,"Failed with error: "+e.getMessage(), Toast.LENGTH_LONG ).show();
-                        progressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
-            }
-        });
+        rejectButton.setOnClickListener(view -> handleReject());
+
         approveButton = activity.findViewById(R.id.log_detail_approve_button);
-        approveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                progressBar.setVisibility(View.VISIBLE);
-                cacheManager.handlePointLog(log, true,false, new CacheManagementInterface() {
-                    @Override
-                    public void onSuccess() {
-                        progressBar.setVisibility(View.INVISIBLE);
-                        rejectButton.setVisibility(View.GONE);
-                        approveButton.setVisibility(View.GONE);
-                        changeStatusButton.setVisibility(View.VISIBLE);
-                        changeStatusButton.setText("Reject");
-                    }
-                    @Override
-                    public void onError(Exception e, Context context){
-                        Toast.makeText(context,"Failed with error: "+e.getMessage(), Toast.LENGTH_LONG ).show();
-                        progressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
-            }
-        });
+        approveButton.setOnClickListener(view -> handleApprove());
+
         changeStatusButton = activity.findViewById(R.id.log_detail_change_status_button);
-        changeStatusButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                progressBar.setVisibility(View.VISIBLE);
-                cacheManager.handlePointLog(log, log.wasRejected(),true, new CacheManagementInterface() {
-                    @Override
-                    public void onSuccess() {
-                        progressBar.setVisibility(View.INVISIBLE);
-                        changeStatusButton.setText(log.wasRejected()?"Approve":"Reject");
-                    }
-                    @Override
-                    public void onError(Exception e, Context context){
-                        Toast.makeText(context,"Failed with error: "+e.getMessage(), Toast.LENGTH_LONG ).show();
-                        progressBar.setVisibility(View.INVISIBLE);
-                    }
-                });
+        changeStatusButton.setOnClickListener(view -> {
+            if(log.wasRejected()){
+                handleApprove();
+            }
+            else{
+                handleReject();
             }
         });
 
@@ -273,7 +229,7 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
         //Remove listeners
         flu.removeCallbacks(CALLBACK_KEY);
         //Reset the notification count when the user leaves.
-        cacheManager.resetPointLogNotificationCount(log,(log.getResidentId().equals(cacheManager.getUserId())));
+        cacheManager.resetPointLogNotificationCount(log);
     }
 
     /**
@@ -342,6 +298,56 @@ public class PointLogDetailsFragment extends Fragment implements ListenerCallbac
             changeStatusButton.setVisibility(View.GONE);
             messageTextField.setVisibility(View.GONE);
         }
+    }
+
+    private void handleApprove() {
+        progressBar.setVisibility(View.VISIBLE);
+        cacheManager.approvePointLog(log,new CacheManagementInterface() {
+            @Override
+            public void onSuccess() {
+                progressBar.setVisibility(View.INVISIBLE);
+                rejectButton.setVisibility(View.GONE);
+                approveButton.setVisibility(View.GONE);
+                changeStatusButton.setVisibility(View.VISIBLE);
+                changeStatusButton.setText("Reject");
+            }
+            @Override
+            public void onHttpError(ResponseCodeMessage responseCodeMessage){
+                Toast.makeText(context,"Sorry, there was an error approving this point. Please try again.", Toast.LENGTH_LONG ).show();
+                progressBar.setVisibility(View.INVISIBLE);
+            }
+            @Override
+            public void onError(Exception e, Context context){
+                Toast.makeText(context,"Sorry, there was an error approving this point. Please try again.", Toast.LENGTH_LONG ).show();
+                progressBar.setVisibility(View.INVISIBLE);
+            }
+        });
+    }
+
+    private void handleReject(){
+        AlertDialogHelper.showDoubleButtonWithEditTextDialog(
+                this.getActivity(), "Reject Point Submission", "Please enter a reason why you are rejecting this point submission.", "Reject", "Cancel", new AlertDialogInterface() {
+                    @Override
+                    public void onPositiveButtonWithTextListener(String text) {
+                        progressBar.setVisibility(View.VISIBLE);
+                        cacheManager.rejectPointLog(log, text, new CacheManagementInterface() {
+                            @Override
+                            public void onSuccess() {
+                                progressBar.setVisibility(View.INVISIBLE);
+                                rejectButton.setVisibility(View.GONE);
+                                approveButton.setVisibility(View.GONE);
+                                changeStatusButton.setVisibility(View.VISIBLE);
+                                changeStatusButton.setText("Approve");
+                            }
+
+                            @Override
+                            public void onError(Exception e, Context context) {
+                                progressBar.setVisibility(View.INVISIBLE);
+                            }
+                        });
+                    }
+                }
+        ).show();
     }
 
 }

@@ -7,28 +7,18 @@ android {
         applicationId "com.hcrpurdue.jason.hcrhousepoints"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 43
-        versionName "2.0.3"
+        versionCode 45
+        versionName "2.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            release {
-                // Enables code shrinking, obfuscation, and optimization for only
-                // your project's release build type.
-                minifyEnabled true
-
-                // Enables resource shrinking, which is performed by the
-                // Android Gradle plugin.
-                shrinkResources true
-
-                // Includes the default ProGuard rules files that are packaged with
-                // the Android Gradle plugin. To learn more, go to the section about
-                // R8 configuration files.
-                proguardFiles getDefaultProguardFile(
-                        'proguard-android-optimize.txt'),
-                        'proguard-rules.pro'
-            }
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
@@ -57,13 +47,9 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
 
-    implementation 'com.google.firebase:firebase-core:16.0.3'
-    implementation 'com.google.firebase:firebase-firestore:17.1.0'
-    implementation 'com.google.firebase:firebase-auth:16.0.3'
-
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
 
-    implementation 'com.google.android.gms:play-services-vision:15.0.2'
+    implementation 'com.google.android.gms:play-services-vision:20.1.0'
 
     implementation 'androidmads.library.qrgenearator:QRGenearator:1.0.3'
     implementation 'androidx.recyclerview:recyclerview:1.0.0'
@@ -72,6 +58,11 @@ dependencies {
 
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+
+    implementation 'com.google.firebase:firebase-firestore:21.5.0'
+    implementation 'com.google.firebase:firebase-dynamic-links:19.1.0'
+    implementation 'com.google.firebase:firebase-core:17.4.4'
+    implementation 'com.google.firebase:firebase-auth:19.3.2'
 
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
 

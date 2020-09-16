@@ -1,6 +1,7 @@
 package com.hcrpurdue.jason.hcrhousepoints.Models;
 
 
+import com.google.firebase.Timestamp;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 
 import java.util.Date;
@@ -13,7 +14,7 @@ public class PointLogMessage {
     private String senderFirstName;
     private String senderLastName;
     private UserPermissionLevel senderPermissionLevel;
-    private Date messageCreationDate;
+    private Timestamp messageCreationDate;
     private MessageType messageType;
 
     public static final String MESSAGE_KEY = "Message";
@@ -29,7 +30,7 @@ public class PointLogMessage {
         this.senderFirstName = senderFirstName;
         this.senderLastName = senderLastName;
         this.senderPermissionLevel = senderPermissionLevel;
-        messageCreationDate = new Date();
+        messageCreationDate = Timestamp.now();
         this.messageType = messageType;
     }
 
@@ -38,7 +39,7 @@ public class PointLogMessage {
         this.senderFirstName = (String) document.get(SENDER_FIRST_NAME_KEY);
         this.senderLastName = (String) document.get(SENDER_LAST_NAME_KEY);
         this.senderPermissionLevel = UserPermissionLevel.fromServerValue(((Long) document.get(SENDER_PERMISSION_LEVEL_KEY)).intValue());
-        messageCreationDate = (Date) document.get(MESSAGE_CREATION_DATE_KEY);
+        messageCreationDate = (Timestamp) document.get(MESSAGE_CREATION_DATE_KEY);
         this.messageType = MessageType.getMessageTypeFromString((String) document.get(MESSAGE_TYPE_KEY));
     }
 
@@ -70,7 +71,7 @@ public class PointLogMessage {
         return senderPermissionLevel;
     }
 
-    public Date getMessageCreationDate(){
+    public Timestamp getMessageCreationDate(){
         return messageCreationDate;
     }
 }

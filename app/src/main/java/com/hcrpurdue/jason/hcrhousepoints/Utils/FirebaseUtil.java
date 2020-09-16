@@ -438,12 +438,7 @@ public class FirebaseUtil {
                         DocumentSnapshot doc = task.getResult();
                         Map<String, Object> data = doc.getData();
                         if (doc.exists() && data != null) {
-                            String descr = (String) data.get("Description");
-                            int pointId = Objects.requireNonNull(doc.getLong("PointID")).intValue();
-                            boolean single = (boolean) data.get("SingleUse");
-                            boolean enabled = (boolean) data.get("Enabled");
-                            boolean archived = (boolean) data.get("Archived");
-                            Link link = new Link(id, descr, single, pointId, enabled, archived);
+                            Link link = new Link(doc.getId(), data);
                             fui.onGetLinkWithIdSuccess(link);
                         } else {
                             fui.onError(new IllegalStateException("No Link"), context);
@@ -486,104 +481,6 @@ public class FirebaseUtil {
         });
     }
 
-
-    /**
-     * Create a new QRCode in the database. If the call is succesful, the new LinkId will be saved into the Link object
-     *
-     * @param link  Link object to be created in the database and the object that will be updated on success
-     * @param fui   Firebase Util Interface with methods onError and onSuccess.
-     */
-    public void createQRCode(Link link, FirebaseUtilInterface fui){
-        //Call Firebase to add the data
-        db.collection(ROOT_LINKS_KEY).add(link.convertToDict()).addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
-                System.out.println("Added Document to: "+task.getResult().getId());
-                //If successful, save the document ID as the LinkID so that the caller has a reference to it.
-                link.setLinkId(task.getResult().getId());
-                // Call the on success
-                fui.onSuccess();
-            }
-            else {
-                System.out.println("Failed to add QR Code");
-                //Error Handler
-                fui.onError(task.getException(),context);
-            }
-        });
-    }
-
-    /**
-     * Update a Link object in the database with a new Enabled Status
-     *
-     * @param link  Link object to be updated
-     * @param fui   FirebaseUtilInterface with method OnError and onSuccess implemented
-     */
-    public void setQRCodeEnabledStatus(Link link, boolean isEnabled, FirebaseUtilInterface fui){
-        //Create a map with all the keys that are going to be updated
-        Map<String, Object> data = new HashMap<>();
-        data.put("Enabled", isEnabled);
-
-        //Tell the document with path Links/<LinkID> to update the values stored in the map
-        db.collection(ROOT_LINKS_KEY).document(link.getLinkId()).update(data).addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
-                System.out.println("Link Update Success");
-                //Make sure local copy is updated
-                link.setEnabled(isEnabled);
-                fui.onSuccess();
-            }
-            else{
-                //Handle Errors
-                fui.onError(task.getException(),context);
-            }
-        });
-    }
-
-    /**
-     * Update a Link object in the database with a new Enabled Status
-     *
-     * @param link  Link object to be updated
-     * @param fui   FirebaseUtilInterface with method OnError and onSuccess implemented
-     */
-    public void updateQRCode(Link link, FirebaseUtilInterface fui){
-
-        //Tell the document with path Links/<LinkID> to update the values stored in the map
-        db.collection(ROOT_LINKS_KEY).document(link.getLinkId()).update(link.convertToDict()).addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
-                System.out.println("Link Update Success");
-                //Make sure local copy is updated
-                fui.onSuccess();
-            }
-            else{
-                //Handle Errors
-                fui.onError(task.getException(),context);
-            }
-        });
-    }
-
-    /**
-     * Update a Link object in the database with a new Archived Status
-     *
-     * @param link  Link object to be updated
-     * @param fui   FirebaseUtilInterface with method OnError and onSuccess implemented
-     */
-    public void setQRCodeArchivedStatus(Link link, boolean isArchived, FirebaseUtilInterface fui){
-        //Create a map with all the keys that are going to be updated
-        Map<String, Object> data = new HashMap<>();
-        data.put("Archived", isArchived);
-
-        //Tell the document with path Links/<LinkID> to update the values stored in the map
-        db.collection(ROOT_LINKS_KEY).document(link.getLinkId()).update(data).addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
-                System.out.println("Link Update Success");
-                //Make sure local copy is updated
-                link.setArchived(isArchived);
-                fui.onSuccess();
-            }
-            else{
-                //Handle Errors
-                fui.onError(task.getException(),context);
-            }
-        });
-    }
 
     /**
      * Retrieve the system preferences from Firestore and callback onGetSystemPreferencesSuccess

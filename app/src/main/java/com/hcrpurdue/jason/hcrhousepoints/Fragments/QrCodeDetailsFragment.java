@@ -93,11 +93,6 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         setContentView(R.layout.fragment_qr_code_expanded);
 
         qrCodeModel = (Link) getIntent().getExtras().getBundle("QRCODE").getSerializable("QRCODE");
-        if(qrCodeModel == null){
-            qrCodeModel = new Link("B8hlX08pQyJFk2mdqAYI", "Test Code", true, 1, true, true);
-        }
-
-
 
         initializeUIElements();
 
@@ -136,12 +131,9 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
                     // of the selected item
                     switch (which){
                         case 0:
-                            copyAndroidLink();
+                            copyLink();
                             break;
                         case 1:
-                            copyIOSLink();
-                            break;
-                        case 2:
                             saveImage();
                             break;
                         default:
@@ -215,7 +207,7 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         isArchivedSwitch.setChecked(qrCodeModel.isArchived());
 
 
-        qrCodeMap = QRCodeUtil.generateQRCodeWithActivityFromString(this,qrCodeModel.getAddress());
+        qrCodeMap = QRCodeUtil.generateQRCodeWithActivityFromString(this,qrCodeModel.getDynamicLink());
         if(qrCodeMap != null){
             qrCodeImageView.setImageBitmap(qrCodeMap);
         }
@@ -271,18 +263,11 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
         });
     }
 
-    private void copyIOSLink(){
+    private void copyLink(){
         ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData cData = ClipData.newPlainText("iOS Link",qrCodeModel.getAddress());
+        ClipData cData = ClipData.newPlainText("Sharing Link",qrCodeModel.getDynamicLink());
         cm.setPrimaryClip(cData);
-        Toast.makeText(this, "iOS Link Copied", Toast.LENGTH_SHORT).show();
-    }
-
-    private void copyAndroidLink(){
-        ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData cData = ClipData.newPlainText("Android Link",qrCodeModel.getAndroidDeepLinkAddress());
-        cm.setPrimaryClip(cData);
-        Toast.makeText(this, "Android Link Copied", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Link Copied", Toast.LENGTH_SHORT).show();
     }
 
     private void saveImage(){
@@ -339,14 +324,14 @@ public class QrCodeDetailsFragment extends AppCompatActivity{
                 @Override
                 public void onError(Exception e, Context context) {
                     System.out.println("ERROR IN CREATING: "+e.getLocalizedMessage());
-                    Toast.makeText(context,"Could not create QR code",Toast.LENGTH_LONG).show();
+                    Toast.makeText(context,"Could not update QR code",Toast.LENGTH_LONG).show();
                     isEnabledSwitch.setChecked(!isEnabledSwitch.isChecked());
                 }
 
                 @Override
                 public void onHttpError(ResponseCodeMessage responseCodeMessage) {
                     System.out.println("HTTP ERROR: "+responseCodeMessage.getMessage());
-                    Toast.makeText(getApplicationContext(),"Could not create QR code",Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),"Could not update QR code",Toast.LENGTH_LONG).show();
                     isEnabledSwitch.setChecked(!isEnabledSwitch.isChecked());
                 }
             });

@@ -52,7 +52,7 @@
                 app:cardCornerRadius="20dp">
 
                 <include
-                    android:id="@+id/reward_card"
+                    android:id="@+id/profile_reward_card"
                     layout="@layout/card_layout_next_reward"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

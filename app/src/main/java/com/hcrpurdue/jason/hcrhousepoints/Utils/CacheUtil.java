@@ -49,6 +49,8 @@ class CacheUtil {
                     "\nfirstName:" + user.getFirstName() +
                     "\nlastName:"  + user.getLastName() +
                     "\ntotalPoints" + user.getTotalPoints() +
+                    "\nsemesterPoints" + user.getSemesterPoints() +
+                    "\nisEnabled" + user.isEnabled() +
                     "\npermissionLevel:" + user.getPermissionLevel().getServerValue();
             fileWriter.write(fileContent);
             fileWriter.close();
@@ -73,8 +75,10 @@ class CacheUtil {
             String houseName = null;
             String first = null;
             String last = null;
+            boolean isEnabled = true;
+            int semesterPoints = 0;
             int totalPoints = 0;
-            UserPermissionLevel permissionLevel = UserPermissionLevel.RESIDENT;
+            int permissionLevel = UserPermissionLevel.RESIDENT.getServerValue();
             String line;
             BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(context.getCacheDir(), FILE_NAME)));
 
@@ -101,14 +105,21 @@ class CacheUtil {
                             break;
                         case "totalPoints":
                             totalPoints = Integer.parseInt(value);
+                            break;
+                        case "semesterPoints":
+                            semesterPoints = Integer.parseInt(value);
+                            break;
+                        case "isEnabled":
+                            isEnabled = Boolean.parseBoolean(value);
+                            break;
                         case "permissionLevel":
-                            permissionLevel = UserPermissionLevel.fromServerValue(Integer.parseInt(value));
+                            permissionLevel = Integer.parseInt(value);
                             break;
                     }
                 }
             }
             bufferedReader.close();
-            User user = new User(userID, first, last, floorName, houseName, permissionLevel, totalPoints);
+            User user = new User(userID, first, last, floorName, houseName, permissionLevel, totalPoints, semesterPoints, isEnabled);
 
             return user;
         } catch (FileNotFoundException e) {

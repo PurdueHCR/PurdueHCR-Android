@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.ImageCacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 public class ResidentProfileToolbar {
@@ -24,8 +25,11 @@ public class ResidentProfileToolbar {
     private Context context;
     private AuthRank userRank;
 
+    ImageCacheManager imageCacheManager;
+
 
     public ResidentProfileToolbar(Context context, View parentView){
+        System.out.println("INIT TOOLBAR");
         houseNameTextView = parentView.findViewById(R.id.house_name_text_view);
         userPointTotalTextView = parentView.findViewById(R.id.your_points_text_view);
         userHouseRankTextView = parentView.findViewById(R.id.house_rank_text_view);
@@ -35,6 +39,7 @@ public class ResidentProfileToolbar {
         this.cacheManager = CacheManager.getInstance(context);
         this.resources = context.getResources();
         this.packageName = context.getPackageName();
+        imageCacheManager = ImageCacheManager.getInstance();
         refreshRank();
         populateTopBar();
     }
@@ -43,7 +48,8 @@ public class ResidentProfileToolbar {
      * SEt text on top Bar
      */
     private void populateTopBar(){
-        int drawableID = resources.getIdentifier(cacheManager.getHouseName().toLowerCase(), "drawable", packageName);
+        System.out.println("POPULATE");
+        int drawableID = resources.getIdentifier("hcr_icon_square", "drawable", packageName);
 
         houseImageView.setImageResource(drawableID);
         houseNameTextView.setText(cacheManager.getHouseAndPermissionName());
@@ -53,6 +59,11 @@ public class ResidentProfileToolbar {
         userPointTotalTextView.setText(userPointsText);
         userHouseRankTextView.setText(houseRankText);
         semesterRankTextView.setText(semesterRankText);
+
+
+        if(cacheManager.getUserHouse() != null && cacheManager.getUserHouse().getDownloadURL() != null){
+            imageCacheManager.setImageViewFromDownloadURL(cacheManager.getUserHouse().getDownloadURL(), houseImageView);
+        }
 
     }
 
@@ -90,6 +101,10 @@ public class ResidentProfileToolbar {
             userHouseRankTextView.setVisibility(View.INVISIBLE);
             semesterRankTextView.setVisibility(View.INVISIBLE);
         }
+    }
+
+    public void handleHousesUpdated() {
+        populateTopBar();
     }
 
 

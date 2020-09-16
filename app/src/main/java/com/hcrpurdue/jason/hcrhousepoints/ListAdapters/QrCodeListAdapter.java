@@ -31,12 +31,14 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.hcrpurdue.jason.hcrhousepoints.Activities.NavigationActivity;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QrCodeDetailsFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -90,7 +92,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
         codeActiveSwitch.setChecked(qrCode.isEnabled());
 
         ImageView qrImageView = view.findViewById(R.id.qr_code_cell_image_view);
-        Bitmap qrCodemap = QRCodeUtil.generateSmallQRCodeFromString(qrCode.getAddress());
+        Bitmap qrCodemap = QRCodeUtil.generateSmallQRCodeFromString(qrCode.getDynamicLink());
         if(qrCodemap != null){
             qrImageView.setImageBitmap(qrCodemap);
         }
@@ -101,8 +103,10 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
         codeActiveSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                HashMap<String, Object> data = new HashMap();
+                data.put("is_enabled", codeActiveSwitch.isChecked());
 
-                CacheManager.getInstance(context).setQRCodeEnabledStatus(qrCodeList.get(position), codeActiveSwitch.isChecked(), new CacheManagementInterface() {
+                CacheManager.getInstance(context).updateQRCode(qrCodeList.get(position).getLinkId(), data, new CacheManagementInterface() {
                     @Override
                     public void onSuccess() {
                         if (codeActiveSwitch.isChecked()) {
@@ -110,7 +114,6 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
                         } else {
                             Toast.makeText(context, "Code has been deactivated", Toast.LENGTH_LONG).show();
                         }
-
                     }
 
                     @Override
@@ -119,7 +122,15 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
                         qrCodeList.get(position).setEnabled(!codeActiveSwitch.isChecked());
                         Toast.makeText(context, "Code could not be updated.", Toast.LENGTH_LONG).show();
                     }
+
+                    @Override
+                    public void onHttpError(ResponseCodeMessage responseCodeMessage) {
+                        codeActiveSwitch.setChecked(!codeActiveSwitch.isChecked());
+                        qrCodeList.get(position).setEnabled(!codeActiveSwitch.isChecked());
+                        Toast.makeText(context, "Code could not be updated.", Toast.LENGTH_LONG).show();
+                    }
                 });
+
             }
         });
 
@@ -152,18 +163,11 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
         return view;
     }
 
-    private void copyIOSLink(Context context, Link qrCodeModel){
+    private void copySharingLink(Context context, Link qrCodeModel){
         ClipboardManager cm = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData cData = ClipData.newPlainText("iOS Link",qrCodeModel.getAddress());
+        ClipData cData = ClipData.newPlainText("Copy Sharing Link",qrCodeModel.getDynamicLink());
         cm.setPrimaryClip(cData);
-        Toast.makeText(context, "iOS Link Copied", Toast.LENGTH_SHORT).show();
-    }
-
-    private void copyAndroidLink(Context context, Link qrCodeModel){
-        ClipboardManager cm = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData cData = ClipData.newPlainText("Android Link",qrCodeModel.getAndroidDeepLinkAddress());
-        cm.setPrimaryClip(cData);
-        Toast.makeText(context, "Android Link Copied", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "Sharing Link Copied", Toast.LENGTH_SHORT).show();
     }
 
     private void saveImage(Context context, Link qrCodeModel, Bitmap qrCodeMap){
@@ -202,7 +206,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
     private void showSystemShareOptions(Context context, Link qrCodeModel){
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
-        Bitmap bitmap = QRCodeUtil.generateQRCodeWithActivityFromString((Activity) context, qrCodeModel.getAddress());
+        Bitmap bitmap = QRCodeUtil.generateQRCodeWithActivityFromString((Activity) context, qrCodeModel.getDynamicLink());
         shareIntent.putExtra(Intent.EXTRA_STREAM, saveImageToCache(context, bitmap));
         shareIntent.setType("image/jpeg");
         context.startActivity(Intent.createChooser(shareIntent, "Share Image"));
@@ -210,7 +214,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
 
     public Dialog createShareDialog(Context context, Link qrCode) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        Bitmap bitmap = QRCodeUtil.generateQRCodeWithActivityFromString((Activity) context, qrCode.getAddress());
+        Bitmap bitmap = QRCodeUtil.generateQRCodeWithActivityFromString((Activity) context, qrCode.getDynamicLink());
         builder.setTitle("Share Options")
                 .setItems(R.array.share_options, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
@@ -218,10 +222,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
                         // of the selected item
                         switch (which){
                             case 0:
-                                copyAndroidLink(context,qrCode);
-                                break;
-                            case 1:
-                                copyIOSLink(context, qrCode);
+                                copySharingLink(context,qrCode);
                                 break;
                             case 2:
                                 saveImage(context, qrCode, bitmap);
