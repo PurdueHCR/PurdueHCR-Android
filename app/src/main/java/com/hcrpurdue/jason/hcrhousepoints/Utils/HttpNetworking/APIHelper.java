@@ -100,17 +100,18 @@ public class APIHelper {
         body.put("message",message);
         return apiInterface.postPointLogMessage(getFirebaseToken(), body);
     }
-
+    //changed approve to string instead of boolean
     public Call<ResponseMessage> approvePointLog(String pointLogId){
         HashMap<String, Object> body = new HashMap<>();
         body.put("point_log_id",pointLogId);
-        body.put("approve", true);
+        body.put("approve", "true");
         return apiInterface.handlePointLog(getFirebaseToken(), body);
     }
+    //changed approve to string instead of boolean
     public Call<ResponseMessage> rejectPointLog(String pointLogId, String message){
         HashMap<String, Object> body = new HashMap<>();
         body.put("point_log_id",pointLogId);
-        body.put("approve", false);
+        body.put("approve", "false");
         body.put("message",message);
         return apiInterface.handlePointLog(getFirebaseToken(), body);
     }
