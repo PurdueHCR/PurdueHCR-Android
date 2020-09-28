@@ -42,6 +42,13 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
  */
 public class QrCodeCreateBottomDialogFragment extends BottomSheetDialogFragment {
 
+    public interface OnQRCodeCreatedListener {
+        /**
+         * Called upon successful creation of a QR code, usually to trigger a refresh in the previous fragment
+         */
+        void onQRCodeCreated();
+    }
+
     private Context context;
     private ArrayList<PointType> enabledTypes = new ArrayList<PointType>();
     CacheManager cacheManager;
@@ -54,6 +61,8 @@ public class QrCodeCreateBottomDialogFragment extends BottomSheetDialogFragment 
     TextView invalidPointType;
     TextView invalidDescription;
     ProgressBar progressBar;
+
+    private OnQRCodeCreatedListener callback;
 
     public QrCodeCreateBottomDialogFragment(Context context) {
         this.context = context;
@@ -89,7 +98,6 @@ public class QrCodeCreateBottomDialogFragment extends BottomSheetDialogFragment 
         return view;
 
     }
-
 
     @Override
     public int getTheme() {
@@ -185,6 +193,12 @@ public class QrCodeCreateBottomDialogFragment extends BottomSheetDialogFragment 
                 public void onHttpSuccess(ResponseCodeMessage responseCodeMessage) {
                     System.out.println("SUCCESS ON CREATE");
                     Toast.makeText(context,responseCodeMessage.getMessage(),Toast.LENGTH_LONG).show();
+
+                    // Call event on callback fragment
+                    if (callback != null) {
+                        callback.onQRCodeCreated();
+                    }
+
                     dismiss();
                 }
                 @Override
@@ -198,5 +212,9 @@ public class QrCodeCreateBottomDialogFragment extends BottomSheetDialogFragment 
             });
 
         }
+    }
+
+    public void setOnQRCodeCreatedListener(OnQRCodeCreatedListener callback) {
+        this.callback = callback;
     }
 }
