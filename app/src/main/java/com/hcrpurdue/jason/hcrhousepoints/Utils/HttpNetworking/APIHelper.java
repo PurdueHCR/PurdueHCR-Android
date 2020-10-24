@@ -25,8 +25,8 @@ public class APIHelper {
     private static Context context;
     private static APIInterface apiInterface;
     //public static String domain = "http://10.0.2.2:5001/purdue-hcr-test/us-central1/";
-    //public static String domain = "https://us-central1-purdue-hcr-test.cloudfunctions.net/";
-    public static String domain = "https://us-central1-hcr-points.cloudfunctions.net/";
+    public static String domain = "https://us-central1-purdue-hcr-test.cloudfunctions.net/";
+   // public static String domain = "https://us-central1-hcr-points.cloudfunctions.net/";
 
     APIHelper(Context context){
         this.context = context;
