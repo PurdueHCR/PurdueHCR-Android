@@ -43,6 +43,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.Events;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
@@ -146,6 +147,10 @@ public class NavigationActivity extends AppCompatActivity {
                                     throw new Error("UNIMPLEMENTED PERMISSION DEFAULT FRAGMENT");
                             }
                             break;
+                        case R.id.nav_events:
+                            fragmentClass = Events.class;
+                            break;
+
                         case R.id.nav_scan_code:
                             //If the QR scanner is selected, check permission and display if approved
                             if (ContextCompat.checkSelfPermission(Objects.requireNonNull(this), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
