@@ -103,6 +103,7 @@ public class QrCodeListAdapter extends BaseAdapter implements ListAdapter {
         codeActiveSwitch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 HashMap<String, Object> data = new HashMap();
                 data.put("is_enabled", codeActiveSwitch.isChecked());
 

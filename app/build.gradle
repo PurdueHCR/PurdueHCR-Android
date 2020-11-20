@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         vectorDrawables.useSupportLibrary = true
         applicationId "com.hcrpurdue.jason.hcrhousepoints"
         minSdkVersion 21
-        targetSdkVersion 28
-        versionCode 45
-        versionName "2.1.0"
+        targetSdkVersion 29
+        versionCode 47
+        versionName "2.1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

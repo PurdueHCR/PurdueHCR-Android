@@ -31,10 +31,13 @@
     <string name="invalid_empty_description">Please Enter a Description</string>
     <string name="invalid_length_description">Max Length is 64 Characters</string>
     <string name="terms_and_policy">I have read and agree to the <a href="https://purduehcr.web.app/terms-and-conditions/">Terms and Conditions</a> and <a href="https://purduehcr.web.app/privacy/">Privacy Policy</a></string>
+    <string name="goingyn">GOING?</string>
 
     <string-array name="share_options">
         <item>Copy Sharing Link</item>
         <item>Save Image</item>
         <item>Share Image</item>
     </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
