@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
@@ -439,7 +440,33 @@ public class CacheManager {
     private void setUserCreatedQRCodes(ArrayList<Link> codes){
         this.userCreatedQRCodes = codes;
     }
+    //createsEvent
+public void createEvent(Event event, CacheManagementInterface si) {
+        APIHelper.getInstance(context).postEvent(event).enqueue(new Callback<Event>() {
+            @Override
+            public void onResponse(Call<Event> call, Response<Event> response) {
+                System.out.println("RESPONSE BODY: "+response.raw().toString());
+                if(response.isSuccessful()){
+                    System.out.println("Success event created");
+                   // si.onHttpCreateUserSuccess(response.body());
+                }
+                else{
+                    try{
+                        System.out.println("GOT Error: "+response.errorBody().string());
+                        si.onHttpError(new ResponseCodeMessage(response.code(), response.errorBody().string()));
+                    }
+                    catch (IOException err){
+                        si.onError(err, context);
+                    }
+                }
+            }
 
+            @Override
+            public void onFailure(Call<Event> call, Throwable t) {
+                si.onError(new Exception(t.getMessage()), context);
+            }
+        });
+}
     public void createUser(String firstName, String lastName, String houseCode, CacheManagementInterface si){
         APIHelper.getInstance(context).createUser(firstName,lastName, houseCode).enqueue(new Callback<User>() {
             @Override

@@ -5,6 +5,7 @@ import android.content.Context;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
@@ -121,6 +122,16 @@ public class APIHelper {
         HashMap<String, Object> body = new HashMap<>();
         body.put("point_log_id",pointLogId);
         return apiInterface.viewMessages(getFirebaseToken(), body);
+    }
+    public Call<Event> postEvent(Event event){
+        Map<String, Object> data = new HashMap<>();
+        data.put("event", event);
+        return apiInterface.createEvent(getFirebaseToken(), data);
+    }
+    public  Call<Event> getEvents(){
+        return apiInterface.getEventFeed(getFirebaseToken());
+
+
     }
 
 }

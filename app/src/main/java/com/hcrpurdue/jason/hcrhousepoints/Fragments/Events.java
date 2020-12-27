@@ -20,6 +20,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
 
 import java.util.Objects;
 
@@ -40,6 +41,8 @@ public class Events extends Fragment {
 
         View baseView = inflater.inflate(R.layout.fragment_events, container, false);
 setUtilities();
+       System.out.println(APIHelper.getInstance(getContext()).getEvents());
+
         // Hiding plus button if permissionlevel is equal to resident
         if (cacheManager.getUser().getPermissionLevel().equals(UserPermissionLevel.RESIDENT)) {
             //hides the menu
