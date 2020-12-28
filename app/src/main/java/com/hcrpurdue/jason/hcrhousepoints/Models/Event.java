@@ -1,4 +1,4 @@
-package com.hcrpurdue.jason.hcrhousepoints;
+package com.hcrpurdue.jason.hcrhousepoints.Models;
 
 import java.util.Date;
 
