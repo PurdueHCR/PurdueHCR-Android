@@ -35,55 +35,54 @@ public LaundryRv.MyHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
 public void onBindViewHolder(LaundryRv.MyHolder holder, final int position) {
 
-final LaundryItem data = laundryItems.get(position);
-       holder
-        //System.out.println(data.getDate_class2());
-        holder.itemView.setOnClickListener(new View.OnClickListener()
-        {
-@Override
-public void onClick( final View view) {
-        String weekReference="";
-        switch (position){
-        case 0:
-        weekReference="Week1";
-        break;
-        case 1:
-        weekReference="Week2";
-        break;
-        case 2:
-        weekReference="Week3";
-        break;
-        case 3:
-        weekReference="Week4";
-        break;
-        case 4:
-        weekReference="Week5";
-        break;
-        case 5:
-        weekReference="Week6";
-        break;
-        case 6:
-        weekReference="Week7";
-        break;
-        case 7:
-        weekReference="Week8";
-        break;
-        case 8:
-        weekReference="Week9";
-        break;
-        case 9:
-        weekReference="week";
-        break;
-default:weekReference="None";
-        }
+    final LaundryItem data = laundryItems.get(position);
+    //System.out.println(data.getDate_class2());
+    holder.itemView.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(final View view) {
+            String weekReference = "";
+            switch (position) {
+                case 0:
+                    weekReference = "Week1";
+                    break;
+                case 1:
+                    weekReference = "Week2";
+                    break;
+                case 2:
+                    weekReference = "Week3";
+                    break;
+                case 3:
+                    weekReference = "Week4";
+                    break;
+                case 4:
+                    weekReference = "Week5";
+                    break;
+                case 5:
+                    weekReference = "Week6";
+                    break;
+                case 6:
+                    weekReference = "Week7";
+                    break;
+                case 7:
+                    weekReference = "Week8";
+                    break;
+                case 8:
+                    weekReference = "Week9";
+                    break;
+                case 9:
+                    weekReference = "week";
+                    break;
+                default:
+                    weekReference = "None";
+            }
 
-        Context context = view.getContext();
+      /*  Context context = view.getContext();
         SharedPreferences mySharedPreferences = context.getSharedPreferences("WeekRef", Context.MODE_PRIVATE);
 
         SharedPreferences.Editor editor = mySharedPreferences.edit();
         editor.putString("WeekRef", weekReference).commit();
-        Intent i = new Intent(context,WeekLayout.class);
-        context.startActivity(i);
+        Intent i = new Intent(context,c.class);
+        context.startActivity(i);*?
         //  Context context = view.getContext();
         //  Intent intent = new Intent(context, Add_class_to_user.class);
         // intent.putExtra("date_class", listdata.get(position).getDate_class());
@@ -96,22 +95,24 @@ default:weekReference="None";
         });
 
         }
-
+*/
+        }
+    });
+}
 @Override
 public int getItemCount() {
-        return weeks.size();
+        return laundryItems.size();
         }
 
 
 class MyHolder extends RecyclerView.ViewHolder{
-    ImageView picture;
-    TextView week,description;
+
+    TextView unit,status;
 
     public MyHolder(View itemView) {
         super(itemView);
-        picture = (ImageView) itemView.findViewById(R.id.picture);
-        week = (TextView) itemView.findViewById(R.id.week);
-        description = (TextView) itemView.findViewById(R.id.theme);
+       unit = itemView.findViewById(R.id.name);
+       status = itemView.findViewById(R.id.status);
 
     }
 }
