@@ -13,7 +13,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.DetailedEventViewActivity"></activity>
+        <activity
+            android:name=".Activities.LaundryTabs"
+            android:label="@string/title_activity_laundry_tabs"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".Activities.LaundryActivity" />
+        <activity android:name=".Activities.DetailedEventViewActivity" />
         <activity
             android:name=".Activities.AppInitializationActivity"
             android:configChanges="orientation|keyboardHidden"
@@ -41,12 +46,12 @@
         <activity
             android:name=".Activities.LogInActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Fragments.QrCodeDetailsFragment"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".Activities.AccountCreationActivity"
             android:configChanges="orientation|keyboardHidden"
