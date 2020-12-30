@@ -28,7 +28,8 @@ public class LaundryTabs extends AppCompatActivity {
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
-        Objects.requireNonNull(this.getSupportActionBar()).setTitle("Laundry");
+
+//        Objects.requireNonNull(this.getSupportActionBar()).setTitle("Laundry");
     }
 
 }

@@ -1,12 +1,8 @@
-package com.hcrpurdue.jason.hcrhousepoints.RecyclerViews;
+package com.hcrpurdue.jason.hcrhousepoints.RecyclerAdapters;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,7 +12,7 @@ import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import java.util.List;
 
-public class LaundryRv extends RecyclerView.Adapter<LaundryRv.MyHolder> {
+public class LaundryRv  extends RecyclerView.Adapter<LaundryRv.MyHolder> {
 
     List<LaundryItem> laundryItems;
 
@@ -36,6 +32,17 @@ public LaundryRv.MyHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 public void onBindViewHolder(LaundryRv.MyHolder holder, final int position) {
 
     final LaundryItem data = laundryItems.get(position);
+    holder.unit.setText(data.getName());
+    //@TODO change value in equals("")
+    if (data.getStatus().equals("Ready")) {
+        //@TODO set text to avaiable and change color to green
+    } else {
+
+        holder.status.setText("Unavailable");
+        //@TODO add time to end as well
+      //  holder.status.append();
+
+    }
     //System.out.println(data.getDate_class2());
     holder.itemView.setOnClickListener(new View.OnClickListener() {
         @Override
@@ -105,13 +112,13 @@ public int getItemCount() {
         }
 
 
-class MyHolder extends RecyclerView.ViewHolder{
+ class MyHolder extends RecyclerView.ViewHolder{
 
     TextView unit,status;
 
     public MyHolder(View itemView) {
         super(itemView);
-       unit = itemView.findViewById(R.id.name);
+       unit =  itemView.findViewById(R.id.name);
        status = itemView.findViewById(R.id.status);
 
     }
