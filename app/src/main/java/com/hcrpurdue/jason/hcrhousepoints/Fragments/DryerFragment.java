@@ -34,7 +34,7 @@ public class DryerFragment extends Fragment {
     public void retrieveData() {
         SharedPreferences mySharedPreferences = getContext().getSharedPreferences("building", Context.MODE_PRIVATE);
 
-        final LaundryRv recycler = new LaundryRv(null);
+        final LaundryRv recycler = new LaundryRv(laundryItems);
         String wr = mySharedPreferences.getString("building", "");
         if (wr != null) {
             if (wr.equals("hn")) {

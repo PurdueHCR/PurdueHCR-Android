@@ -45,4 +45,11 @@
     <string name="dryers">Dryers</string>
     <string name="laundry">Laundry</string>
     <string name="unavailable">Unavailable</string>
+    <string-array name="houseList">
+        <item>Copper</item>
+        <item>Silver</item>
+        <item>Palladium</item>
+        <item>Platinum</item>
+        <item>Titanium</item>
+    </string-array>
 </resources>

@@ -13,10 +13,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".Activities.createEvent"></activity>
         <activity
             android:name=".Activities.LaundryTabs"
             android:label="@string/title_activity_laundry_tabs"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".Activities.LaundryActivity" />
         <activity android:name=".Activities.DetailedEventViewActivity" />
         <activity

@@ -1,37 +1,42 @@
 package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
-import android.widget.Toolbar;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.hcrpurdue.jason.hcrhousepoints.Activities.createEvent;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.R;
+import com.hcrpurdue.jason.hcrhousepoints.RecyclerAdapters.EventsAdapter;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 
 public class Events extends Fragment {
     static private CacheManager cacheManager;
     private FirebaseListenerUtil flu;
+    private RecyclerView recyclerView;
+    private final ArrayList<Event> events = new ArrayList<>();
+
     public Events() {
         // Required empty public constructor
     }
-
 
 
     @Override
@@ -40,25 +45,31 @@ public class Events extends Fragment {
 
 
         View baseView = inflater.inflate(R.layout.fragment_events, container, false);
-setUtilities();
-       System.out.println(APIHelper.getInstance(getContext()).getEvents());
+        setUtilities();
+        recyclerView = baseView.findViewById(R.id.rvEvents);
+        System.out.println(APIHelper.getInstance(getContext()).getEvents());
 
         // Hiding plus button if permissionlevel is equal to resident
-        if (cacheManager.getUser().getPermissionLevel().equals(UserPermissionLevel.RESIDENT)) {
-            //hides the menu
-            setHasOptionsMenu(false);
-
-        } else {
-            //shows the menu
-            setHasOptionsMenu(true);
-        }
+        //hides the menu
+        //shows the menu
+        setHasOptionsMenu(!cacheManager.getUser().getPermissionLevel().equals(UserPermissionLevel.RESIDENT));
+        retrieveData();
         return baseView;
     }
-  //  @Override
-  //  public void onCreate(Bundle savedInstanceState) {
-  //      super.onCreate(savedInstanceState);
-  //      setHasOptionsMenu(true);
-  //  }
+
+    private void retrieveData() {
+        final EventsAdapter recycler = new EventsAdapter(events);
+        RecyclerView.LayoutManager layoutmanager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(layoutmanager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(recycler);
+    }
+
+    //  @Override
+    //  public void onCreate(Bundle savedInstanceState) {
+    //      super.onCreate(savedInstanceState);
+    //      setHasOptionsMenu(true);
+    //  }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu items for use in the action bar
@@ -67,13 +78,14 @@ setUtilities();
 
 
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add:
                 //code should be added here for opening create activity page
-                Toast.makeText(getContext(),"Opening create event activity",Toast.LENGTH_LONG).show();
 
+                startActivity(new Intent(getContext(), createEvent.class));
                 return true;
 
             default:
@@ -83,6 +95,7 @@ setUtilities();
 
         }
     }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -90,12 +103,14 @@ setUtilities();
 
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Events");
     }
-    private void setUtilities(){
+
+    private void setUtilities() {
         cacheManager = CacheManager.getInstance(getContext());
         cacheManager.getCachedData();
         flu = FirebaseListenerUtil.getInstance(getContext());
     }
-    protected int getMenuLayoutId(){
+
+    protected int getMenuLayoutId() {
         return R.menu.eventmenu;
     }
 }
