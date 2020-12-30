@@ -44,4 +44,5 @@
     <string name="washers">Washer</string>
     <string name="dryers">Dryers</string>
     <string name="laundry">Laundry</string>
+    <string name="unavailable">Unavailable</string>
 </resources>

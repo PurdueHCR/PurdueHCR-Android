@@ -1,6 +1,8 @@
 package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,11 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
-import com.hcrpurdue.jason.hcrhousepoints.Activities.LaundryActivity;
 import com.hcrpurdue.jason.hcrhousepoints.Activities.LaundryTabs;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.R;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
 
 import java.util.Objects;
 
@@ -37,9 +36,13 @@ public class Laundry extends Fragment {
 hn.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View v) {
+
+        Context context = v.getContext();
+        SharedPreferences mySharedPreferences = context.getSharedPreferences("building", Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = mySharedPreferences.edit();
+        editor.putString("building","hn").apply();
         Intent intent = new Intent(getContext(), LaundryTabs.class);
-        //passes intent varaible with name building and value hn "
-        intent.putExtra("building","hn");
         startActivity(intent);
 
     }
@@ -47,9 +50,14 @@ hn.setOnClickListener(new View.OnClickListener() {
 hs.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View v) {
-        Intent intent = new Intent(getContext(),LaundryActivity.class);
-        //passes intent varaible with name building and value hn "
-        intent.putExtra("building","hs");
+        Context context = v.getContext();
+        SharedPreferences mySharedPreferences = context.getSharedPreferences("building", Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = mySharedPreferences.edit();
+        editor.putString("building","hs").apply();
+        Intent intent = new Intent(getContext(), LaundryTabs.class);
+
+
         startActivity(intent);
 
     }

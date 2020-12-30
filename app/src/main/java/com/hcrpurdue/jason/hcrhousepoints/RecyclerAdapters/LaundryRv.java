@@ -38,50 +38,13 @@ public void onBindViewHolder(LaundryRv.MyHolder holder, final int position) {
         //@TODO set text to avaiable and change color to green
     } else {
 
-        holder.status.setText("Unavailable");
+        holder.status.setText(R.string.unavailable);
         //@TODO add time to end as well
       //  holder.status.append();
 
     }
-    //System.out.println(data.getDate_class2());
-    holder.itemView.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(final View view) {
-            String weekReference = "";
-            switch (position) {
-                case 0:
-                    weekReference = "Week1";
-                    break;
-                case 1:
-                    weekReference = "Week2";
-                    break;
-                case 2:
-                    weekReference = "Week3";
-                    break;
-                case 3:
-                    weekReference = "Week4";
-                    break;
-                case 4:
-                    weekReference = "Week5";
-                    break;
-                case 5:
-                    weekReference = "Week6";
-                    break;
-                case 6:
-                    weekReference = "Week7";
-                    break;
-                case 7:
-                    weekReference = "Week8";
-                    break;
-                case 8:
-                    weekReference = "Week9";
-                    break;
-                case 9:
-                    weekReference = "week";
-                    break;
-                default:
-                    weekReference = "None";
-            }
+
+
 
       /*  Context context = view.getContext();
         SharedPreferences mySharedPreferences = context.getSharedPreferences("WeekRef", Context.MODE_PRIVATE);
@@ -104,8 +67,8 @@ public void onBindViewHolder(LaundryRv.MyHolder holder, final int position) {
         }
 */
         }
-    });
-}
+
+
 @Override
 public int getItemCount() {
         return laundryItems.size();
