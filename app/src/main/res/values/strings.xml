@@ -52,4 +52,24 @@
         <item>Platinum</item>
         <item>Titanium</item>
     </string-array>
+    <string-array name="floorList">
+        <item>All Floors</item>
+        <item>Copper House</item>
+        <item>Platinum House</item>
+        <item> Titanium House</item>
+        <item>Silver House</item>
+        <item>Palladium House</item>
+        <item>1N</item>
+        <item>2N</item>
+        <item>3N</item>
+        <item>4N</item>
+        <item>5N</item>
+        <item>6N</item>
+        <item>1S</item>
+        <item>2S</item>
+        <item>3S</item>
+        <item>4S</item>
+        <item>5S</item>
+        <item>6S</item>
+    </string-array>
 </resources>
