@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,34 +10,18 @@
         style="?android:attr/progressBarStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
         android:layout_weight="1"
         android:clickable="true"
         android:elevation="10dp"
         android:focusable="true"
         android:indeterminate="false"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        android:visibility="gone" />
 
     <ScrollView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -47,167 +30,103 @@
                 android:id="@+id/name_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
                 android:text="Name of Event"
+                android:layout_margin="10dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="16dp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/event_name_input_layout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/name_title"
-                tools:layout_conversion_wrapHeight="148"
-                tools:layout_conversion_wrapWidth="996">
-
-                <EditText
+           <EditText
+               android:layout_margin="10dp"
+               android:layout_below="@id/name_title"
                     android:id="@+id/event_name_input"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:autofillHints="Enter name for event"
                     android:ems="10"
+                    android:hint="Event Name"
                     android:inputType="textNoSuggestions" />
-            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
+                android:layout_margin="10dp"
+                android:layout_below="@id/dateINput"
                 android:id="@+id/start_time_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:text="Start"
+                android:text="Start Time"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/event_name_input_layout" />
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="121dp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/start_time_input_layout"
-                android:layout_width="121dp"
-                android:layout_height="60dp"
 
-                android:layout_marginTop="8dp"
-                app:boxBackgroundColor="@color/white"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.055"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/start_time_title"
-                tools:layout_conversion_wrapHeight="148"
-                tools:layout_conversion_wrapWidth="996">
+            <DatePicker
+                android:layout_margin="10dp"
+                android:id="@+id/dateINput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/dateTitle"
+                android:layout_weight="1"
+                android:datePickerMode="spinner"
+                android:ems="10"
+                android:hint="TIme"
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="148dp" />
 
-                <EditText
-                    android:id="@+id/start_input"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:autofillHints="Enter start time for event"
-                    android:ems="10"
-                    android:hint="TIme"
-                    android:inputType="text|time" />
-            </com.google.android.material.textfield.TextInputLayout>
-
+            <TimePicker
+                android:id="@+id/timePicker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/start_time_title"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:timePickerMode="spinner" />
             <TextView
                 android:id="@+id/end_time_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:text="End"
+                android:text="End TIme"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/start_time_input_layout" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/end_time_input_layout"
-                android:layout_width="121dp"
-                android:layout_height="60dp"
-                android:layout_marginTop="8dp"
-                android:textColorHint="@color/white"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.055"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/end_time_title"
-                tools:layout_conversion_wrapHeight="148"
-                tools:layout_conversion_wrapWidth="996">
-
-                <EditText
-                    android:id="@+id/end_input"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:ems="10"
-
-                    android:inputType="text|time" />
-            </com.google.android.material.textfield.TextInputLayout>
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="264dp" />
 
             <TextView
+                android:layout_margin="10dp"
+                android:layout_below="@id/timePicker"
                 android:id="@+id/location_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
                 android:text="Location"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/end_time_input_layout" />
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="376dp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/location_input_layout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/location_title"
-                tools:layout_conversion_wrapHeight="148"
-                tools:layout_conversion_wrapWidth="996">
 
                 <EditText
+                    android:layout_margin="10dp"
+                    android:layout_below="@id/location_title"
                     android:id="@+id/location_input"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="textNoSuggestions" />
-            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
+                android:layout_below="@id/location_input"
+                android:layout_margin="10dp"
                 android:id="@+id/description_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
                 android:text="Description"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                app:layout_constraintStart_toStartOf="parent"
 
-                app:layout_constraintTop_toBottomOf="@id/houses_list" />
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="556dp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/description_input_layout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/description_title"
-                tools:layout_conversion_wrapHeight="148"
-                tools:layout_conversion_wrapWidth="996">
-
-                <EditText
+              <EditText
                     android:id="@+id/description_input"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -215,129 +134,99 @@
                     android:autofillHints=""
                     android:ems="10"
                     android:inputType="textNoSuggestions" />
-            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
+                android:layout_margin="10dp"
+                android:layout_below="@id/location_input"
                 android:id="@+id/houses_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
                 android:text="Houses"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/location_input_layout" />
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="481dp" />
             <!--add list of houses here (add them in string.xml/houses_array) OR to spinner in main activity)-->
             <TextView
+                android:layout_below="@id/hostInput"
                 android:id="@+id/points_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
                 android:text="Points"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
 
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/description_input_layout" />
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="665dp" />
 
             <Spinner
+                android:layout_below="@id/houses_title"
                 android:id="@+id/houses_list"
-                android:layout_width="0dp"
+                android:layout_width="379dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
                 android:entries="@array/houseList"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/houses_title"
-                tools:layout_editor_absoluteX="51dp"
-                tools:layout_editor_absoluteY="220dp" />
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="516dp" />
 
             <TextView
+
+                android:layout_margin="10dp"
+                android:layout_below="@id/houses_list"
                 android:id="@+id/host_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="76dp"
                 android:text="Event Host "
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/points_input" />
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="811dp" />
 
-            <TextView
-                android:id="@+id/host_description"
+            <EditText
+                android:layout_margin="10dp"
+                android:layout_below="@id/host_title"
+                android:id="@+id/hostInput"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="32dp"
-                android:text="I am hosting the event"
+              android:hint="Name of host(leave blank if you are hosting)"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/host_title" />
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="870dp" />
 
-            <Switch
-                android:id="@+id/host_check_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text=""
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.056"
-
-                app:layout_constraintStart_toEndOf="@+id/host_description"
-                app:layout_constraintTop_toBottomOf="@+id/host_title" />
 
             <Button
                 android:id="@+id/button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
                 android:text="Create Event"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/host_description" />
+                tools:layout_editor_absoluteX="134dp"
+                tools:layout_editor_absoluteY="913dp" />
 
-            <EditText
-                android:id="@+id/start_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:ems="10"
-                android:inputType="date"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.02"
-                app:layout_constraintStart_toEndOf="@+id/start_time_input_layout"
-                app:layout_constraintTop_toBottomOf="@+id/start_time_title" />
-
-            <EditText
-                android:id="@+id/end_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:ems="10"
-                android:inputType="date"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.02"
-                app:layout_constraintStart_toEndOf="@+id/end_time_input_layout"
-                app:layout_constraintTop_toBottomOf="@+id/end_time_title" />
 
             <EditText
                 android:id="@+id/points_input"
                 android:layout_width="259dp"
                 android:layout_height="38dp"
-                android:layout_marginTop="4dp"
+                android:layout_below="@id/points_title"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+
+                android:layout_marginBottom="10dp"
                 android:layout_weight="1"
                 android:ems="10"
+                android:hint="Enter point value of event"
                 android:inputType="textNoSuggestions"
-                app:layout_constraintEnd_toEndOf="parent"
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="696dp" />
 
-                app:layout_constraintHorizontal_bias="0.105"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/points_title" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:layout_margin="10dp"
+                android:layout_below="@id/event_name_input"
+                android:id="@+id/dateTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:textSize="20sp"
+                tools:layout_editor_absoluteX="161dp"
+                tools:layout_editor_absoluteY="135dp" />
+        </RelativeLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
