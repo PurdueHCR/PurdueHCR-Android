@@ -1,88 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+<ScrollView android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:android="http://schemas.android.com/apk/res/android">
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".Activities.DetailedEventViewActivity"
-    android:orientation="vertical">
-
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
+
         <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="12dp"
             android:text="Snack and Chat"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
             android:textSize="@dimen/dp_40"
-            android:layout_alignParentLeft="true"
-            android:layout_margin="12dp">
-        </TextView>
+            android:textStyle="bold"/>
 
         <CheckBox
+
             android:id="@+id/going"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_margin="12dp"
-            android:text="@string/goingyn">
+            android:layout_alignEnd="@id/title"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="12dp"
+            android:text="@string/goingyn"
+            android:textAlignment="center">
 
         </CheckBox>
 
-    </RelativeLayout>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
 
         <TextView
+            android:layout_below="@id/title"
             android:id="@+id/date_header"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
+
             android:layout_marginStart="12dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="12dp"
             android:layout_marginBottom="4dp"
             android:text="DATE"
-            android:textSize="18sp">
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
 
-        </TextView>
+
         <TextView
             android:id="@+id/time_header"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="TIME"
-            android:layout_alignParentRight="true"
+            android:layout_below="@id/going"
+            android:layout_alignParentEnd="true"
             android:layout_marginStart="12dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="12dp"
             android:layout_marginBottom="4dp"
-            android:textSize="18sp">
+            android:text="TIME"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
 
-        </TextView>
-    </RelativeLayout>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+
+
+
 
         <TextView
+            android:layout_below="@id/date_header"
             android:id="@+id/date_actual"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_alignParentLeft="true"
+
             android:layout_marginStart="12dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="12dp"
             android:layout_marginBottom="4dp"
             android:text="date_placeholder"
-            android:textSize="18sp">
+            android:textSize="18sp"/>
 
-        </TextView>
+
         <TextView
+            android:layout_below="@id/time_header"
             android:id="@+id/time_actual"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -92,112 +98,153 @@
             android:layout_marginTop="4dp"
             android:layout_marginEnd="12dp"
             android:layout_marginBottom="4dp"
-            android:textSize="18sp">
+            android:textSize="18sp"/>
 
-        </TextView>
-    </RelativeLayout>
+
+        <TextView
+            android:id="@+id/loc_header"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@id/date_actual"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="4dp"
+            android:text="LOCATION"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/loc_actual"
+
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@id/loc_header"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="4dp"
+            android:text="loc_placeholder"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+
     <TextView
-        android:id="@+id/loc_header"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:text="LOCATION"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="4dp"
-        android:textSize="18sp"/>
-    <TextView
-        android:id="@+id/loc_actual"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:text="loc_placeholder"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="4dp"
-        android:textSize="18sp"/>
-    <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/loc_actual"
         android:id="@+id/host_header"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="4dp"
         android:text="HOST"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="4dp"
-        android:textSize="18sp"/>
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/host_actual"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@id/host_header"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="12dp"
+
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="4dp"
+            android:text="host_placeholder"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+
     <TextView
-        android:id="@+id/host_actual"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:text="host_placeholder"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="4dp"
-        android:textSize="18sp"/>
-    <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/host_actual"
         android:id="@+id/attendees_header"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="4dp"
         android:text="ATTENDEES"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="4dp"
-        android:textSize="18sp"/>
-    <TextView
-        android:id="@+id/attendees_actual"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:text="attend_placeholder"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="4dp"
-        android:textSize="18sp"/>
-    <TextView
-        android:id="@+id/details_header"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:text="DETAILS"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="4dp"
-        android:textSize="18sp"/>
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/attendees_actual"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@id/attendees_header"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="12dp"
+
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="4dp"
+            android:text="attend_placeholder"
+            android:textAlignment="center"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/details_header"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_below="@id/attendees_actual"
+            android:layout_centerHorizontal="true"
+
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="4dp"
+            android:text="DETAILS"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/details_actual"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/details_header"
+            android:layout_centerHorizontal="true"
+
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="4dp"
+            android:text="details_placeholder"
+            android:textAlignment="center"
+            android:textSize="18sp" />
 
     <TextView
-        android:id="@+id/details_actual"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="4dp"
-        android:text="details_placeholder"
-        android:textSize="18sp" />
-    <TextView
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/details_actual"
         android:id="@+id/export_header"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:text="EXPORT"
-        android:layout_alignParentRight="true"
+
         android:layout_marginStart="12dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="4dp"
-        android:textSize="18sp"/>
+        android:text="EXPORT"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <Button
+        android:layout_below="@id/export_header"
+        android:layout_centerHorizontal="true"
         android:id="@+id/gcexport"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -208,5 +255,5 @@
         android:text="Google Calendar"
         android:textSize="18sp" />
 
-</LinearLayout>
+</RelativeLayout>
 </ScrollView>

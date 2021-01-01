@@ -6,7 +6,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import retrofit2.Call;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -30,7 +28,7 @@ public class APIHelper {
    // public static String domain = "https://us-central1-hcr-points.cloudfunctions.net/";
 
     APIHelper(Context context){
-        this.context = context;
+        APIHelper.context = context;
         if(apiInterface == null) {
             Gson gson = new GsonBuilder().setLenient().create();
 
@@ -128,7 +126,7 @@ public class APIHelper {
         data.put("event", event);
         return apiInterface.createEvent(getFirebaseToken(), data);
     }
-    public  Call<Event> getEvents(){
+    public  Call<ResponseMessage> getEvents(){
         return apiInterface.getEventFeed(getFirebaseToken());
 
 

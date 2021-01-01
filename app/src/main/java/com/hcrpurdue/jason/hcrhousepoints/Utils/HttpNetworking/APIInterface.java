@@ -5,7 +5,6 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 
-
 import java.util.Map;
 
 import retrofit2.Call;
@@ -21,7 +20,7 @@ public interface APIInterface {
     @GET("user/auth-rank")
     Call<AuthRank> getAuthRank(@Header("Authorization") String firebaseToken);
     @GET("events/feed")
-    Call<Event> getEventFeed(@Header("Authorization") String firebaseToken);
+    Call<ResponseMessage> getEventFeed(@Header("Authorization") String firebaseToken);
    /* @GET("events/")
     Call<Event> getEventFeed(@Header("Authorization") String firebaseToken);
 */

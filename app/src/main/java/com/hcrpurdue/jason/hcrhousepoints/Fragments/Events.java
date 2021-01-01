@@ -100,7 +100,7 @@ public class Events extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         AppCompatActivity activity = (AppCompatActivity) getActivity();
-
+       System.out.println(APIHelper.getInstance(getContext()).getEvents());
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Events");
     }
 
