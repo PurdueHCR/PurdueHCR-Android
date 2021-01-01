@@ -218,7 +218,7 @@
                 android:layout_below="@id/description_input"
                 android:layout_margin="10dp"
                 android:layout_centerHorizontal="true"
-                android:text="Create Event"
+                android:text="Update Event"
                 tools:layout_editor_absoluteX="134dp"
                 tools:layout_editor_absoluteY="913dp" />
 

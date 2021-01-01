@@ -38,6 +38,17 @@ public class Event {
         this.floorColors = floorColors;
     }
 
+    public Event(String name, String details, Date startDate, Date endDate, String location, int point, String[] floorIds, String host) {
+        this.name = name;
+        this.details = details;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.location = location;
+        this.point = point;
+        this.floorIds = floorIds;
+        this.host = host;
+    }
+
     public String getName() {
         return name;
     }

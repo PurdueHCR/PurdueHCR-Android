@@ -16,18 +16,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
-public class createEvent extends AppCompatActivity {
-EditText eventName,location,eventHost,points,eventDescription;
-Spinner floors;
-DatePicker datePicker;
-TimePicker startTimePicker,endTimePicker;
-Button createevent;
-ProgressBar progressBar;
+class editEvent extends AppCompatActivity {
+    EditText eventName,location,eventHost,points,eventDescription;
+    Spinner floors;
+    DatePicker datePicker;
+    TimePicker startTimePicker,endTimePicker;
+    Button updateEvent;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_event);
+        setContentView(R.layout.activity_edit_event);
         eventName = findViewById(R.id.event_name_input);
         location = findViewById(R.id.location_input);
         eventHost = findViewById(R.id.hostInput);
@@ -37,11 +37,26 @@ ProgressBar progressBar;
         datePicker = findViewById(R.id.dateINput);
         startTimePicker = findViewById(R.id.timePicker);
         endTimePicker = findViewById(R.id.endTimePIcker);
-        createevent = findViewById(R.id.button);
+        updateEvent = findViewById(R.id.button);
         progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
-        createevent.setOnClickListener(v -> {
+        //setting text below to previous values
+        //@TODO set initial values
+        /*
+        eventName.setText();
+        location.setText();
+        eventHost.setText();
+        points.setText();
+        eventDescription.setText();
+        //@TODO need to compare floor value to position in @array house/floor in strings file to get position for spinner
+        floors.setSelection();
+        startTimePicker.setHour();
+        startTimePicker.setMinute();
+        endTimePicker.setHour();
+        endTimePicker.setMinute();*/
+        updateEvent.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
+
             if (eventName.getText().toString().length() == 0 || location.getText().toString().length() == 0 || eventDescription.getText().toString().length() == 0 || points.getText().toString().length() == 0 || floors.toString().length() == 0) {
               /*  AlertDialog.Builder builder;
                 builder = new AlertDialog.Builder(getApplicationContext());
@@ -55,9 +70,9 @@ ProgressBar progressBar;
                 builder.setCancelable(true);
                 builder.show();
 */
-                AlertDialog alertDialog = new AlertDialog.Builder(createEvent.this).create();
-                alertDialog.setTitle("Important");
-                alertDialog.setMessage("Please make sure to fill in all of the required fields");
+                AlertDialog alertDialog = new AlertDialog.Builder(getApplication()).create();
+                alertDialog.setTitle("Alert");
+                alertDialog.setMessage("Alert message to be shown");
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {

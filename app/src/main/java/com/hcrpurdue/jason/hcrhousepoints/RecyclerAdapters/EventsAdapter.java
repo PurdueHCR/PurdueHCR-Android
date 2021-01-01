@@ -35,8 +35,14 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyHolder> 
         final Event data = events.get(position);
         // holder.location.setText("Dfsf");
         //@TODO bind data here
-
-
+        //@TODO enable if user is privilidged resident or above
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+              //@TODO launch edit event page
+                return true;// returning true instead of false, works for me
+            }
+        });
     }
 
 
