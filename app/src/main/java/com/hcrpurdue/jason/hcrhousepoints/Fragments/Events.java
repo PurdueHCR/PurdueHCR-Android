@@ -24,7 +24,10 @@ import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
 
 
@@ -48,11 +51,23 @@ public class Events extends Fragment {
         setUtilities();
         recyclerView = baseView.findViewById(R.id.rvEvents);
         System.out.println(APIHelper.getInstance(getContext()).getEvents());
-        events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.","flgk","null",null,4,new String[]{"1N","2N"},"Honors Society"));
+        SimpleDateFormat sdg = new SimpleDateFormat("EEE, MMM d h:mm a");
+        Date date;
+        try {
+           date = sdg.parse("Wed, Jul 4 08:00 PM");
+        } catch (ParseException e) {
+            System.out.println("Date couldn't be formatted");
+            e.printStackTrace();
+            date = null;
+        }
+
+        events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
+        events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
+        events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
 
         // Hiding plus button if permissionlevel is equal to resident
-        //hides the menu
-        //shows the menu
+
+        //shows the menu if the user has a non-resident permisson level
         setHasOptionsMenu(!cacheManager.getUser().getPermissionLevel().equals(UserPermissionLevel.RESIDENT));
         retrieveData();
         return baseView;

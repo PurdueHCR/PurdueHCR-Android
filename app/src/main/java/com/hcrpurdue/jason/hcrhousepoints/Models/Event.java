@@ -1,13 +1,14 @@
 package com.hcrpurdue.jason.hcrhousepoints.Models;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Event implements Serializable {
 
     private String name;
     private String details;
-    private final String startDate;
-    private final String endDate;
+    private final Date startDate;
+    private final Date endDate;
     private String location;
     private int point;
     private int pointTypeId;
@@ -19,7 +20,7 @@ public class Event implements Serializable {
     private String host;
     private String[] floorColors;
 
-    public Event(String name, String details, String startDate, String endDate, String location,
+    public Event(String name, String details, Date startDate, Date endDate, String location,
                  int point, int pointTypeId, String pointTypeName, String pointTypeDescription,
                  String[] floorIds, String id, String creatorId, String host, String[] floorColors) {
         this.name = name;
@@ -38,7 +39,7 @@ public class Event implements Serializable {
         this.floorColors = floorColors;
     }
 
-    public Event(String name, String details, String startDate, String endDate, String location, int point, String[] floorIds, String host) {
+    public Event(String name, String details, Date startDate, Date endDate, String location, int point, String[] floorIds, String host) {
         this.name = name;
         this.details = details;
         this.startDate = startDate;
@@ -65,7 +66,13 @@ public class Event implements Serializable {
         this.details = details;
     }
 
+    public Date getStartDate() {
+        return startDate;
+    }
 
+    public Date getEndDate() {
+        return endDate;
+    }
 
     public String getLocation() {
         return location;

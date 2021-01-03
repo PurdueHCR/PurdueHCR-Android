@@ -48,6 +48,7 @@
             tools:layout_editor_absoluteX="112dp"
             tools:layout_editor_absoluteY="16dp" />
         <ScrollView
+            android:focusedByDefault="true"
             android:id="@+id/descriptionScrollView"
 
             android:layout_below="@id/cnIcon"
