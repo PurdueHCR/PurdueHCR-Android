@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
-class editEvent extends AppCompatActivity {
+public class editEvent extends AppCompatActivity {
     EditText eventName,location,eventHost,points,eventDescription;
     Spinner floors;
     DatePicker datePicker;
@@ -27,6 +27,8 @@ class editEvent extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //getting intent
+        Event event = (Event) getIntent().getSerializableExtra("event");
         setContentView(R.layout.activity_edit_event);
         eventName = findViewById(R.id.event_name_input);
         location = findViewById(R.id.location_input);
@@ -90,7 +92,7 @@ class editEvent extends AppCompatActivity {
                 } else {
                     host = eventHost.getText().toString().trim();
                 }
-                Event event;
+                Event event2;
                 try {
 
 
@@ -104,7 +106,7 @@ class editEvent extends AppCompatActivity {
                     endTime = endTimePicker.toString();
                     date = datePicker.toString();
                     //event = new Event(name,description,null,null,locationstr,Integer.parseInt(pointValue),null,null,null,null,null,null,host,null);
-                    event = new Event(name, description, null, null, locationstr, Integer.parseInt(pointValue), null, host);
+                    event2 = new Event(name, description, null, null, locationstr, Integer.parseInt(pointValue), null, host);
                 } catch (NullPointerException nullPointerException) {
                     //@TODO show dialog reminding users to fill in all fields
                 } catch (Exception e) {

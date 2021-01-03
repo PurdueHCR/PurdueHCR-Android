@@ -48,6 +48,7 @@ public class Events extends Fragment {
         setUtilities();
         recyclerView = baseView.findViewById(R.id.rvEvents);
         System.out.println(APIHelper.getInstance(getContext()).getEvents());
+        events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.","flgk","null",null,4,new String[]{"1N","2N"},"Honors Society"));
 
         // Hiding plus button if permissionlevel is equal to resident
         //hides the menu
@@ -60,6 +61,8 @@ public class Events extends Fragment {
     private void retrieveData() {
         final EventsAdapter recycler = new EventsAdapter(events);
         RecyclerView.LayoutManager layoutmanager = new LinearLayoutManager(getContext());
+        //@TODO fetch event data here
+        recycler.notifyDataSetChanged();
         recyclerView.setLayoutManager(layoutmanager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(recycler);
