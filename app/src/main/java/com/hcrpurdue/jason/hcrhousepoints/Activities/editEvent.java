@@ -106,7 +106,7 @@ public class editEvent extends AppCompatActivity {
                     endTime = endTimePicker.toString();
                     date = datePicker.toString();
                     //event = new Event(name,description,null,null,locationstr,Integer.parseInt(pointValue),null,null,null,null,null,null,host,null);
-                    event2 = new Event(name, description, null, null, locationstr, Integer.parseInt(pointValue), null, host);
+                   // event2 = new Event(name, description, null, null, locationstr, Integer.parseInt(pointValue), null, host);
                 } catch (NullPointerException nullPointerException) {
                     //@TODO show dialog reminding users to fill in all fields
                 } catch (Exception e) {

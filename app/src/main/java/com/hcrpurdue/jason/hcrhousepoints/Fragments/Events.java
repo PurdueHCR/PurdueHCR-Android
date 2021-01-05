@@ -66,9 +66,9 @@ public class Events extends Fragment {
             date = null;
         }
 
-        events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
-        events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
-        events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
+     //   events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
+      //  events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
+       // events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
 
         // Hiding plus button if permissionlevel is equal to resident
 

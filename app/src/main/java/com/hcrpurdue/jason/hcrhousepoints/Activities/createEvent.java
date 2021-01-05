@@ -17,8 +17,8 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
+import java.text.ParseException;
+import java.util.Calendar;
 
 public class createEvent extends AppCompatActivity {
 EditText eventName,location,eventHost,points,eventDescription;
@@ -90,29 +90,27 @@ ProgressBar progressBar;
                     pointValue = points.getText().toString().trim();
                     description = eventDescription.getText().toString().trim();
                     floor = floors.toString().trim();
-                    startTime = startTimePicker.toString();
-                    endTime = endTimePicker.toString();
-                    date = datePicker.toString();
-                    //generating start date in required format
-                  String sd =  generateDate(date,startTime);
-                    //generating end date in required format
-                  String ed =  generateDate(date,endTime);
+                        generateDate();
 
-                     event = new Event(name, description, sd, ed, locationstr, Integer.parseInt(pointValue), null, host);
+                    //generating start date in required format
+                    //generating end date in required format
+
+
+                    // event = new Event(name, description, sd, ed, locationstr, Integer.parseInt(pointValue), null, host);
                 } catch (NullPointerException nullPointerException) {
                     //@TODO show dialog reminding users to fill in all fields
                 } catch (Exception e) {
-                    AlertDialog.Builder builder;
-                    builder = new AlertDialog.Builder(getApplicationContext());
-                    //builder.setIcon(R.drawable.open_browser);
-                    builder.setTitle(" Please make sure the point value is a number");
-                    builder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.dismiss();
-                        }
-                    });
-                    builder.setCancelable(true);
-                    builder.show();
+                    AlertDialog alertDialog = new AlertDialog.Builder(createEvent.this).create();
+                    alertDialog.setTitle("Error");
+                    alertDialog.setMessage(e.getMessage());
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.show();
+
 
                 }
 
@@ -123,14 +121,22 @@ ProgressBar progressBar;
 
     }
 
-    private String generateDate(String date, String time) {
-        String tempDate = date + " " + time;
+    private String generateDate() throws ParseException {
 
-        final SimpleDateFormat sdf =
-                new SimpleDateFormat("EEE, MMM d, yyyy hh:mm:ss a z");
+        int day = datePicker.getDayOfMonth();
+        int month = datePicker.getMonth();
+        int year =  datePicker.getYear();
+       // Instant instant = new Instant(year,month,day);
 
-// Give it to me in GMT time.
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-        System.out.println("GMT time: " + sdf.format(tempDate));
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month, day);
+      //  SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        System.out.println("Fsdf");
+    startTimePicker.
+        //System.out.println(df.parse(String.valueOf(calendar.getTimeInMillis())));
+        System.out.println("Time" + calendar.getTime());
+        System.out.println("STring Date: " + calendar.getTime().toString());
+
+       return calendar.getTime().toString();
     }
 }
