@@ -16,6 +16,9 @@ public class Event implements Serializable {
     private String pointTypeDescription;
     private String[] floorIds;
     private String id;
+    //automatically set to false for now
+    private boolean isPublicEvent;
+    private boolean isAllFloors;
     private String creatorId;
     private String host;
     private String[] floorColors;
@@ -38,16 +41,18 @@ public class Event implements Serializable {
         this.host = host;
         this.floorColors = floorColors;
     }
-
-    public Event(String name, String details, Date startDate, Date endDate, String location, int point, String[] floorIds, String host) {
+//constructor used for creating an Event
+    public Event(String name, String details, Date startDate, Date endDate, String location, int pointTypeId, String[] floorIds, boolean isPublicEvent, boolean isAllFloors,String host) {
         this.name = name;
         this.details = details;
         this.startDate = startDate;
         this.endDate = endDate;
         this.location = location;
-        this.point = point;
+        this.pointTypeId = pointTypeId;
         this.floorIds = floorIds;
         this.host = host;
+        this.isAllFloors = isAllFloors;
+        this.isPublicEvent = isPublicEvent;
     }
 
     public String getName() {
@@ -152,5 +157,21 @@ public class Event implements Serializable {
 
     public void setFloorColors(String[] floorColors) {
         this.floorColors = floorColors;
+    }
+
+    public boolean isPublicEvent() {
+        return isPublicEvent;
+    }
+
+    public void setPublicEvent(boolean publicEvent) {
+        isPublicEvent = publicEvent;
+    }
+
+    public boolean isAllFloors() {
+        return isAllFloors;
+    }
+
+    public void setAllFloors(boolean allFloors) {
+        isAllFloors = allFloors;
     }
 }

@@ -50,7 +50,12 @@ public class Events extends Fragment {
         View baseView = inflater.inflate(R.layout.fragment_events, container, false);
         setUtilities();
         recyclerView = baseView.findViewById(R.id.rvEvents);
-        System.out.println(APIHelper.getInstance(getContext()).getEvents());
+    cacheManager = CacheManager.getInstance(getContext());
+    //fetches the events from the server and stores the json string in the cacheManager
+    cacheManager.getEvents(getContext());
+    System.out.println(cacheManager.getEventsString());
+
+
         SimpleDateFormat sdg = new SimpleDateFormat("EEE, MMM d h:mm a");
         Date date;
         try {

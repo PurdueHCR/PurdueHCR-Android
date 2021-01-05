@@ -1,10 +1,25 @@
 package com.hcrpurdue.jason.hcrhousepoints.Utils;
 
 import android.content.Context;
-import android.util.Pair;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
+import com.hcrpurdue.jason.hcrhousepoints.Models.House;
+import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
+import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
+import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
+import com.hcrpurdue.jason.hcrhousepoints.Models.User;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.FirebaseUtilInterface;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,26 +28,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
-import com.hcrpurdue.jason.hcrhousepoints.Models.House;
-import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
-import com.hcrpurdue.jason.hcrhousepoints.Models.MessageType;
-import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
-import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
-import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
-import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
-import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
-import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
-import com.hcrpurdue.jason.hcrhousepoints.Models.User;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIInterface;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.FirebaseUtilInterface;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,8 +35,8 @@ import retrofit2.Response;
 // Because non-global variables are for people who care about technical debt
 public class CacheManager {
     private static CacheManager instance = null;
-    private FirebaseUtil fbutil = new FirebaseUtil();
-    private CacheUtil cacheUtil = new CacheUtil();
+    private final FirebaseUtil fbutil = new FirebaseUtil();
+    private final CacheUtil cacheUtil = new CacheUtil();
     private List<PointType> pointTypeList = null;
     private User user = null;
     private int notificationCount = 0;
@@ -54,6 +49,8 @@ public class CacheManager {
     private AuthRank userRank = null;
     private Context context;
     private String authToken;
+    private String eventsString;
+    private ArrayList<Event> events;
 
     private CacheManager() {
         // Exists only to defeat instantiation. Get rekt, instantiation
@@ -449,6 +446,7 @@ public void createEvent(Event event, CacheManagementInterface si) {
                 if(response.isSuccessful()){
                     System.out.println("Success event created");
                    // si.onHttpCreateUserSuccess(response.body());
+                  //  si.onGetEvent(response.body().);
                 }
                 else{
                     try{
@@ -466,6 +464,7 @@ public void createEvent(Event event, CacheManagementInterface si) {
                 si.onError(new Exception(t.getMessage()), context);
             }
         });
+
 }
     public void createUser(String firstName, String lastName, String houseCode, CacheManagementInterface si){
         APIHelper.getInstance(context).createUser(firstName,lastName, houseCode).enqueue(new Callback<User>() {
@@ -511,6 +510,42 @@ public void createEvent(Event event, CacheManagementInterface si) {
                     si.onHttpSuccess(new ResponseCodeMessage(response.code(), response.body().getMessage()));
                 }
                 else{
+                   try{
+                        System.out.println("GOT Error: "+response.errorBody().string());
+                        si.onHttpError(new ResponseCodeMessage(response.code(), response.errorBody().string()));
+                    }
+                    catch (IOException err){
+                        si.onError(err, context);
+                    }
+
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                si.onError(new Exception(t.getMessage()), context);
+            }
+        });
+    }
+
+
+    /**
+     * Update a QRCode in the database. If the call is succesful, the new LinkId will be saved into the Link object
+     *
+     * @param si   CacheManagementInterface with methods onError and onSuccess
+     */
+    public void updateQRCode(String linkId ,Map<String, Object> data, CacheManagementInterface si){
+        APIHelper.getInstance(context).updateLink(linkId, data).enqueue(new Callback<ResponseMessage>() {
+            @Override
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                System.out.println("GOT CODE: "+response.code());
+                if(response.isSuccessful()) {
+                    System.out.println("Event retrieved");
+                    System.out.println("GOT RESPONSE: "+response.body().getMessage());
+                    si.onHttpSuccess(new ResponseCodeMessage(response.code(), response.body().getMessage()));
+                }
+                else{
                     try{
                         System.out.println("GOT Error: "+response.errorBody().string());
                         si.onHttpError(new ResponseCodeMessage(response.code(), response.errorBody().string()));
@@ -530,37 +565,6 @@ public void createEvent(Event event, CacheManagementInterface si) {
         });
     }
 
-    /**
-     * Update a QRCode in the database. If the call is succesful, the new LinkId will be saved into the Link object
-     *
-     * @param si   CacheManagementInterface with methods onError and onSuccess
-     */
-    public void updateQRCode(String linkId ,Map<String, Object> data, CacheManagementInterface si){
-        APIHelper.getInstance(context).updateLink(linkId, data).enqueue(new Callback<ResponseMessage>() {
-            @Override
-            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
-                if(response.isSuccessful()) {
-                    System.out.println("GOT RESPONSE: "+response.body().getMessage());
-                    si.onHttpSuccess(new ResponseCodeMessage(response.code(), response.body().getMessage()));
-                }
-                else{
-                    try {
-                        System.out.println("ERROR CODE: " + response.code());
-                        System.out.println("GOT Error: " + response.errorBody().string());
-                        si.onHttpError(new ResponseCodeMessage(response.code(), "Failure"));
-                    }
-                    catch (IOException err){
-                        si.onError(err, context);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseMessage> call, Throwable t) {
-                si.onError(new Exception(t.getMessage()), context);
-            }
-        });
-    }
 
     public void getAllHousePoints(CacheManagementInterface si) {
         fbutil.getAllHousePoints(user.getHouseName(), user.getFloorId(), new FirebaseUtilInterface() {
@@ -789,6 +793,33 @@ public void createEvent(Event event, CacheManagementInterface si) {
             }
         });
     }
+    public void getEvents(Context context ){
+        APIHelper.getInstance(context).getEvents().enqueue(new retrofit2.Callback<ResponseMessage>() {
+            @Override
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                //saves events
+               instance.setEventsString(response.body().getMessage());
+                System.out.println("Body" + response.body().toString());
+                System.out.println("Getting events");
+                System.out.println(response.message());
+                if(response.isSuccessful()) {
+                    System.out.println("Events have successfully been retrieved");
+                    System.out.println(response.raw());
+
+                }
+                else {
+                    System.out.println(response.code() + ": " + response.message());
+                    //cmi.onError(new Exception(response.code() + ": " + response.message()), context);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                System.out.println("ERROR getting events "+t.getMessage());
+
+            }
+        });
+    }
 
     /**
      * Set RHPNotificationLog List (Usually from Listener)
@@ -828,4 +859,19 @@ public void createEvent(Event event, CacheManagementInterface si) {
         this.rewards = rewards;
     }
 
+    public String getEventsString() {
+        return eventsString;
+    }
+
+    public void setEventsString(String eventsString) {
+        this.eventsString = eventsString;
+    }
+
+    public ArrayList<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(ArrayList<Event> events) {
+        this.events = events;
+    }
 }

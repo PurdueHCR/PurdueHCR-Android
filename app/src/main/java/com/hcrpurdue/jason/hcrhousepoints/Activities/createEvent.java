@@ -15,6 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.R;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
+
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 public class createEvent extends AppCompatActivity {
 EditText eventName,location,eventHost,points,eventDescription;
@@ -71,7 +75,8 @@ ProgressBar progressBar;
                 String host, name, locationstr, pointValue, description, floor, startTime, endTime, date;
                 if (eventHost.getText().toString().trim().length() == 0) {
                     //@TODO get creators name
-                    host = "BOB";
+                    CacheManager cacheManager = CacheManager.getInstance(getApplicationContext());
+                   host = cacheManager.getUser().getFirstName() + " " + cacheManager.getUser().getLastName();
                 } else {
                     host = eventHost.getText().toString().trim();
                 }
@@ -88,8 +93,12 @@ ProgressBar progressBar;
                     startTime = startTimePicker.toString();
                     endTime = endTimePicker.toString();
                     date = datePicker.toString();
-                    //event = new Event(name,description,null,null,locationstr,Integer.parseInt(pointValue),null,null,null,null,null,null,host,null);
-                    event = new Event(name, description, null, null, locationstr, Integer.parseInt(pointValue), null, host);
+                    //generating start date in required format
+                  String sd =  generateDate(date,startTime);
+                    //generating end date in required format
+                  String ed =  generateDate(date,endTime);
+
+                     event = new Event(name, description, sd, ed, locationstr, Integer.parseInt(pointValue), null, host);
                 } catch (NullPointerException nullPointerException) {
                     //@TODO show dialog reminding users to fill in all fields
                 } catch (Exception e) {
@@ -112,5 +121,16 @@ ProgressBar progressBar;
             progressBar.setVisibility(View.INVISIBLE);
         });
 
+    }
+
+    private String generateDate(String date, String time) {
+        String tempDate = date + " " + time;
+
+        final SimpleDateFormat sdf =
+                new SimpleDateFormat("EEE, MMM d, yyyy hh:mm:ss a z");
+
+// Give it to me in GMT time.
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        System.out.println("GMT time: " + sdf.format(tempDate));
     }
 }

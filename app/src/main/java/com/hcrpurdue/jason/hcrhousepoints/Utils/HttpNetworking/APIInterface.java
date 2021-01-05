@@ -19,7 +19,7 @@ public interface APIInterface {
 
     @GET("user/auth-rank")
     Call<AuthRank> getAuthRank(@Header("Authorization") String firebaseToken);
-    @GET("events/feed")
+    @GET("event/feed")
     Call<ResponseMessage> getEventFeed(@Header("Authorization") String firebaseToken);
    /* @GET("events/")
     Call<Event> getEventFeed(@Header("Authorization") String firebaseToken);
