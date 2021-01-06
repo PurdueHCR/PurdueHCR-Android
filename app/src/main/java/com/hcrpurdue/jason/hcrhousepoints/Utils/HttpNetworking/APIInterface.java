@@ -1,7 +1,6 @@
 package com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 
@@ -27,8 +26,8 @@ public interface APIInterface {
     @PUT("link/update")
     Call<ResponseMessage> updateLink(@Header("Authorization") String firebaseToken, @Body Map<String, Object> body);
 
-    @POST("events/")
-    Call<Event> createEvent(@Header("Authorization") String firebaseToken, @Body Map<String, Object> body);
+    @POST("event/")
+    Call<ResponseMessage> createEvent(@Header("Authorization") String firebaseToken, @Body Map<String, Object> body);
 
     @POST("link/create")
     Call<ResponseMessage> createLink(@Header("Authorization") String firebaseToken, @Body Map<String, Object> body);

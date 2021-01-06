@@ -121,7 +121,7 @@ public class APIHelper {
         body.put("point_log_id",pointLogId);
         return apiInterface.viewMessages(getFirebaseToken(), body);
     }
-    public Call<Event> postEvent(Event event){
+    public Call<ResponseMessage> postEvent(Event event){
         Map<String, Object> data = new HashMap<>();
         data.put("event", event);
         return apiInterface.createEvent(getFirebaseToken(), data);

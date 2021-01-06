@@ -438,34 +438,7 @@ public class CacheManager {
         this.userCreatedQRCodes = codes;
     }
     //createsEvent
-public void createEvent(Event event, CacheManagementInterface si) {
-        APIHelper.getInstance(context).postEvent(event).enqueue(new Callback<Event>() {
-            @Override
-            public void onResponse(Call<Event> call, Response<Event> response) {
-                System.out.println("RESPONSE BODY: "+response.raw().toString());
-                if(response.isSuccessful()){
-                    System.out.println("Success event created");
-                   // si.onHttpCreateUserSuccess(response.body());
-                  //  si.onGetEvent(response.body().);
-                }
-                else{
-                    try{
-                        System.out.println("GOT Error: "+response.errorBody().string());
-                        si.onHttpError(new ResponseCodeMessage(response.code(), response.errorBody().string()));
-                    }
-                    catch (IOException err){
-                        si.onError(err, context);
-                    }
-                }
-            }
 
-            @Override
-            public void onFailure(Call<Event> call, Throwable t) {
-                si.onError(new Exception(t.getMessage()), context);
-            }
-        });
-
-}
     public void createUser(String firstName, String lastName, String houseCode, CacheManagementInterface si){
         APIHelper.getInstance(context).createUser(firstName,lastName, houseCode).enqueue(new Callback<User>() {
             @Override

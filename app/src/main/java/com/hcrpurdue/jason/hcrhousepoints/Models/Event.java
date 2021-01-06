@@ -7,8 +7,10 @@ public class Event implements Serializable {
 
     private String name;
     private String details;
-    private final Date startDate;
-    private final Date endDate;
+    private String startDateString;
+    private String endDateString;
+    private  Date startDate;
+    private  Date endDate;
     private String location;
     private int point;
     private int pointTypeId;
@@ -42,11 +44,11 @@ public class Event implements Serializable {
         this.floorColors = floorColors;
     }
 //constructor used for creating an Event
-    public Event(String name, String details, Date startDate, Date endDate, String location, int pointTypeId, String[] floorIds, boolean isPublicEvent, boolean isAllFloors,String host) {
+    public Event(String name, String details, String startDateString, String endDateString, String location, int pointTypeId, String[] floorIds, boolean isPublicEvent, boolean isAllFloors,String host) {
         this.name = name;
         this.details = details;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.startDateString= startDateString;
+        this.endDateString = endDateString;
         this.location = location;
         this.pointTypeId = pointTypeId;
         this.floorIds = floorIds;
