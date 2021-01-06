@@ -18,15 +18,14 @@ import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 import java.text.ParseException;
-import java.util.Calendar;
 
 public class createEvent extends AppCompatActivity {
-EditText eventName,location,eventHost,points,eventDescription;
-Spinner floors;
-DatePicker datePicker;
-TimePicker startTimePicker,endTimePicker;
-Button createevent;
-ProgressBar progressBar;
+    EditText eventName, location, eventHost, points, eventDescription;
+    Spinner floors;
+    DatePicker datePicker;
+    TimePicker startTimePicker, endTimePicker;
+    Button createevent;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +75,7 @@ ProgressBar progressBar;
                 if (eventHost.getText().toString().trim().length() == 0) {
                     //@TODO get creators name
                     CacheManager cacheManager = CacheManager.getInstance(getApplicationContext());
-                   host = cacheManager.getUser().getFirstName() + " " + cacheManager.getUser().getLastName();
+                    host = cacheManager.getUser().getFirstName() + " " + cacheManager.getUser().getLastName();
                 } else {
                     host = eventHost.getText().toString().trim();
                 }
@@ -90,7 +89,7 @@ ProgressBar progressBar;
                     pointValue = points.getText().toString().trim();
                     description = eventDescription.getText().toString().trim();
                     floor = floors.toString().trim();
-                        generateDate();
+                    generateDate();
 
                     //generating start date in required format
                     //generating end date in required format
@@ -122,21 +121,44 @@ ProgressBar progressBar;
     }
 
     private String generateDate() throws ParseException {
-
+        StringBuilder sb = new StringBuilder();
         int day = datePicker.getDayOfMonth();
-        int month = datePicker.getMonth();
-        int year =  datePicker.getYear();
-       // Instant instant = new Instant(year,month,day);
+        System.out.println("day: " + day);
+        //adding 1 because months start at 0
+        int month = datePicker.getMonth() + 1;
+        System.out.println("Month: ");
+        System.out.println(month);
+        int year = datePicker.getYear();
+        int hour = startTimePicker.getHour();
+        int minute = startTimePicker.getMinute();
+        sb.append(year).append("-");
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day);
-      //  SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        System.out.println("Fsdf");
-    startTimePicker.
+        if (month < 10) {
+            sb.append("0");
+
+
+
+        }
+        sb.append(month);
+        sb.append("-");
+        if (day < 10) {
+
+            sb.append("0");
+
+        }
+        sb.append(day);
+        sb.append("T");
+        if (hour < 10) {
+            sb.append("0");
+        }
+        sb.append(hour);
+        sb.append(":00:00+4:00");
+        System.out.println(sb.toString());
+
         //System.out.println(df.parse(String.valueOf(calendar.getTimeInMillis())));
-        System.out.println("Time" + calendar.getTime());
-        System.out.println("STring Date: " + calendar.getTime().toString());
+        //  System.out.println("Time" + calendar.getTime());
+        //   System.out.println("STring Date: " + calendar.getTime().toString());
 
-       return calendar.getTime().toString();
+        return sb.toString();
     }
 }

@@ -5,7 +5,7 @@ android {
     defaultConfig {
         vectorDrawables.useSupportLibrary = true
         applicationId "com.hcrpurdue.jason.hcrhousepoints"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 30
         versionCode 47
         versionName "2.1.2"
