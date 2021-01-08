@@ -1,16 +1,15 @@
 package com.hcrpurdue.jason.hcrhousepoints.Models;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class Event implements Serializable {
 
     private String name;
     private String details;
-    private String startDateString;
-    private String endDateString;
-    private  Date startDate;
-    private  Date endDate;
+    private String startDate;
+    private String endDate;
+  //  private  Date startDate;
+   // private  Date endDate;
     private String location;
     private int point;
     private int pointTypeId;
@@ -24,7 +23,7 @@ public class Event implements Serializable {
     private String creatorId;
     private String host;
     private String[] floorColors;
-
+/*
     public Event(String name, String details, Date startDate, Date endDate, String location,
                  int point, int pointTypeId, String pointTypeName, String pointTypeDescription,
                  String[] floorIds, String id, String creatorId, String host, String[] floorColors) {
@@ -42,19 +41,19 @@ public class Event implements Serializable {
         this.creatorId = creatorId;
         this.host = host;
         this.floorColors = floorColors;
-    }
+    }*/
 //constructor used for creating an Event
-    public Event(String name, String details, String startDateString, String endDateString, String location, int pointTypeId, String[] floorIds, boolean isPublicEvent, boolean isAllFloors,String host) {
+    public Event(String name, String details, String startDate, String endDate, String location, int pointTypeId,String[] floorIds, boolean isPublicEvent, boolean isAllFloors,String host) {
         this.name = name;
         this.details = details;
-        this.startDateString= startDateString;
-        this.endDateString = endDateString;
+        this.startDate= startDate;
+        this.endDate = endDate;
         this.location = location;
         this.pointTypeId = pointTypeId;
-        this.floorIds = floorIds;
         this.host = host;
-        this.isAllFloors = isAllFloors;
         this.isPublicEvent = isPublicEvent;
+        this.isAllFloors = isAllFloors;
+        this.floorIds = floorIds;
     }
 
     public String getName() {
@@ -73,13 +72,7 @@ public class Event implements Serializable {
         this.details = details;
     }
 
-    public Date getStartDate() {
-        return startDate;
-    }
 
-    public Date getEndDate() {
-        return endDate;
-    }
 
     public String getLocation() {
         return location;
@@ -175,5 +168,21 @@ public class Event implements Serializable {
 
     public void setAllFloors(boolean allFloors) {
         isAllFloors = allFloors;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
 }

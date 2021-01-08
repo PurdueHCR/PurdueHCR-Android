@@ -49,7 +49,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyHolder> 
         // holder.location.setText("Dfsf");
         //@TODO bind data here
         holder.title.setText(data.getName());
-        holder.timeStamp.setText(data.getStartDate().toString());
+        holder.timeStamp.setText(data.getStartDate());
         holder.location.setText(data.getLocation());
         holder.eventDescription.setText(data.getDetails());
         holder.points.setText(String.valueOf(data.getPoint()));

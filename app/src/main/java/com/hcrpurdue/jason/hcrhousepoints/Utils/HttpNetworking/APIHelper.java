@@ -123,7 +123,8 @@ public class APIHelper {
     }
     public Call<ResponseMessage> postEvent(Event event){
         Map<String, Object> data = new HashMap<>();
-        data.put("event", event);
+        data.put("events", event);
+        System.out.println("key:" + getFirebaseToken());
         return apiInterface.createEvent(getFirebaseToken(), data);
     }
     public  Call<ResponseMessage> getEvents(){

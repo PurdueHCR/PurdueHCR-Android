@@ -108,7 +108,7 @@ public class createEvent extends AppCompatActivity {
                     String actualSD = generateDate(startTimePicker);
                     String actualED = generateDate(endTimePicker);
 
-                     System.out.println("Name:" + name);
+                    System.out.println("Name:" + name);
                     System.out.println("Description:" + description);
                     System.out.println("SD:" + actualSD);
                     System.out.println("ED:" + actualED);
@@ -116,8 +116,10 @@ public class createEvent extends AppCompatActivity {
                     System.out.println("Points:" + Integer.parseInt(pointValue));
                     System.out.println("Floor id:" + floorID[0]);
                     System.out.println("Host:" + host);
-                    event = new Event(name, description,actualSD , actualED, locationstr, Integer.parseInt(pointValue), floorID, false, isAllFloors, host);
-
+                    //event = new Event(name, description, actualSD, actualED, locationstr, Integer.parseInt(pointValue), floorID, false, isAllFloors,host);
+                    String[] flooors = new String[1];
+                    flooors[0] = "2N";
+                        event = new Event("A Very Fun Event","A very fun event by me!","2020-11-08T10:00:00+04:00","2020-11-08T10:00:00+04:00","HCRS 1066",22,flooors,false,false,"The Society");
                     postEvent(event);
                 } catch (NullPointerException nullPointerException) {
                     //@TODO show dialog reminding users to fill in all fields
@@ -138,6 +140,7 @@ public class createEvent extends AppCompatActivity {
             }
         });
     }
+
     private void postEvent(Event event) {
         APIHelper.getInstance(createEvent.this).postEvent(event).enqueue(new Callback<ResponseMessage>() {
             @Override
@@ -156,15 +159,12 @@ public class createEvent extends AppCompatActivity {
 
                 }
             }
+
             @Override
             public void onFailure(Call<ResponseMessage> call, Throwable t) {
 
                 System.out.println("Failure: " + t.getMessage());
             }
-
-
-
-
 
 
         });
