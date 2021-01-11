@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
+import com.hcrpurdue.jason.hcrhousepoints.Models.EventList;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
@@ -23,9 +24,9 @@ public class APIHelper {
     private static APIHelper instance;
     private static Context context;
     private static APIInterface apiInterface;
-    //public static String domain = "http://10.0.2.2:5001/purdue-hcr-test/us-central1/";
-    public static String domain = "https://us-central1-purdue-hcr-test.cloudfunctions.net/";
-   // public static String domain = "https://us-central1-hcr-points.cloudfunctions.net/";
+    public static String domain = "http://10.0.2.2:5001/purdue-hcr-test/us-central1/";
+    //public static String domain = "https://us-central1-purdue-hcr-test.cloudfunctions.net/";
+    //public static String domain = "https://us-central1-hcr-points.cloudfunctions.net/";
 
     APIHelper(Context context){
         APIHelper.context = context;
@@ -54,7 +55,7 @@ public class APIHelper {
 
     public Call<AuthRank> getRank(){
         System.out.println("CALLLING TO GET RANK");
-        return apiInterface.getAuthRank(getFirebaseToken());
+        return apiInterface.getAuthRank(getFirebaseToken(),"application/json");
     }
 
     public Call<ResponseMessage> createLink(String description, int pointTypeId, boolean isSingleUse){
@@ -122,12 +123,10 @@ public class APIHelper {
         return apiInterface.viewMessages(getFirebaseToken(), body);
     }
     public Call<ResponseMessage> postEvent(Event event){
-        Map<String, Object> data = new HashMap<>();
-        data.put("events", event);
-        System.out.println("key:" + getFirebaseToken());
-        return apiInterface.createEvent(getFirebaseToken(), data);
+
+        return apiInterface.createEvent(getFirebaseToken(),"application/json", event);
     }
-    public  Call<ResponseMessage> getEvents(){
+    public  Call<EventList> getEvents(){
         return apiInterface.getEventFeed(getFirebaseToken());
 
 

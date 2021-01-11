@@ -80,7 +80,6 @@ public class createEvent extends AppCompatActivity {
             } else {
                 String host, name, locationstr, pointValue, description, floor, startTime, endTime, date;
                 if (eventHost.getText().toString().trim().length() == 0) {
-                    //@TODO get creators name
                     CacheManager cacheManager = CacheManager.getInstance(getApplicationContext());
                     host = cacheManager.getUser().getFirstName() + " " + cacheManager.getUser().getLastName();
                 } else {
@@ -116,10 +115,10 @@ public class createEvent extends AppCompatActivity {
                     System.out.println("Points:" + Integer.parseInt(pointValue));
                     System.out.println("Floor id:" + floorID[0]);
                     System.out.println("Host:" + host);
-                    //event = new Event(name, description, actualSD, actualED, locationstr, Integer.parseInt(pointValue), floorID, false, isAllFloors,host);
-                    String[] flooors = new String[1];
-                    flooors[0] = "2N";
-                        event = new Event("A Very Fun Event","A very fun event by me!","2020-11-08T10:00:00+04:00","2020-11-08T10:00:00+04:00","HCRS 1066",22,flooors,false,false,"The Society");
+                    event = new Event(name, description, actualSD, actualED, locationstr, Integer.parseInt(pointValue), floorID, false, isAllFloors,host);
+                   // String[] flooors = new String[1];
+                   // flooors[0] = "2N";
+                        //event = new Event("A Very Fun Event","A very fun event by me!","2020-11-08T10:00:00+04:00","2020-11-08T10:00:00+04:00","HCRS 1066",22,flooors,false,false,"The Society");
                     postEvent(event);
                 } catch (NullPointerException nullPointerException) {
                     //@TODO show dialog reminding users to fill in all fields
@@ -206,7 +205,7 @@ public class createEvent extends AppCompatActivity {
 
         }
         sb.append(minute);
-        sb.append(":00+4:00");
+        sb.append(":00+04:00");
         System.out.println(sb.toString());
 
         return sb.toString();

@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
+import com.hcrpurdue.jason.hcrhousepoints.Models.EventList;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
@@ -49,7 +50,7 @@ public class CacheManager {
     private AuthRank userRank = null;
     private Context context;
     private String authToken;
-    private String eventsString;
+    private ResponseMessage eventsString;
     private ArrayList<Event> events;
 
     private CacheManager() {
@@ -767,13 +768,16 @@ public class CacheManager {
         });
     }
     public void getEvents(Context context ){
-        APIHelper.getInstance(context).getEvents().enqueue(new retrofit2.Callback<ResponseMessage>() {
+        APIHelper.getInstance(context).getEvents().enqueue(new retrofit2.Callback<EventList>() {
             @Override
-            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+            public void onResponse(Call<EventList> call, Response<EventList> response) {
+
                 //saves events
-               instance.setEventsString(response.body().getMessage());
-                System.out.println("Body" + response.body().toString());
                 System.out.println("Getting events");
+                System.out.println(response.body().getEvents().size());
+              // instance.setEventsString(response.body().length);
+                System.out.println("Body" + response.body());
+
                 System.out.println(response.message());
                 if(response.isSuccessful()) {
                     System.out.println("Events have successfully been retrieved");
@@ -787,7 +791,7 @@ public class CacheManager {
             }
 
             @Override
-            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+            public void onFailure(Call<EventList> call, Throwable t) {
                 System.out.println("ERROR getting events "+t.getMessage());
 
             }
@@ -832,11 +836,11 @@ public class CacheManager {
         this.rewards = rewards;
     }
 
-    public String getEventsString() {
+    public ResponseMessage getEventsString() {
         return eventsString;
     }
 
-    public void setEventsString(String eventsString) {
+    public void setEventsString(ResponseMessage eventsString) {
         this.eventsString = eventsString;
     }
 

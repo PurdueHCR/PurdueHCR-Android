@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 public class Event implements Serializable {
 
+
+
+    private  int claimedCount;
     private String name;
     private String details;
     private String startDate;
@@ -23,10 +26,10 @@ public class Event implements Serializable {
     private String creatorId;
     private String host;
     private String[] floorColors;
-/*
-    public Event(String name, String details, Date startDate, Date endDate, String location,
+
+    public Event(String name, String details, String startDate, String endDate, String location,
                  int point, int pointTypeId, String pointTypeName, String pointTypeDescription,
-                 String[] floorIds, String id, String creatorId, String host, String[] floorColors) {
+                 String[] floorIds, String id, String creatorId, String host, String[] floorColors,boolean isPublicEvent, int claimedCount) {
         this.name = name;
         this.details = details;
         this.startDate = startDate;
@@ -41,7 +44,9 @@ public class Event implements Serializable {
         this.creatorId = creatorId;
         this.host = host;
         this.floorColors = floorColors;
-    }*/
+        this.isPublicEvent = isPublicEvent;
+        this.claimedCount = claimedCount;
+    }
 //constructor used for creating an Event
     public Event(String name, String details, String startDate, String endDate, String location, int pointTypeId,String[] floorIds, boolean isPublicEvent, boolean isAllFloors,String host) {
         this.name = name;
@@ -184,5 +189,12 @@ public class Event implements Serializable {
 
     public void setEndDate(String endDate) {
         this.endDate = endDate;
+    }
+    public int getClaimedCount() {
+        return claimedCount;
+    }
+
+    public void setClaimedCount(int claimedCount) {
+        this.claimedCount = claimedCount;
     }
 }
