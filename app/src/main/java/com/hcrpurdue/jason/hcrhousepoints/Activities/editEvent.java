@@ -27,8 +27,7 @@ public class editEvent extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //getting intent
-        Event event = (Event) getIntent().getSerializableExtra("event");
+
         setContentView(R.layout.activity_edit_event);
         eventName = findViewById(R.id.event_name_input);
         location = findViewById(R.id.location_input);
@@ -42,6 +41,20 @@ public class editEvent extends AppCompatActivity {
         updateEvent = findViewById(R.id.button);
         progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
+        try {
+            //  //getting intent with Event Object
+            Event event = (Event) getIntent().getSerializableExtra("event");
+            eventDescription.setText(event.getDetails());
+            location.setText(event.getLocation());
+            eventHost.setText(event.getHost());
+            points.setText(event.getPoint());
+            int position = 0;
+
+        }catch (Exception exception) {
+
+
+        }
+
         //setting text below to previous values
         //@TODO set initial values
         /*
@@ -73,8 +86,8 @@ public class editEvent extends AppCompatActivity {
                 builder.show();
 */
                 AlertDialog alertDialog = new AlertDialog.Builder(getApplication()).create();
-                alertDialog.setTitle("Alert");
-                alertDialog.setMessage("Alert message to be shown");
+                alertDialog.setTitle("Error");
+                alertDialog.setMessage("Please fill in all the required fields");
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {

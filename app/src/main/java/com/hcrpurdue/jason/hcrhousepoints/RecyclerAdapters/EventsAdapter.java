@@ -16,6 +16,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 
@@ -50,9 +51,12 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyHolder> 
         //@TODO bind data here
         holder.title.setText(data.getName());
         holder.timeStamp.setText(data.getStartDate());
+        Timestamp timestamp = Timestamp.valueOf(data.getStartDate());
         holder.location.setText(data.getLocation());
         holder.eventDescription.setText(data.getDetails());
+        holder.points.setText(data.getPoint());
         holder.points.setText(String.valueOf(data.getPoint()));
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,6 +84,10 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyHolder> 
 
     @Override
     public int getItemCount() {
+        if (events == null) {
+            return 0;
+        }
+        System.out.println("Size" + events.size());
         return events.size();
        // return events.size();
     }
@@ -104,4 +112,9 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyHolder> 
         }
     }
 
+    public List<Event> getEvents() {
+        return events;
+    }
+
 }
+

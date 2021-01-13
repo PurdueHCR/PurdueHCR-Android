@@ -1,5 +1,6 @@
 package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,24 +19,26 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.hcrpurdue.jason.hcrhousepoints.Activities.createEvent;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
+import com.hcrpurdue.jason.hcrhousepoints.Models.EventList;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.RecyclerAdapters.EventsAdapter;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Objects;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 
 public class Events extends Fragment {
     static private CacheManager cacheManager;
     private FirebaseListenerUtil flu;
     private RecyclerView recyclerView;
-    private final ArrayList<Event> events = new ArrayList<>();
+
+    private ArrayList<Event> events;
 
     public Events() {
         // Required empty public constructor
@@ -52,36 +55,20 @@ public class Events extends Fragment {
         recyclerView = baseView.findViewById(R.id.rvEvents);
     cacheManager = CacheManager.getInstance(getContext());
     //fetches the events from the server and stores the json string in the cacheManager
-    cacheManager.getEvents(getContext());
-    System.out.println(cacheManager.getEventsString());
 
-
-        SimpleDateFormat sdg = new SimpleDateFormat("EEE, MMM d h:mm a");
-        Date date;
-        try {
-           date = sdg.parse("Wed, Jul 4 08:00 PM");
-        } catch (ParseException e) {
-            System.out.println("Date couldn't be formatted");
-            e.printStackTrace();
-            date = null;
-        }
-
-     //   events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
-      //  events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
-       // events.add(new Event("Snack and chat","Free snacks and you can get to know RHPs and other students.",date,null,"Lobby",4,new String[]{"1N","2N"},"Honors Society"));
-
-        // Hiding plus button if permissionlevel is equal to resident
-
-        //shows the menu if the user has a non-resident permisson level
+        //shows the plus button if the user has a non-resident permisson level
         setHasOptionsMenu(!cacheManager.getUser().getPermissionLevel().equals(UserPermissionLevel.RESIDENT));
         retrieveData();
         return baseView;
     }
 
     private void retrieveData() {
-        final EventsAdapter recycler = new EventsAdapter(events);
+
+
+         EventsAdapter recycler = new EventsAdapter(events);
         RecyclerView.LayoutManager layoutmanager = new LinearLayoutManager(getContext());
         //@TODO fetch event data here
+        getEvents(getContext(),recycler);
         recycler.notifyDataSetChanged();
         recyclerView.setLayoutManager(layoutmanager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -126,6 +113,39 @@ public class Events extends Fragment {
        System.out.println(APIHelper.getInstance(getContext()).getEvents());
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Events");
     }
+    public void getEvents(Context context, EventsAdapter eventsAdapter){
+        APIHelper.getInstance(context).getEvents().enqueue(new retrofit2.Callback<EventList>() {
+            @Override
+            public void onResponse(Call<EventList> call, Response<EventList> response) {
+
+                //saves events
+                System.out.println("Getting events");
+                System.out.println(response.body().getEvents().size());
+               setEvents(response.body().getEvents());
+                eventsAdapter.setEvents(response.body().getEvents());
+                eventsAdapter.notifyDataSetChanged();
+
+                System.out.println("Body" + response.body());
+
+                System.out.println(response.message());
+                if(response.isSuccessful()) {
+                    System.out.println("Events have successfully been retrieved");
+                    System.out.println(response.raw());
+
+                }
+                else {
+                    System.out.println(response.code() + ": " + response.message());
+                    //cmi.onError(new Exception(response.code() + ": " + response.message()), context);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<EventList> call, Throwable t) {
+                System.out.println("ERROR getting events "+t.getMessage());
+
+            }
+        });
+    }
 
     private void setUtilities() {
         cacheManager = CacheManager.getInstance(getContext());
@@ -135,5 +155,12 @@ public class Events extends Fragment {
 
     protected int getMenuLayoutId() {
         return R.menu.eventmenu;
+    }
+    public ArrayList<Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(ArrayList<Event> events) {
+        this.events = events;
     }
 }

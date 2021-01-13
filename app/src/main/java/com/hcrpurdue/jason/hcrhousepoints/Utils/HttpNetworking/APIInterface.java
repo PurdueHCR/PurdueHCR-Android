@@ -3,6 +3,7 @@ package com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.Models.EventList;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointTypeList;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 
@@ -23,6 +24,8 @@ public interface APIInterface {
 
     @GET("event/feed")
     Call<EventList> getEventFeed(@Header("Authorization") String firebaseToken);
+    @GET("point_type")
+    Call<PointTypeList> getPointTypes(@Header("Authorization") String firebaseToken, @Header("Content-Type") String contentType);
 
     /* @GET("events/")
      Call<Event> getEventFeed(@Header("Authorization") String firebaseToken);

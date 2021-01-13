@@ -1,19 +1,19 @@
 package com.hcrpurdue.jason.hcrhousepoints.Models;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class EventList {
 
-    private List<Event> events;
+    private ArrayList<Event> events;
 
-    public EventList(List<Event> events) {
+    public EventList(ArrayList<Event> events) {
         this.events = events;
     }
-    public List<Event> getEvents() {
+    public ArrayList<Event> getEvents() {
         return events;
     }
 
-    public void setEvents(List<Event> events) {
+    public void setEvents(ArrayList<Event> events) {
         this.events = events;
     }
 }

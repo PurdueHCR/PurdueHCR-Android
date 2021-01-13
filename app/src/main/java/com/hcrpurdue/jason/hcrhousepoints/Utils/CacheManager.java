@@ -13,6 +13,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointTypeList;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
@@ -51,7 +52,8 @@ public class CacheManager {
     private Context context;
     private String authToken;
     private ResponseMessage eventsString;
-    private ArrayList<Event> events;
+    private ArrayList<PointType> pointTypes;
+   private ArrayList<Event> events;
 
     private CacheManager() {
         // Exists only to defeat instantiation. Get rekt, instantiation
@@ -767,6 +769,7 @@ public class CacheManager {
             }
         });
     }
+    // @TODO need to save event in Cache Manager. API is currently being called from Events class
     public void getEvents(Context context ){
         APIHelper.getInstance(context).getEvents().enqueue(new retrofit2.Callback<EventList>() {
             @Override
@@ -775,7 +778,9 @@ public class CacheManager {
                 //saves events
                 System.out.println("Getting events");
                 System.out.println(response.body().getEvents().size());
-              // instance.setEventsString(response.body().length);
+               instance.setEvents(response.body().getEvents());
+                System.out.println(events.size());
+
                 System.out.println("Body" + response.body());
 
                 System.out.println(response.message());
@@ -794,6 +799,22 @@ public class CacheManager {
             public void onFailure(Call<EventList> call, Throwable t) {
                 System.out.println("ERROR getting events "+t.getMessage());
 
+            }
+        });
+    }
+    public void getPointTypes(Context context) {
+        APIHelper.getInstance(context).getPointTypes().enqueue(new Callback<PointTypeList>() {
+            @Override
+            public void onResponse(Call<PointTypeList> call, Response<PointTypeList> response) {
+                if (response.body().getPointTypes() != null) {
+                    System.out.println("Got point types");
+                    setPointTypes(response.body().getPointTypes());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PointTypeList> call, Throwable t) {
+                System.out.println("Error gettting point types " + t.getMessage());
             }
         });
     }
@@ -850,5 +871,13 @@ public class CacheManager {
 
     public void setEvents(ArrayList<Event> events) {
         this.events = events;
+    }
+
+    public ArrayList<PointType> getPointTypes() {
+        return pointTypes;
+    }
+
+    public void setPointTypes(ArrayList<PointType> pointTypes) {
+        this.pointTypes = pointTypes;
     }
 }

@@ -7,6 +7,7 @@ import com.google.gson.GsonBuilder;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.Models.EventList;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointTypeList;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
@@ -125,6 +126,9 @@ public class APIHelper {
     public Call<ResponseMessage> postEvent(Event event){
 
         return apiInterface.createEvent(getFirebaseToken(),"application/json", event);
+    }
+    public Call<PointTypeList> getPointTypes() {
+        return apiInterface.getPointTypes(getFirebaseToken(),"application/json");
     }
     public  Call<EventList> getEvents(){
         return apiInterface.getEventFeed(getFirebaseToken());
