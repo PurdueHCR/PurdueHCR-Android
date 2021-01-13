@@ -17,6 +17,7 @@ import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 
@@ -50,8 +51,20 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyHolder> 
         // holder.location.setText("Dfsf");
         //@TODO bind data here
         holder.title.setText(data.getName());
+System.out.println(data.getStartDate().substring(0,19));
+String s1 = data.getStartDate().substring(0,10);
+        String s2 = data.getStartDate().substring(11);
+System.out.println(s1);
+        System.out.println(s2);
+s1+=" ";
+s1 += s2;
+
+
+
+        Timestamp timestamp = Timestamp.valueOf(s1);
+        SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+       //String date4 = sfd.format(timestamp);
         holder.timeStamp.setText(data.getStartDate());
-        Timestamp timestamp = Timestamp.valueOf(data.getStartDate());
         holder.location.setText(data.getLocation());
         holder.eventDescription.setText(data.getDetails());
         holder.points.setText(data.getPoint());
