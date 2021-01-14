@@ -13,6 +13,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointTypeList;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
@@ -61,5 +62,5 @@ public interface CacheManagementInterface {
 
     default void onGetRank(AuthRank rank){}
     default void  onGetEvent(ArrayList<Event> events){}
-
+    default void onGetPointTypes(PointTypeList pointTypeList) {}
 }

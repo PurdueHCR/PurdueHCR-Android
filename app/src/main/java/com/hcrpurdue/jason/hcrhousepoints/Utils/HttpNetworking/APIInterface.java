@@ -24,7 +24,7 @@ public interface APIInterface {
 
     @GET("event/feed")
     Call<EventList> getEventFeed(@Header("Authorization") String firebaseToken);
-    @GET("point_type")
+    @GET("point_type/submittable")
     Call<PointTypeList> getPointTypes(@Header("Authorization") String firebaseToken, @Header("Content-Type") String contentType);
 
     /* @GET("events/")

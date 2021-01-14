@@ -802,14 +802,25 @@ public class CacheManager {
             }
         });
     }
-    public void getPointTypes(Context context) {
+    public void getPointTypes(Context context, CacheManagementInterface cacheManagementInterface) {
         APIHelper.getInstance(context).getPointTypes().enqueue(new Callback<PointTypeList>() {
             @Override
             public void onResponse(Call<PointTypeList> call, Response<PointTypeList> response) {
-                if (response.body().getPointTypes() != null) {
-                    System.out.println("Got point types");
-                    setPointTypes(response.body().getPointTypes());
+                try {
+                    System.out.println(response.message());
+                    System.out.println(response.toString());
+                    if (response.isSuccessful()) {
+                        cacheManagementInterface.onGetPointTypes(response.body());
+                        System.out.println(response.body().getPointTypes().size());
+                    }
+                    if (response.body() != null) {
+                        System.out.println("Got point types");
+                        setPointTypes(response.body().getPointTypes());
+                    }
+                } catch (Exception exception) {
+                    exception.printStackTrace();
                 }
+
             }
 
             @Override

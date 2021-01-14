@@ -1,8 +1,10 @@
 package com.hcrpurdue.jason.hcrhousepoints.Activities;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -14,13 +16,17 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointTypeList;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,7 +39,7 @@ public class createEvent extends AppCompatActivity {
     TimePicker startTimePicker, endTimePicker;
     Button createevent;
     ProgressBar progressBar;
-
+    CacheManager cacheManager = CacheManager.getInstance(createEvent.this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +56,8 @@ public class createEvent extends AppCompatActivity {
         createevent = findViewById(R.id.button);
         progressBar = findViewById(R.id.progressBar);
         progressBar.setVisibility(View.INVISIBLE);
+        //fetch point types
+       fetchPointTypes();
         createevent.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
             if (eventName.getText().toString().length() == 0 || location.getText().toString().length() == 0 || eventDescription.getText().toString().length() == 0 || points.getText().toString().length() == 0 || floors.toString().length() == 0) {
@@ -138,6 +146,32 @@ public class createEvent extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void fetchPointTypes() {
+
+
+        cacheManager.getPointTypes(createEvent.this, new CacheManagementInterface() {
+            @Override
+            public void onError(Exception e, Context context) {
+                System.out.println(e.getMessage());
+
+            }
+                    @Override
+                    public void onGetPointTypes(PointTypeList pointTypeList) {
+                        ArrayList < PointType > pointTypes = pointTypeList.getPointTypes();
+                        String[] pointTypeNames = new String[pointTypes.size()];
+                        for (int i = 0; i <pointTypes.size();i++) {
+
+                            pointTypeNames[i] = pointTypes.get(i).getName();
+                        }
+                        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+                                createEvent.this, android.R.layout.simple_spinner_item,pointTypeNames);
+                        floors.setAdapter(spinnerArrayAdapter);
+
+                    }
+                });
+
     }
 
     private void postEvent(Event event) {

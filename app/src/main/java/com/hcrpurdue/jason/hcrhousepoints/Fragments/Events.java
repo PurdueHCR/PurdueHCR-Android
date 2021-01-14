@@ -119,20 +119,18 @@ public class Events extends Fragment {
             public void onResponse(Call<EventList> call, Response<EventList> response) {
 
                 //saves events
-                System.out.println("Getting events");
-                System.out.println(response.body().getEvents().size());
-               setEvents(response.body().getEvents());
-                eventsAdapter.setEvents(response.body().getEvents());
-                eventsAdapter.notifyDataSetChanged();
+                if (response.isSuccessful()) {
+                    System.out.println("Getting events");
+                    System.out.println(response.body().getEvents().size());
+                    setEvents(response.body().getEvents());
+                    eventsAdapter.setEvents(response.body().getEvents());
+                    eventsAdapter.notifyDataSetChanged();
 
-                System.out.println("Body" + response.body());
+                    System.out.println("Body" + response.body());
 
-                System.out.println(response.message());
-                if(response.isSuccessful()) {
-                    System.out.println("Events have successfully been retrieved");
-                    System.out.println(response.raw());
-
+                    System.out.println(response.message());
                 }
+
                 else {
                     System.out.println(response.code() + ": " + response.message());
                     //cmi.onError(new Exception(response.code() + ": " + response.message()), context);
