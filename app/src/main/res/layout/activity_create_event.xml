@@ -55,7 +55,7 @@
                 android:id="@+id/start_time_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/dateINput"
+                android:layout_below="@id/endDatePicker"
                 android:layout_margin="10dp"
                 android:text="Start Time"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
@@ -75,6 +75,31 @@
                 android:hint="TIme"
                 tools:layout_editor_absoluteX="16dp"
                 tools:layout_editor_absoluteY="148dp" />
+            <TextView
+                android:id="@+id/endDateLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/dateINput"
+                android:layout_margin="10dp"
+                android:text="End Date"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="121dp" />
+
+
+            <DatePicker
+                android:id="@+id/endDatePicker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/endDateLabel"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:datePickerMode="spinner"
+                android:ems="10"
+                android:hint="Time"
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="148dp" />
+
 
             <TimePicker
                 android:id="@+id/timePicker"
@@ -132,7 +157,7 @@
                 android:id="@+id/description_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/points_input"
+                android:layout_below="@id/pointsSpinner"
                 android:layout_margin="10dp"
                 android:text="Description"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
@@ -177,22 +202,49 @@
                 tools:layout_editor_absoluteX="16dp"
                 tools:layout_editor_absoluteY="665dp" />
 
-            <Spinner
-                android:id="@+id/houses_list"
-                android:layout_width="379dp"
-                android:layout_height="wrap_content"
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/allFloorsSwitch"
                 android:layout_below="@id/houses_title"
-                android:entries="@array/floorList"
-                android:spinnerMode="dialog"
-                tools:layout_editor_absoluteX="16dp"
-                tools:layout_editor_absoluteY="516dp" />
+                android:text="ALl Floors"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:checked="true"
+                android:layout_margin="10dp"/>
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/myHouseSwitch"
+                android:layout_below="@id/allFloorsSwitch"
+                android:text="My House"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:checked="false"
+                android:layout_margin="10dp"/>
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:layout_margin="10dp"
+                android:id="@+id/myFloorSwitch"
+                android:layout_below="@id/myHouseSwitch"
+                android:text="My Floor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:checked="false"/>
+            <Button
+                android:id="@+id/customButton"
+                android:layout_margin="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/myFloorSwitch"
+               android:text="Custom"
+                />
 
             <TextView
 
                 android:id="@+id/host_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/houses_list"
+                android:layout_below="@id/customButton"
                 android:layout_margin="10dp"
                 android:text="Event Host "
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
@@ -223,16 +275,13 @@
                 tools:layout_editor_absoluteY="913dp" />
 
 
-            <EditText
-                android:id="@+id/points_input"
+            <Spinner
+                android:id="@+id/pointsSpinner"
                 android:layout_width="259dp"
                 android:layout_height="38dp"
                 android:layout_below="@id/points_title"
                 android:layout_margin="10dp"
-                android:layout_weight="1"
                 android:ems="10"
-                android:hint="Enter point value of event"
-                android:inputType="textNoSuggestions"
                 tools:layout_editor_absoluteX="16dp"
                 tools:layout_editor_absoluteY="696dp" />
 
@@ -241,8 +290,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/event_name_input"
-                android:layout_margin="10dp"
-                android:text="Date"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:text="Start Date"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
                 android:textSize="20sp"
                 tools:layout_editor_absoluteX="161dp"

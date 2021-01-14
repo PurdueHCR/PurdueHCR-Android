@@ -13,9 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.createEvent"
-           />
-        <activity android:name=".Activities.editEvent"/>
+        <activity android:name=".Activities.CustomFloorList"></activity>
+        <activity android:name=".Activities.createEvent" />
+        <activity android:name=".Activities.editEvent" />
         <activity
             android:name=".Activities.LaundryTabs"
             android:label="@string/title_activity_laundry_tabs"

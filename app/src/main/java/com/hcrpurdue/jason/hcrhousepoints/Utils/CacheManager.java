@@ -809,6 +809,7 @@ public class CacheManager {
                 try {
                     System.out.println(response.message());
                     System.out.println(response.toString());
+                    System.out.println(response.body());
                     if (response.isSuccessful()) {
                         cacheManagementInterface.onGetPointTypes(response.body());
                         System.out.println(response.body().getPointTypes().size());

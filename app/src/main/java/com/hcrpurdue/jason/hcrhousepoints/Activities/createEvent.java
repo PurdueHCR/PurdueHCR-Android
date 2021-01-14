@@ -1,11 +1,11 @@
 package com.hcrpurdue.jason.hcrhousepoints.Activities;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -15,18 +15,17 @@ import android.widget.TimePicker;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
-import com.hcrpurdue.jason.hcrhousepoints.Models.PointTypeList;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.HttpNetworking.APIHelper;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -34,11 +33,12 @@ import retrofit2.Response;
 
 public class createEvent extends AppCompatActivity {
     EditText eventName, location, eventHost, points, eventDescription;
-    Spinner floors;
-    DatePicker datePicker;
+    Spinner pointTypeSpinner;
+    DatePicker startDatePicker,endDatePicker;
     TimePicker startTimePicker, endTimePicker;
-    Button createevent;
+    Button createevent,customButton;
     ProgressBar progressBar;
+    SwitchMaterial allFloorsSwitch,myHouseSwitch, myFloorSwitch;
     CacheManager cacheManager = CacheManager.getInstance(createEvent.this);
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,20 +47,83 @@ public class createEvent extends AppCompatActivity {
         eventName = findViewById(R.id.event_name_input);
         location = findViewById(R.id.location_input);
         eventHost = findViewById(R.id.hostInput);
-        points = findViewById(R.id.points_input);
+        pointTypeSpinner = findViewById(R.id.pointsSpinner);
+
         eventDescription = findViewById(R.id.description_input);
-        floors = findViewById(R.id.houses_list);
-        datePicker = findViewById(R.id.dateINput);
+
+        startDatePicker = findViewById(R.id.dateINput);
+        endDatePicker = findViewById(R.id.endDatePicker);
+
         startTimePicker = findViewById(R.id.timePicker);
         endTimePicker = findViewById(R.id.endTimePIcker);
+
         createevent = findViewById(R.id.button);
+        customButton = findViewById(R.id.customButton);
+
+
         progressBar = findViewById(R.id.progressBar);
+
+        allFloorsSwitch = findViewById(R.id.allFloorsSwitch);
+        myFloorSwitch = findViewById(R.id.myFloorSwitch);
+        myHouseSwitch = findViewById(R.id.myHouseSwitch);
         progressBar.setVisibility(View.INVISIBLE);
+
         //fetch point types
        fetchPointTypes();
+       myHouseSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    myHouseSwitch.setChecked(false);
+                } else {
+                    myHouseSwitch.setChecked(true);
+                   allFloorsSwitch.setChecked(false);
+                    myFloorSwitch.setChecked(false);
+                    // The toggle is disabled
+                }
+            }
+        });
+        allFloorsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    allFloorsSwitch.setChecked(false);
+                } else {
+                    allFloorsSwitch.setChecked(true);
+                    myHouseSwitch.setChecked(false);
+                    myFloorSwitch.setChecked(false);
+                    // The toggle is disabled
+                }
+            }
+        });
+        myFloorSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    myFloorSwitch.setChecked(false);
+                } else {
+                    myFloorSwitch.setChecked(true);
+                    allFloorsSwitch.setChecked(false);
+                    myHouseSwitch.setChecked(false);
+                    // The toggle is disabled
+                }
+            }
+        });
+
         createevent.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
-            if (eventName.getText().toString().length() == 0 || location.getText().toString().length() == 0 || eventDescription.getText().toString().length() == 0 || points.getText().toString().length() == 0 || floors.toString().length() == 0) {
+            if (!myFloorSwitch.isChecked() && !myHouseSwitch.isChecked() && !allFloorsSwitch.isChecked()) {
+                AlertDialog alertDialog = new AlertDialog.Builder(createEvent.this).create();
+                alertDialog.setTitle("Important");
+                alertDialog.setMessage("Please make sure one of the house switches are on");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+
+                return;
+            }
+            if (eventName.getText().toString().length() == 0 || location.getText().toString().length() == 0 || eventDescription.getText().toString().length() == 0  || floors.toString().length() == 0) {
               /*  AlertDialog.Builder builder;
                 builder = new AlertDialog.Builder(getApplicationContext());
                 //builder.setIcon(R.drawable.open_browser);
@@ -100,9 +163,11 @@ public class createEvent extends AppCompatActivity {
                     name = eventName.getText().toString().trim();
                     locationstr = location.getText().toString().trim();
 
-                    pointValue = points.getText().toString().trim();
+                    pointValue = pointTypeSpinner.getSelectedItem().toString();
                     description = eventDescription.getText().toString().trim();
-                    floor = floors.getSelectedItem().toString();
+                    if (allFloorsSwitch.isChecked()) {
+                        fl
+                    }
 
 
                     boolean isAllFloors = false;
@@ -112,8 +177,8 @@ public class createEvent extends AppCompatActivity {
                     }
                     String[] floorID = {floor};
 
-                    String actualSD = generateDate(startTimePicker);
-                    String actualED = generateDate(endTimePicker);
+                    String actualSD = generateDate(startTimePicker,startDatePicker);
+                    String actualED = generateDate(endTimePicker,endDatePicker);
 
                     System.out.println("Name:" + name);
                     System.out.println("Description:" + description);
@@ -147,30 +212,18 @@ public class createEvent extends AppCompatActivity {
             }
         });
     }
-
+//fetching available point types
     private void fetchPointTypes() {
+        List<PointType> pointTypes = cacheManager.getPointTypeList();
+        String[] pointTypeTitles = new String[pointTypes.size()];
+        for (int i = 0; i< pointTypeTitles.length;i++) {
+            pointTypeTitles[i] = pointTypes.get(i).getName();
+        }
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+                createEvent.this, android.R.layout.simple_spinner_item, pointTypeTitles);
+        pointTypeSpinner.setAdapter(spinnerArrayAdapter);
 
 
-        cacheManager.getPointTypes(createEvent.this, new CacheManagementInterface() {
-            @Override
-            public void onError(Exception e, Context context) {
-                System.out.println(e.getMessage());
-
-            }
-                    @Override
-                    public void onGetPointTypes(PointTypeList pointTypeList) {
-                        ArrayList < PointType > pointTypes = pointTypeList.getPointTypes();
-                        String[] pointTypeNames = new String[pointTypes.size()];
-                        for (int i = 0; i <pointTypes.size();i++) {
-
-                            pointTypeNames[i] = pointTypes.get(i).getName();
-                        }
-                        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-                                createEvent.this, android.R.layout.simple_spinner_item,pointTypeNames);
-                        floors.setAdapter(spinnerArrayAdapter);
-
-                    }
-                });
 
     }
 
@@ -204,7 +257,7 @@ public class createEvent extends AppCompatActivity {
 
     }
 
-    private String generateDate(TimePicker tp) throws ParseException {
+    private String generateDate(TimePicker tp, DatePicker datePicker) throws ParseException {
         StringBuilder sb = new StringBuilder();
         int day = datePicker.getDayOfMonth();
         //adding 1 because months start at 0
