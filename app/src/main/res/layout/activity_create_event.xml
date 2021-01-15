@@ -229,13 +229,23 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:checked="false"/>
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:layout_margin="10dp"
+                android:id="@+id/isPublicSwitch"
+                android:layout_below="@id/myFloorSwitch"
+                android:text="Public Event"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:checked="false"/>
+
             <Button
                 android:id="@+id/customButton"
                 android:layout_margin="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_below="@id/myFloorSwitch"
+                android:layout_below="@id/isPublicSwitch"
                android:text="Custom"
                 />
 

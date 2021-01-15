@@ -28,6 +28,14 @@ public class CustomFloorList extends AppCompatActivity {
         listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_multiple_choice, getResources().getStringArray(R.array.floorList)));
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         listView.setItemsCanFocus(false);
+       // listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+       //     @Override
+       //     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        //        if (listView.isItemChecked(position)) {
+        //            listView.setItemChecked(position,false);
+        //        }
+        //    }
+       // });
 
         back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -35,20 +43,29 @@ public class CustomFloorList extends AppCompatActivity {
                 Intent intent = new Intent(CustomFloorList.this, createEvent.class);
                 SparseBooleanArray checked = listView.getCheckedItemPositions();
                 StringBuilder stringBuilder = new StringBuilder();
+                System.out.println(checked.size());
                 if (checked.size() == 0) {
                     intent.putExtra("floorList", "");
                 } else {
-
+                   String[] floorList= getResources().getStringArray(R.array.floorList);
                     for (int i = 0; i < checked.size(); i++) {
-                        stringBuilder.append(checked.get(i));
-                        stringBuilder.append(",");
+                        if (checked.valueAt(i)) {
+                            stringBuilder.append(floorList[checked.keyAt(i)]);
+                            stringBuilder.append(",");
+                        }
+
 
                     }
-                    stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-                    intent.putExtra("floorList", stringBuilder.toString());
-                    startActivity(intent);
+                    if (stringBuilder.length() > 1) {
+                        stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+                        intent.putExtra("floorList", stringBuilder.toString());
+
+                    }else {
+                        intent.putExtra("floorList", "");
+                    }
 
                 }
+                startActivity(intent);
             }
         });
 

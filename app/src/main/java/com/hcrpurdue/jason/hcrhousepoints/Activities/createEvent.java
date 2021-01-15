@@ -35,13 +35,14 @@ import retrofit2.Response;
 public class createEvent extends AppCompatActivity {
     EditText eventName, location, eventHost, points, eventDescription;
     Spinner pointTypeSpinner;
-    DatePicker startDatePicker,endDatePicker;
+    DatePicker startDatePicker, endDatePicker;
     TimePicker startTimePicker, endTimePicker;
-    Button createevent,customButton;
+    Button createevent, customButton;
     ProgressBar progressBar;
     String customFloorList;
-    SwitchMaterial allFloorsSwitch,myHouseSwitch, myFloorSwitch;
+    SwitchMaterial allFloorsSwitch, myHouseSwitch, myFloorSwitch, isPublicSwitch;
     CacheManager cacheManager = CacheManager.getInstance(createEvent.this);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,41 +69,66 @@ public class createEvent extends AppCompatActivity {
         allFloorsSwitch = findViewById(R.id.allFloorsSwitch);
         myFloorSwitch = findViewById(R.id.myFloorSwitch);
         myHouseSwitch = findViewById(R.id.myHouseSwitch);
+        isPublicSwitch = findViewById(R.id.isPublicSwitch);
+
         progressBar.setVisibility(View.INVISIBLE);
 
         //fetch point types
-       fetchPointTypes();
-       //getting list of floors from CustomFloorlist
-       if (!getIntent().getStringExtra("floorList").equals("")) {
-           customFloorList = getIntent().getStringExtra("floorList");
-       }
-       customButton.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               Intent intent = new Intent(createEvent.this,CustomFloorList.class);
-               startActivity(intent);
-           }
-       });
-       myHouseSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        fetchPointTypes();
+        //getting list of floors from CustomFloorlist
+        if (getIntent().getStringExtra("floorList") != null) {
+            if (!getIntent().getStringExtra("floorList").equals("")) {
+                customFloorList = getIntent().getStringExtra("floorList");
+                System.out.println(customFloorList);
+                allFloorsSwitch.setChecked(false);
+                myFloorSwitch.setChecked(false);
+                myHouseSwitch.setChecked(false);
+                isPublicSwitch.setChecked(false);
+            }
+        }
+        if (savedInstanceState != null) {
+            System.out.println(savedInstanceState.getString("eventName"));
+            eventName.setText(savedInstanceState.getString("eventName"));
+            eventHost.setText(savedInstanceState.getString("host"));
+            eventDescription.setText(savedInstanceState.getString("description"));
+            location.setText(savedInstanceState.getString("location"));
+
+        }
+        customButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(createEvent.this, CustomFloorList.class);
+                startActivity(intent);
+            }
+        });
+        myHouseSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    myHouseSwitch.setChecked(false);
-                } else {
-                    myHouseSwitch.setChecked(true);
-                   allFloorsSwitch.setChecked(false);
-                    myFloorSwitch.setChecked(false);
-                    // The toggle is disabled
+                    if (myHouseSwitch.isChecked()) {
+                        allFloorsSwitch.setChecked(false);
+                        myFloorSwitch.setChecked(false);
+                        isPublicSwitch.setChecked(false);
+
+                        //myHouseSwitch.setChecked(false);
+                    } else {
+                        //myHouseSwitch.setChecked(true);
+
+                        // The toggle is disabled
+                    }
+
                 }
             }
         });
         allFloorsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    allFloorsSwitch.setChecked(false);
-                } else {
-                    allFloorsSwitch.setChecked(true);
+                   /// allFloorsSwitch.setChecked(false);
                     myHouseSwitch.setChecked(false);
                     myFloorSwitch.setChecked(false);
+
+                } else {
+                  //  allFloorsSwitch.setChecked(true);
+
                     // The toggle is disabled
                 }
             }
@@ -110,12 +136,14 @@ public class createEvent extends AppCompatActivity {
         myFloorSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    myFloorSwitch.setChecked(false);
-                } else {
-                    myFloorSwitch.setChecked(true);
+                 //   myFloorSwitch.setChecked(false);
                     allFloorsSwitch.setChecked(false);
                     myHouseSwitch.setChecked(false);
-                    // The toggle is disabled
+                    isPublicSwitch.setChecked(false);
+
+                } else {
+                  //  myFloorSwitch.setChecked(true);
+
                 }
             }
         });
@@ -136,7 +164,7 @@ public class createEvent extends AppCompatActivity {
 
                 return;
             }
-            if (eventName.getText().toString().length() == 0 || location.getText().toString().length() == 0 || eventDescription.getText().toString().length() == 0 ) {
+            if (eventName.getText().toString().length() == 0 || location.getText().toString().length() == 0 || eventDescription.getText().toString().length() == 0) {
               /*  AlertDialog.Builder builder;
                 builder = new AlertDialog.Builder(getApplicationContext());
                 //builder.setIcon(R.drawable.open_browser);
@@ -184,25 +212,70 @@ public class createEvent extends AppCompatActivity {
 
 
                     boolean isAllFloors = false;
-                    String[] floorIDS;
+                    boolean publicEvent = false;
+                    String[] floorIDS = new String[1];
+                    if (isPublicSwitch.isChecked()) {
+                        publicEvent = true;
+
+                    }
                     if (allFloorsSwitch.isChecked()) {
                         floorIDS = new String[1];
                         floorIDS[0] = "All Floors";
+                        isAllFloors = true;
+
 
                     } else if (myHouseSwitch.isChecked()) {
-                       cacheManager.
+                        String houseName = cacheManager.getUser().getHouseName();
+                        floorIDS = new String[2];
+                        switch (houseName) {
+                            case "Copper":
+                                floorIDS[0] = "2N";
+                                floorIDS[1] = "2S";
+                            case "Palladium":
+                                floorIDS[0] = "3N";
+                                floorIDS[1] = "3S";
+                            case "Silver":
+                                floorIDS[0] = "5N";
+                                floorIDS[1] = "5S";
+                            case "Titanium":
+                                floorIDS[0] = "6N";
+                                floorIDS[1] = "6S";
+                            case "Platinum":
+                                floorIDS[0] = "4N";
+                                floorIDS[1] = "4S";
+                        }
+                    } else if (myFloorSwitch.isChecked()) {
+                        floorIDS = new String[1];
+                        floorIDS[0] = cacheManager.getUser().getFloorId();
+
+                    } else {
+                        if (customFloorList == null || customFloorList.equals("")) {
+                            AlertDialog alertDialog = new AlertDialog.Builder(createEvent.this).create();
+                            alertDialog.setTitle("Important");
+                            alertDialog.setMessage("Please make sure one of the house switches are on or you have set a custom list");
+                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                                    new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                        }
+                                    });
+                            alertDialog.show();
+
+
+                        } else {
+                            System.out.println(customFloorList);
+                            floorIDS = customFloorList.split(",");
+
+                        }
                     }
-                    else if (myFloorSwitch.isChecked()) {
+                    //  if (floor.equals("All Floors")) {
+                    //     isAllFloors = true;
 
-                    }
-                  //  if (floor.equals("All Floors")) {
-                   //     isAllFloors = true;
+                    // }
+                    //  String[] floorID = {floor};
 
-                   // }
-                  //  String[] floorID = {floor};
-
-                    String actualSD = generateDate(startTimePicker,startDatePicker);
-                    String actualED = generateDate(endTimePicker,endDatePicker);
+                    String actualSD = generateDate(startTimePicker, startDatePicker);
+                    String actualED = generateDate(endTimePicker, endDatePicker);
 
                     System.out.println("Name:" + name);
                     System.out.println("Description:" + description);
@@ -212,11 +285,11 @@ public class createEvent extends AppCompatActivity {
                     System.out.println("Points:" + Integer.parseInt(pointValue));
                     //System.out.println("Floor id:" + floorID[0]);
                     System.out.println("Host:" + host);
-                 //   event = new Event(name, description, actualSD, actualED, locationstr, Integer.parseInt(pointValue), floorID, false, isAllFloors,host);
-                   // String[] flooors = new String[1];
-                   // flooors[0] = "2N";
-                        //event = new Event("A Very Fun Event","A very fun event by me!","2020-11-08T10:00:00+04:00","2020-11-08T10:00:00+04:00","HCRS 1066",22,flooors,false,false,"The Society");
-                    //postEvent(event);
+                    event = new Event(name, description, actualSD, actualED, locationstr, Integer.parseInt(pointValue), floorIDS, publicEvent, isAllFloors, host);
+                    // String[] flooors = new String[1];
+                    // flooors[0] = "2N";
+                    //event = new Event("A Very Fun Event","A very fun event by me!","2020-11-08T10:00:00+04:00","2020-11-08T10:00:00+04:00","HCRS 1066",22,flooors,false,false,"The Society");
+                    postEvent(event);
                 } catch (NullPointerException nullPointerException) {
                     //@TODO show dialog reminding users to fill in all fields
                 } catch (Exception e) {
@@ -236,17 +309,17 @@ public class createEvent extends AppCompatActivity {
             }
         });
     }
-//fetching available point types
+
+    //fetching available point types
     private void fetchPointTypes() {
         List<PointType> pointTypes = cacheManager.getPointTypeList();
         String[] pointTypeTitles = new String[pointTypes.size()];
-        for (int i = 0; i< pointTypeTitles.length;i++) {
+        for (int i = 0; i < pointTypeTitles.length; i++) {
             pointTypeTitles[i] = pointTypes.get(i).getName();
         }
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
                 createEvent.this, android.R.layout.simple_spinner_item, pointTypeTitles);
         pointTypeSpinner.setAdapter(spinnerArrayAdapter);
-
 
 
     }
@@ -320,5 +393,16 @@ public class createEvent extends AppCompatActivity {
         System.out.println(sb.toString());
 
         return sb.toString();
+    }
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        savedInstanceState.putString("eventName", eventName.getText().toString());
+        savedInstanceState.putString("host", eventHost.getText().toString());
+        savedInstanceState.putString("location", location.getText().toString());
+        savedInstanceState.putString("description", eventDescription.getText().toString());
+        super.onSaveInstanceState(savedInstanceState);
+        //@TODO save data from pickers
+
     }
 }
