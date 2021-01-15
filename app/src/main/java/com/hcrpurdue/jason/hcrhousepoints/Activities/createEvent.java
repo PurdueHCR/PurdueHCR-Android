@@ -1,6 +1,7 @@
 package com.hcrpurdue.jason.hcrhousepoints.Activities;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -38,6 +39,7 @@ public class createEvent extends AppCompatActivity {
     TimePicker startTimePicker, endTimePicker;
     Button createevent,customButton;
     ProgressBar progressBar;
+    String customFloorList;
     SwitchMaterial allFloorsSwitch,myHouseSwitch, myFloorSwitch;
     CacheManager cacheManager = CacheManager.getInstance(createEvent.this);
     @Override
@@ -70,6 +72,17 @@ public class createEvent extends AppCompatActivity {
 
         //fetch point types
        fetchPointTypes();
+       //getting list of floors from CustomFloorlist
+       if (!getIntent().getStringExtra("floorList").equals("")) {
+           customFloorList = getIntent().getStringExtra("floorList");
+       }
+       customButton.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               Intent intent = new Intent(createEvent.this,CustomFloorList.class);
+               startActivity(intent);
+           }
+       });
        myHouseSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
@@ -109,10 +122,10 @@ public class createEvent extends AppCompatActivity {
 
         createevent.setOnClickListener(v -> {
             progressBar.setVisibility(View.VISIBLE);
-            if (!myFloorSwitch.isChecked() && !myHouseSwitch.isChecked() && !allFloorsSwitch.isChecked()) {
+            if (!myFloorSwitch.isChecked() && !myHouseSwitch.isChecked() && !allFloorsSwitch.isChecked() && customFloorList == null) {
                 AlertDialog alertDialog = new AlertDialog.Builder(createEvent.this).create();
                 alertDialog.setTitle("Important");
-                alertDialog.setMessage("Please make sure one of the house switches are on");
+                alertDialog.setMessage("Please make sure one of the house switches are on or you have set a custom list");
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -123,7 +136,7 @@ public class createEvent extends AppCompatActivity {
 
                 return;
             }
-            if (eventName.getText().toString().length() == 0 || location.getText().toString().length() == 0 || eventDescription.getText().toString().length() == 0  || floors.toString().length() == 0) {
+            if (eventName.getText().toString().length() == 0 || location.getText().toString().length() == 0 || eventDescription.getText().toString().length() == 0 ) {
               /*  AlertDialog.Builder builder;
                 builder = new AlertDialog.Builder(getApplicationContext());
                 //builder.setIcon(R.drawable.open_browser);
@@ -166,16 +179,27 @@ public class createEvent extends AppCompatActivity {
                     pointValue = pointTypeSpinner.getSelectedItem().toString();
                     description = eventDescription.getText().toString().trim();
                     if (allFloorsSwitch.isChecked()) {
-                        fl
+
                     }
 
 
                     boolean isAllFloors = false;
-                    if (floor.equals("All Floors")) {
-                        isAllFloors = true;
+                    String[] floorIDS;
+                    if (allFloorsSwitch.isChecked()) {
+                        floorIDS = new String[1];
+                        floorIDS[0] = "All Floors";
+
+                    } else if (myHouseSwitch.isChecked()) {
+                       cacheManager.
+                    }
+                    else if (myFloorSwitch.isChecked()) {
 
                     }
-                    String[] floorID = {floor};
+                  //  if (floor.equals("All Floors")) {
+                   //     isAllFloors = true;
+
+                   // }
+                  //  String[] floorID = {floor};
 
                     String actualSD = generateDate(startTimePicker,startDatePicker);
                     String actualED = generateDate(endTimePicker,endDatePicker);
@@ -186,13 +210,13 @@ public class createEvent extends AppCompatActivity {
                     System.out.println("ED:" + actualED);
                     System.out.println("Location:" + locationstr);
                     System.out.println("Points:" + Integer.parseInt(pointValue));
-                    System.out.println("Floor id:" + floorID[0]);
+                    //System.out.println("Floor id:" + floorID[0]);
                     System.out.println("Host:" + host);
-                    event = new Event(name, description, actualSD, actualED, locationstr, Integer.parseInt(pointValue), floorID, false, isAllFloors,host);
+                 //   event = new Event(name, description, actualSD, actualED, locationstr, Integer.parseInt(pointValue), floorID, false, isAllFloors,host);
                    // String[] flooors = new String[1];
                    // flooors[0] = "2N";
                         //event = new Event("A Very Fun Event","A very fun event by me!","2020-11-08T10:00:00+04:00","2020-11-08T10:00:00+04:00","HCRS 1066",22,flooors,false,false,"The Society");
-                    postEvent(event);
+                    //postEvent(event);
                 } catch (NullPointerException nullPointerException) {
                     //@TODO show dialog reminding users to fill in all fields
                 } catch (Exception e) {
