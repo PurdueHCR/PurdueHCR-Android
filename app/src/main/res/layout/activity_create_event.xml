@@ -278,9 +278,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/description_input"
-                android:layout_margin="10dp"
                 android:layout_centerHorizontal="true"
-                android:text="Create Event"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:text="Update Event"
                 tools:layout_editor_absoluteX="134dp"
                 tools:layout_editor_absoluteY="913dp" />
 
@@ -309,6 +312,14 @@
                 android:textSize="20sp"
                 tools:layout_editor_absoluteX="161dp"
                 tools:layout_editor_absoluteY="135dp" />
+            <Button
+                android:id="@+id/deleteButton"
+                android:layout_below="@id/button"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete Event"/>
 
         </RelativeLayout>
     </ScrollView>

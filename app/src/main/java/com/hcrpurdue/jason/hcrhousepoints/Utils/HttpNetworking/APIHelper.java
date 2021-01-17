@@ -127,6 +127,10 @@ public class APIHelper {
 
         return apiInterface.createEvent(getFirebaseToken(),"application/json", event);
     }
+    public Call<ResponseMessage> updateEvent(Event event){
+
+        return apiInterface.updateEvent(getFirebaseToken(),"application/json", event);
+    }
     public Call<PointTypeList> getPointTypes() {
         return apiInterface.getPointTypes(getFirebaseToken(),"application/json");
     }

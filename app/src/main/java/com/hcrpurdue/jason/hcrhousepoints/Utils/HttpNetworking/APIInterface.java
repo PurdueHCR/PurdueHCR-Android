@@ -37,6 +37,9 @@ public interface APIInterface {
     @POST("event")
     Call<ResponseMessage> createEvent(@Header("Authorization")  String firebaseToken,@Header("Content-Type") String contentType, @Body Event event);
 
+    @PUT("event")
+    Call<ResponseMessage> updateEvent(@Header("Authorization")  String firebaseToken,@Header("Content-Type") String contentType, @Body Event event);
+
     @POST("link/create")
     Call<ResponseMessage> createLink(@Header("Authorization") String firebaseToken, @Body Map<String, Object> body);
 

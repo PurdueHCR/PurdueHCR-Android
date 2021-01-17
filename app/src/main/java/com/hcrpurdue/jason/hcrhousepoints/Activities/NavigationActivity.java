@@ -11,23 +11,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.ListFragment;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,10 +21,23 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.Events;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
@@ -50,20 +46,18 @@ import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointApprovalFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointTypeListFragment;
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.RHPProfileFragment;
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.ResidentProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCodeListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCreationFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRScannerFragment;
-
-import java.util.Objects;
-
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.RHPProfileFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.ResidentProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.SubmitPointsFragment;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
+
+import java.util.Objects;
 
 public class NavigationActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
@@ -268,8 +262,8 @@ public class NavigationActivity extends AppCompatActivity {
                 case PRIVILEGED_RESIDENT: //privileged Resident Case
                     menu.findItem(R.id.nav_qr_code_list).setVisible(true);
                     break;
-                case FHP:;//Facility Member
-                case PROFESSIONAL_STAFF:;//Professional Staff
+                case FHP://Facility Member
+                case PROFESSIONAL_STAFF://Professional Staff
                 case RHP://RHP
                     menu.findItem(R.id.nav_approve_point).setVisible(true);
                     menu.findItem(R.id.nav_point_history).setVisible(true);
@@ -303,7 +297,7 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == 10) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 try {
@@ -341,7 +335,7 @@ public class NavigationActivity extends AppCompatActivity {
      * Used when a task is successful to display to the user that it is a success
      */
     public void animateSuccess() {
-        LinearLayout successLayout = findViewById(R.id.success_layout);
+        RelativeLayout successLayout = findViewById(R.id.success_layout);
         Animation showAnim = new AlphaAnimation(0.0f, 1.0f);
         showAnim.setDuration(1000);
         showAnim.setInterpolator(new DecelerateInterpolator());

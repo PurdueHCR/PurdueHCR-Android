@@ -13,6 +13,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Activities.DetailedEventViewActivity;
 import com.hcrpurdue.jason.hcrhousepoints.Activities.editEvent;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PassEvent;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
@@ -76,6 +77,7 @@ System.out.println(s1);
         Timestamp timestamp = Timestamp.valueOf(s1);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(timestamp);
+        int month = calendar.get(Calendar.MONTH);
         int dayOFMonth = calendar.get(Calendar.DAY_OF_MONTH);
         int  hour =  calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
@@ -83,8 +85,9 @@ System.out.println(s1);
         Timestamp timestamp2 = Timestamp.valueOf(s3);
         Calendar calendar2 = Calendar.getInstance();
         calendar2.setTime(timestamp2);
+        int month2 = calendar.get(Calendar.MONTH);
         int dayOFMonth2 = calendar2.get(Calendar.DAY_OF_MONTH);
-        int  hour2 =  calendar2.get(Calendar.HOUR_OF_DAY);
+       int  hour2 =  calendar2.get(Calendar.HOUR_OF_DAY);
         int minute2 = calendar2.get(Calendar.MINUTE);
 
         SimpleDateFormat sfd = new SimpleDateFormat("EEE, MMM d");
@@ -135,6 +138,7 @@ System.out.println(s1);
         holder.location.setText(data.getLocation());
         holder.eventDescription.setText(data.getDetails());
         //holder.points.setText(data.getPoint());
+        System.out.println("Point value" + data.getPoint());
         holder.points.setText(String.valueOf(data.getPoint()));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -147,12 +151,14 @@ System.out.println(s1);
         });
        //long cick(hold) for editing only works if the user is a priviledged residert or higher
         if (!cacheManager.getUser().getPermissionLevel().equals(UserPermissionLevel.RESIDENT)) {
+            int finalHour = hour;
+            int finalHour1 = hour2;
             holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
                     //@TODO launch edit event pages
                     Intent intent = new Intent(view.getContext(), editEvent.class);
-                    intent.putExtra("event", data);
+                    intent.putExtra("event", new PassEvent(data.getName(),data.getHost(),data.getDetails(),data.getLocation(),data.getPointTypeName(),String.valueOf(month),String.valueOf(dayOFMonth), String.valueOf(finalHour),String.valueOf(minute),String.valueOf(month2),String.valueOf(dayOFMonth2), String.valueOf(finalHour1),String.valueOf(minute2),data.getFloorIds(),data.isPublicEvent(),data.getId()));
 
                     view.getContext().startActivity(intent);
                     return true;// returning true instead of false, works for me
