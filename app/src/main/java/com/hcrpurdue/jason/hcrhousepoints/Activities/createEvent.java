@@ -190,7 +190,7 @@ public class createEvent extends AppCompatActivity {
 
 
             } else {
-                String host, name, locationstr, pointValue, description, floor, startTime, endTime, date;
+                String host, name, locationstr, pointTypeName, description, floor, startTime, endTime, date;
                 if (eventHost.getText().toString().trim().length() == 0) {
                     CacheManager cacheManager = CacheManager.getInstance(getApplicationContext());
                     host = cacheManager.getUser().getFirstName() + " " + cacheManager.getUser().getLastName();
@@ -204,7 +204,7 @@ public class createEvent extends AppCompatActivity {
                     name = eventName.getText().toString().trim();
                     locationstr = location.getText().toString().trim();
 
-                    pointValue = pointTypeSpinner.getSelectedItem().toString();
+                    pointTypeName = pointTypeSpinner.getSelectedItem().toString();
                     description = eventDescription.getText().toString().trim();
                     if (allFloorsSwitch.isChecked()) {
 
@@ -282,10 +282,10 @@ public class createEvent extends AppCompatActivity {
                     System.out.println("SD:" + actualSD);
                     System.out.println("ED:" + actualED);
                     System.out.println("Location:" + locationstr);
-                    System.out.println("Points:" + Integer.parseInt(pointValue));
+                    System.out.println("Points:" + fetchPointValue(pointTypeName));
                     //System.out.println("Floor id:" + floorID[0]);
                     System.out.println("Host:" + host);
-                    event = new Event(name, description, actualSD, actualED, locationstr, Integer.parseInt(pointValue), floorIDS, publicEvent, isAllFloors, host);
+                    event = new Event(name, description, actualSD, actualED, locationstr, fetchPointValue(pointTypeName), floorIDS, publicEvent, isAllFloors, host);
                     // String[] flooors = new String[1];
                     // flooors[0] = "2N";
                     //event = new Event("A Very Fun Event","A very fun event by me!","2020-11-08T10:00:00+04:00","2020-11-08T10:00:00+04:00","HCRS 1066",22,flooors,false,false,"The Society");
@@ -323,6 +323,18 @@ public class createEvent extends AppCompatActivity {
 
 
     }
+    private int fetchPointValue(String pointTypeName) {
+        List<PointType> pointTypes = cacheManager.getPointTypeList();
+        for (PointType pointType: pointTypes) {
+            if (pointType.getName().equals(pointTypeName)) {
+                return pointType.getValue();
+
+            }
+
+        }
+        return 0;
+
+    }
 
     private void postEvent(Event event) {
         APIHelper.getInstance(createEvent.this).postEvent(event).enqueue(new Callback<ResponseMessage>() {
@@ -331,8 +343,29 @@ public class createEvent extends AppCompatActivity {
                 System.out.println("Event Posted: " + response.code());
                 if (response.isSuccessful()) {
                     System.out.println(" GOT RESPONSE: " + response.body().getMessage());
+                    AlertDialog alertDialog = new AlertDialog.Builder(createEvent.this).create();
+                    alertDialog.setTitle("Success");
+                    alertDialog.setMessage("You have successfully created an event!");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.show();
+
 
                 } else {
+                    AlertDialog alertDialog = new AlertDialog.Builder(createEvent.this).create();
+                    alertDialog.setTitle("Error");
+                    alertDialog.setMessage("There was a problem creating the event. Please make sure all the fields are filled out correctly and try again.");
+                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+                    alertDialog.show();
                     try {
                         System.out.println("GOT Error: " + response.errorBody().string());
                     } catch (IOException err) {

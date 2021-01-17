@@ -9,6 +9,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -37,6 +38,9 @@ public class Events extends Fragment {
     static private CacheManager cacheManager;
     private FirebaseListenerUtil flu;
     private RecyclerView recyclerView;
+    private EventsAdapter eventsAdapter;
+    private ProgressBar progressBar;
+
 
     private ArrayList<Event> events;
 
@@ -44,6 +48,11 @@ public class Events extends Fragment {
         // Required empty public constructor
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+       getEvents(getContext(),eventsAdapter);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -53,6 +62,7 @@ public class Events extends Fragment {
         View baseView = inflater.inflate(R.layout.fragment_events, container, false);
         setUtilities();
         recyclerView = baseView.findViewById(R.id.rvEvents);
+        progressBar = baseView.findViewById(R.id.progressBar2);
     cacheManager = CacheManager.getInstance(getContext());
     //fetches the events from the server and stores the json string in the cacheManager
 
@@ -65,14 +75,14 @@ public class Events extends Fragment {
     private void retrieveData() {
 
 
-         EventsAdapter recycler = new EventsAdapter(events);
+         eventsAdapter = new EventsAdapter(events);
         RecyclerView.LayoutManager layoutmanager = new LinearLayoutManager(getContext());
         //@TODO fetch event data here
-        getEvents(getContext(),recycler);
-        recycler.notifyDataSetChanged();
+        getEvents(getContext(),eventsAdapter);
+        eventsAdapter.notifyDataSetChanged();
         recyclerView.setLayoutManager(layoutmanager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(recycler);
+        recyclerView.setAdapter(eventsAdapter);
     }
 
     //  @Override
@@ -114,12 +124,14 @@ public class Events extends Fragment {
         Objects.requireNonNull(activity.getSupportActionBar()).setTitle("Events");
     }
     public void getEvents(Context context, EventsAdapter eventsAdapter){
+        progressBar.setVisibility(View.VISIBLE);
         APIHelper.getInstance(context).getEvents().enqueue(new retrofit2.Callback<EventList>() {
             @Override
             public void onResponse(Call<EventList> call, Response<EventList> response) {
 
                 //saves events
                 if (response.isSuccessful()) {
+                    progressBar.setVisibility(View.INVISIBLE);
                     System.out.println("Getting events");
                     System.out.println(response.body().getEvents().size());
                     setEvents(response.body().getEvents());

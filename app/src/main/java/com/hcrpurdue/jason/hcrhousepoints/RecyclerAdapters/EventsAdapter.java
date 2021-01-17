@@ -61,26 +61,45 @@ s1+=" ";
 s1 += s2;
 
 System.out.println(s1);
+        //parsing end date and getting required information
+        String s3 = data.getEndDate().substring(0,10);
+        String s4 = data.getEndDate().substring(11,19);
 
-            StringBuilder sb = new StringBuilder();
+        s3+=" ";
+        s3 += s4;
+
+        System.out.println(s3);
+
+
+        StringBuilder sb = new StringBuilder();
         //creating timestamp for start date
         Timestamp timestamp = Timestamp.valueOf(s1);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(timestamp);
+        int dayOFMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        int  hour =  calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
         //creating timestamp for end date
-        Timestamp timestamp2 = Timestamp.valueOf(s1);
+        Timestamp timestamp2 = Timestamp.valueOf(s3);
         Calendar calendar2 = Calendar.getInstance();
         calendar2.setTime(timestamp2);
+        int dayOFMonth2 = calendar2.get(Calendar.DAY_OF_MONTH);
+        int  hour2 =  calendar2.get(Calendar.HOUR_OF_DAY);
+        int minute2 = calendar2.get(Calendar.MINUTE);
 
         SimpleDateFormat sfd = new SimpleDateFormat("EEE, MMM d");
         String date4 = sfd.format(timestamp);
-
-        if (calendar.get(Calendar.DAY_OF_MONTH) != calendar2.get(Calendar.DAY_OF_MONTH)) {
+            System.out.println(calendar.get(Calendar.DAY_OF_MONTH));
+            System.out.println(calendar2.get(Calendar.DAY_OF_MONTH));
+            sb.append(date4);
+        if (dayOFMonth != dayOFMonth2) {
             sb.append(" to ");
             sb.append(sfd.format(timestamp2));
-        }  sb.append(date4).append(" from ");
-        int  hour =  calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
+            sb.append(" ");
+        }  else {
+            sb.append(" from ");
+        }
+
         if (hour>12) {
 
             hour-=12;
@@ -91,18 +110,9 @@ System.out.println(s1);
        }
        sb.append(minute);
        sb.append("-");
-       //parsing end date and getting required information
-        String s3 = data.getEndDate().substring(0,10);
-        String s4 = data.getEndDate().substring(11,19);
-
-        s3+=" ";
-        s3 += s4;
-
-        System.out.println(s3);
 
 
-        int  hour2 =  calendar.get(Calendar.HOUR_OF_DAY);
-        int minute2 = calendar.get(Calendar.MINUTE);
+
         String ampm = "AM";
         if (hour2>12) {
             ampm = "PM";
