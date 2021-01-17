@@ -184,6 +184,7 @@ public class createEvent extends AppCompatActivity {
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
+                                progressBar.setVisibility(View.INVISIBLE);
                             }
                         });
                 alertDialog.show();
@@ -257,6 +258,7 @@ public class createEvent extends AppCompatActivity {
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int which) {
                                             dialog.dismiss();
+                                            progressBar.setVisibility(View.INVISIBLE);
                                         }
                                     });
                             alertDialog.show();
@@ -300,6 +302,7 @@ public class createEvent extends AppCompatActivity {
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
+                                    progressBar.setVisibility(View.INVISIBLE);
                                 }
                             });
                     alertDialog.show();
@@ -337,6 +340,7 @@ public class createEvent extends AppCompatActivity {
     }
 
     private void postEvent(Event event) {
+        progressBar.setVisibility(View.VISIBLE);
         APIHelper.getInstance(createEvent.this).postEvent(event).enqueue(new Callback<ResponseMessage>() {
             @Override
             public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
