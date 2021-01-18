@@ -19,23 +19,8 @@
             android:textAllCaps="false"
             android:textColor="@color/black"
             android:textSize="@dimen/dp_40"
-            android:textStyle="bold"/>
-
-        <CheckBox
-
-            android:id="@+id/going"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignEnd="@id/title"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="12dp"
-            android:text="@string/goingyn"
-            android:textAlignment="center">
-
-        </CheckBox>
+            android:textStyle="bold"
+            android:layout_centerHorizontal="true"/>
 
 
         <TextView
@@ -58,7 +43,7 @@
             android:id="@+id/time_header"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_below="@id/going"
+            android:layout_below="@id/title"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="12dp"
             android:layout_marginTop="4dp"
@@ -163,46 +148,17 @@
             android:textAlignment="center"
             android:textSize="18sp" />
 
-    <TextView
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/host_actual"
-        android:id="@+id/attendees_header"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
 
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="4dp"
-        android:text="ATTENDEES"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/attendees_actual"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_below="@id/attendees_header"
-            android:layout_centerHorizontal="true"
-            android:layout_marginStart="12dp"
-
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginBottom="4dp"
-            android:text="attend_placeholder"
-            android:textAlignment="center"
-            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/details_header"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_below="@id/attendees_actual"
+            android:layout_width="81dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/host_actual"
             android:layout_centerHorizontal="true"
 
             android:layout_marginStart="12dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="12dp"
             android:layout_marginBottom="4dp"
             android:text="DETAILS"

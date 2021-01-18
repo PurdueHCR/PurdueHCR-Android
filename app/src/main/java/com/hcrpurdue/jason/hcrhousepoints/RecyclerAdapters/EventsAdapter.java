@@ -141,11 +141,15 @@ System.out.println(s1);
         System.out.println("Point value" + data.getPoint());
         holder.points.setText(String.valueOf(data.getPoint()));
 
+        int ifinalHour2 = hour2;
+        int ifinalHour1 = hour;
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent2 = new Intent(v.getContext(), DetailedEventViewActivity.class);
-                intent2.putExtra("EVENT",data);
+
+                intent2.putExtra("EVENT",new PassEvent(data.getName(),data.getHost(),data.getDetails(),data.getLocation(),data.getPoint(),data.getStartDate(),data.getEndDate(),String.valueOf(month+1),String.valueOf(dayOFMonth), String.valueOf(ifinalHour1),String.valueOf(minute),String.valueOf(month2+1),String.valueOf(dayOFMonth2), String.valueOf(ifinalHour2),String.valueOf(minute2),data.getFloorIds(),data.isPublicEvent(),data.getId()));
+
                 v.getContext().startActivity(intent2);
             }
         });
@@ -158,7 +162,7 @@ System.out.println(s1);
                 public boolean onLongClick(View view) {
                     //@TODO launch edit event pages
                     Intent intent = new Intent(view.getContext(), editEvent.class);
-                    intent.putExtra("event", new PassEvent(data.getName(),data.getHost(),data.getDetails(),data.getLocation(),data.getPointTypeName(),String.valueOf(month),String.valueOf(dayOFMonth), String.valueOf(finalHour),String.valueOf(minute),String.valueOf(month2),String.valueOf(dayOFMonth2), String.valueOf(finalHour1),String.valueOf(minute2),data.getFloorIds(),data.isPublicEvent(),data.getId()));
+                    intent.putExtra("event", new PassEvent(data.getName(),data.getHost(),data.getDetails(),data.getLocation(),data.getPointTypeName(),data.getStartDate(), data.getEndDate(),String.valueOf(month),String.valueOf(dayOFMonth), String.valueOf(finalHour),String.valueOf(minute),String.valueOf(month2),String.valueOf(dayOFMonth2), String.valueOf(finalHour1),String.valueOf(minute2),data.getFloorIds(),data.isPublicEvent(),data.getId()));
 
                     view.getContext().startActivity(intent);
                     return true;// returning true instead of false, works for me

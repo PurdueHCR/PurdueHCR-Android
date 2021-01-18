@@ -10,18 +10,18 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.Events;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PassEvent;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
-import java.text.ParseException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
 
 public class DetailedEventViewActivity extends AppCompatActivity {
 
     private TextView date;
     private TextView time;
-    private TextView attendees;
+    private TextView title;
     private TextView location;
     private TextView host;
     private TextView details;
@@ -32,39 +32,39 @@ public class DetailedEventViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detailed_event_view);
-
+title = findViewById(R.id.title);
         date = findViewById(R.id.date_actual);
         time = findViewById(R.id.time_actual);
-        attendees = findViewById(R.id.attendees_actual);
+
         location = findViewById(R.id.loc_actual);
         host = findViewById(R.id.host_actual);
         details = findViewById(R.id.details_actual);
-        going = findViewById(R.id.going);
+
         gcExport = findViewById(R.id.gcexport);
-        Event event;
+        PassEvent event;
+        event = (PassEvent) getIntent().getSerializableExtra("EVENT");
         try {
 
 System.out.println("Execute");
 
-            event = (Event) getIntent().getSerializableExtra("EVENT");
+
             System.out.println("Event passed successfully");
+            title.setText(event.getEventName());
+            date.setText(event.getStartDateMonth() +"-" + event.getStartDateDay() + " to " +event.getEndDateMonth() + "-" + event.getEndDateDay());
+            time.setText(event.getStartDateHour() + ":" + event.getStartDateMinute() +"-" + event.getEndDateHour() + ":"+ event.getEndDateMinute());
             location.setText(event.getLocation());
             host.setText(event.getHost());
-            details.setText("fdsjfdslkfjlkjfglkdjga;klf;jg;oufijgheriujvgriojdifjdslkfjlkgjfk;gjdflkgjfdklgjfdlg;jaklg;");
+            details.setText(event.getDescription());
 
             SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
 
 
-                Date date2 = format.parse(event.getStartDate());
-                System.out.println(date2.toString());
+
            // Calendar calendar = Calendar.getInstance();
           //  calendar.setTime(date2);
 
             }
-        catch (ParseException parseException){
-            System.out.println("Error");
-            parseException.printStackTrace();
-        }
+
         catch (Exception e) {
             event = null;
             System.out.println("Error passing event");
@@ -74,10 +74,34 @@ System.out.println("Execute");
         }
 
 
+        PassEvent finalEvent = event;
         gcExport.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //code to export to google calendar
+                Calendar cal = Calendar.getInstance();
+                String s1 = finalEvent.getStartDate().substring(0,10);
+                String s2 = finalEvent.getStartDate().substring(11,19);
+                System.out.println(s1);
+                System.out.println(s2);
+                s1+=" ";
+                s1 += s2;
+                Timestamp timestamp = Timestamp.valueOf(s1);
+                cal.setTime(timestamp);
+                Intent intent = new Intent(Intent.ACTION_EDIT);
+                intent.setType("vnd.android.cursor.item/event");
+                intent.putExtra("beginTime", cal.getTimeInMillis());
+
+
+                String s3 = finalEvent.getEndDate().substring(0,10);
+                String s4 = finalEvent.getEndDate().substring(11,19);
+
+                s3+=" ";
+                s3 += s4;
+                Timestamp timestamp2 = Timestamp.valueOf(s3);
+                cal.setTime(timestamp2);
+                intent.putExtra("endTime", cal.getTimeInMillis());
+                intent.putExtra("title", finalEvent.getEventName());
+                startActivity(intent);
             }
         });
     }

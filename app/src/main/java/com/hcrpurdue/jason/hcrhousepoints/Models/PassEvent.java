@@ -6,7 +6,10 @@ public class PassEvent implements Serializable {
     String eventName;
     String description;
     String location;
+    int pointValue;
     String pointTypeTitle;
+    String startDate;
+    String endDate;
     String startDateMonth;
     String startDateDay;
     String startDateHour;
@@ -20,11 +23,34 @@ public class PassEvent implements Serializable {
     boolean publicEvent;
     String id;
 
-    public PassEvent(String eventName,String host, String description, String location, String pointTypeTitle, String startDateMonth, String startDateDay, String startDateHour, String startDateMinute, String endDateMonth, String endDateDay, String endDateHour, String endDateMinute, String[] floorIDs, boolean publicEvent, String id) {
+    public PassEvent(String eventName, String host, String description, String location, String pointTypeTitle, String startDate, String endDate, String startDateMonth, String startDateDay, String startDateHour, String startDateMinute, String endDateMonth, String endDateDay, String endDateHour, String endDateMinute, String[] floorIDs, boolean publicEvent, String id) {
         this.eventName = eventName;
+        this.host = host;
         this.description = description;
         this.location = location;
         this.pointTypeTitle = pointTypeTitle;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.startDateMonth = startDateMonth;
+        this.startDateDay = startDateDay;
+        this.startDateHour = startDateHour;
+        this.startDateMinute = startDateMinute;
+        this.endDateMonth = endDateMonth;
+        this.endDateDay = endDateDay;
+        this.endDateHour = endDateHour;
+        this.endDateMinute = endDateMinute;
+        this.floorIDs = floorIDs;
+        this.publicEvent = publicEvent;
+        this.id = id;
+    }
+    public PassEvent(String eventName, String host, String description, String location, int pointValue, String startDate, String endDate, String startDateMonth, String startDateDay, String startDateHour, String startDateMinute, String endDateMonth, String endDateDay, String endDateHour, String endDateMinute, String[] floorIDs, boolean publicEvent, String id) {
+        this.eventName = eventName;
+        this.description = description;
+        this.location = location;
+      this.host = host;
+      this.pointValue = pointValue;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.startDateMonth = startDateMonth;
         this.startDateDay = startDateDay;
         this.startDateHour = startDateHour;
@@ -164,5 +190,21 @@ public class PassEvent implements Serializable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(String startDate) {
+        this.startDate = startDate;
+    }
+
+    public String getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(String endDate) {
+        this.endDate = endDate;
     }
 }
