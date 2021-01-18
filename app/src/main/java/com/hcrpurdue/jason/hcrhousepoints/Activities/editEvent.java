@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.switchmaterial.SwitchMaterial;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.Events;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PassEvent;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
@@ -106,10 +107,11 @@ public class editEvent extends AppCompatActivity {
 
         }
         deleteButton = findViewById(R.id.deleteButton);
+        PassEvent finalPassEvent1 = passEvent;
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //@TODO delete event
+              deleteEvent(finalPassEvent1.getId());
             }
         });
 
@@ -362,6 +364,7 @@ public class editEvent extends AppCompatActivity {
 
     }
 
+
     private void setHouseInformation(String[] floorIDS2, String houseName, PassEvent passEvent) {
         if (floorIDS2.length == 10) {
             allFloorsSwitch.setChecked(true);
@@ -444,6 +447,25 @@ public class editEvent extends AppCompatActivity {
         }
         return 0;
 
+    }
+    private void deleteEvent(String id) {
+        System.out.println("Deleting event");
+        APIHelper.getInstance(getApplicationContext()).deleteEvent(id).enqueue(new Callback<ResponseMessage>() {
+            @Override
+            public void onResponse(Call<ResponseMessage> call, Response<ResponseMessage> response) {
+                if (response.isSuccessful()) {
+                    System.out.println("Event has successfully been deleted");
+                    Intent intent = new Intent(editEvent.this, Events.class);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseMessage> call, Throwable t) {
+                System.out.println("Failure" + t.getMessage());
+
+            }
+        });
     }
     private void updateEvent(Event event) {
         APIHelper.getInstance(editEvent.this).updateEvent(event).enqueue(new Callback<ResponseMessage>() {

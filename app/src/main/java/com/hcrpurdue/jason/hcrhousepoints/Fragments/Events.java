@@ -40,8 +40,6 @@ public class Events extends Fragment {
     private RecyclerView recyclerView;
     private EventsAdapter eventsAdapter;
     private ProgressBar progressBar;
-
-
     private ArrayList<Event> events;
 
     public Events() {

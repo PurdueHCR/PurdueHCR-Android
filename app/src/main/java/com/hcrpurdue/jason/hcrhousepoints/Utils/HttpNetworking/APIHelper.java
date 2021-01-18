@@ -131,6 +131,9 @@ public class APIHelper {
 
         return apiInterface.updateEvent(getFirebaseToken(),"application/json", event);
     }
+    public Call<ResponseMessage> deleteEvent(String id) {
+        return apiInterface.deleteEvent(id,getFirebaseToken());
+    }
     public Call<PointTypeList> getPointTypes() {
         return apiInterface.getPointTypes(getFirebaseToken(),"application/json");
     }

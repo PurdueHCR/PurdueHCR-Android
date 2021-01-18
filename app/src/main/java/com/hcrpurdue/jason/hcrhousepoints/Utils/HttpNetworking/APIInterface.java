@@ -11,10 +11,12 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
+import retrofit2.http.Path;
 
 
 public interface APIInterface {
@@ -61,4 +63,6 @@ public interface APIInterface {
     @POST("point_log/viewMessages")
     Call<ResponseMessage> viewMessages(@Header("Authorization") String firebaseToken, @Body Map<String, Object> body);
 
+    @DELETE("event/{id}")
+    Call<ResponseMessage> deleteEvent(@Path("id") String id, @Header("Authorization") String firebaseToken);
 }
