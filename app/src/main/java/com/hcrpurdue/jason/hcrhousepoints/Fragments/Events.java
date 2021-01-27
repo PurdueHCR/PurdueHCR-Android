@@ -131,8 +131,14 @@ public class Events extends Fragment {
                 if (response.isSuccessful()) {
                     progressBar.setVisibility(View.INVISIBLE);
                     System.out.println("Getting events");
-                    System.out.println(response.body().getEvents().size());
+                    System.out.println(response.body().toString());
+                    System.out.println(response.body().getEvents());
+                    for(Event event: response.body().getEvents()) {
+                        System.out.println(event.getPoint());
+                        System.out.println(event.getPointTypeId());
+                    }
                     setEvents(response.body().getEvents());
+
                     eventsAdapter.setEvents(response.body().getEvents());
                     eventsAdapter.notifyDataSetChanged();
 

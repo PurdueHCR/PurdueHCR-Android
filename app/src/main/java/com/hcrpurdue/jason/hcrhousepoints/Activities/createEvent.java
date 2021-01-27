@@ -37,7 +37,7 @@ public class createEvent extends AppCompatActivity {
     Spinner pointTypeSpinner;
     DatePicker startDatePicker, endDatePicker;
     TimePicker startTimePicker, endTimePicker;
-    Button createevent, customButton;
+    Button createevent, customButton,deleteButton;
     ProgressBar progressBar;
     String customFloorList;
     SwitchMaterial allFloorsSwitch, myHouseSwitch, myFloorSwitch, isPublicSwitch;
@@ -61,8 +61,10 @@ public class createEvent extends AppCompatActivity {
         endTimePicker = findViewById(R.id.endTimePIcker);
 
         createevent = findViewById(R.id.button);
+        createevent.setText("Create Event");
         customButton = findViewById(R.id.customButton);
-
+        deleteButton = findViewById(R.id.deleteButton);
+        deleteButton.setVisibility(View.INVISIBLE);
 
         progressBar = findViewById(R.id.progressBar);
 

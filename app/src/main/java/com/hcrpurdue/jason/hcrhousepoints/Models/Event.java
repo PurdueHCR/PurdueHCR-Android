@@ -5,16 +5,15 @@ import java.io.Serializable;
 public class Event implements Serializable {
 
 
-
-    private  int claimedCount;
+    private int claimedCount;
     private String name;
     private String details;
     private String startDate;
     private String endDate;
-  //  private  Date startDate;
-   // private  Date endDate;
+    //  private  Date startDate;
+    // private  Date endDate;
     private String location;
-    private int point;
+    private int points;
     private int pointTypeId;
     private String pointTypeName;
     private String pointTypeDescription;
@@ -29,14 +28,14 @@ public class Event implements Serializable {
 
 
     public Event(String name, String details, String startDate, String endDate, String location,
-                 int point, int pointTypeId, String pointTypeName, String pointTypeDescription,
-                 String[] floorIds, String id, String creatorId, String host, String[] floorColors,boolean isPublicEvent, int claimedCount) {
+                 int points, int pointTypeId, String pointTypeName, String pointTypeDescription,
+                 String[] floorIds, String id, String creatorId, String host, String[] floorColors, boolean isPublicEvent, int claimedCount) {
         this.name = name;
         this.details = details;
         this.startDate = startDate;
         this.endDate = endDate;
         this.location = location;
-        this.point = point;
+        this.points = points;
         this.pointTypeId = pointTypeId;
         this.pointTypeName = pointTypeName;
         this.pointTypeDescription = pointTypeDescription;
@@ -48,11 +47,12 @@ public class Event implements Serializable {
         this.isPublicEvent = isPublicEvent;
         this.claimedCount = claimedCount;
     }
-//constructor used for creating an Event
-    public Event(String name, String details, String startDate, String endDate, String location, int pointTypeId,String[] floorIds, boolean isPublicEvent, boolean isAllFloors,String host) {
+
+    //constructor used for creating an Event
+    public Event(String name, String details, String startDate, String endDate, String location, int pointTypeId, String[] floorIds, boolean isPublicEvent, boolean isAllFloors, String host) {
         this.name = name;
         this.details = details;
-        this.startDate= startDate;
+        this.startDate = startDate;
         this.endDate = endDate;
         this.location = location;
         this.pointTypeId = pointTypeId;
@@ -61,11 +61,12 @@ public class Event implements Serializable {
         this.isAllFloors = isAllFloors;
         this.floorIds = floorIds;
     }
+
     //update event constructor
-    public Event(String name, String details, String startDate, String endDate, String location, int pointTypeId,String[] floorIds, boolean isPublicEvent, boolean isAllFloors,String host, String id) {
+    public Event(String name, String details, String startDate, String endDate, String location, int pointTypeId, String[] floorIds, boolean isPublicEvent, boolean isAllFloors, String host, String id) {
         this.name = name;
         this.details = details;
-        this.startDate= startDate;
+        this.startDate = startDate;
         this.endDate = endDate;
         this.location = location;
         this.pointTypeId = pointTypeId;
@@ -93,7 +94,6 @@ public class Event implements Serializable {
     }
 
 
-
     public String getLocation() {
         return location;
     }
@@ -103,11 +103,11 @@ public class Event implements Serializable {
     }
 
     public int getPoint() {
-        return point;
+        return points;
     }
 
-    public void setPoint(int point) {
-        this.point = point;
+    public void setPoint(int points) {
+        this.points = points;
     }
 
     public int getPointTypeId() {
@@ -205,6 +205,7 @@ public class Event implements Serializable {
     public void setEndDate(String endDate) {
         this.endDate = endDate;
     }
+
     public int getClaimedCount() {
         return claimedCount;
     }

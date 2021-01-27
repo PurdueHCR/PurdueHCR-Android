@@ -14,6 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".Activities.CustomFloorList"></activity>
+
         <activity android:name=".Activities.createEvent" />
         <activity android:name=".Activities.editEvent" />
         <activity

@@ -51,6 +51,12 @@ System.out.println("Execute");
             System.out.println("Event passed successfully");
             title.setText(event.getEventName());
             date.setText(event.getStartDateMonth() +"-" + event.getStartDateDay() + " to " +event.getEndDateMonth() + "-" + event.getEndDateDay());
+            if (event.getStartDateMinute().equals("0")) {
+                event.setStartDateMinute("00");
+            }
+            if (event.getEndDateMinute().equals("0")) {
+                event.setEndDateMinute("00");
+            }
             time.setText(event.getStartDateHour() + ":" + event.getStartDateMinute() +"-" + event.getEndDateHour() + ":"+ event.getEndDateMinute());
             location.setText(event.getLocation());
             host.setText(event.getHost());
