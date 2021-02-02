@@ -134,7 +134,7 @@ public class Events extends Fragment {
                     System.out.println(response.body().toString());
                     System.out.println(response.body().getEvents());
                     for(Event event: response.body().getEvents()) {
-                        System.out.println(event.getPoint());
+                        System.out.println("Points" + event.getPoint());
                         System.out.println(event.getPointTypeId());
                     }
                     setEvents(response.body().getEvents());

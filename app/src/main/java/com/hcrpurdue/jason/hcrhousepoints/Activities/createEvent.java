@@ -332,7 +332,8 @@ public class createEvent extends AppCompatActivity {
         List<PointType> pointTypes = cacheManager.getPointTypeList();
         for (PointType pointType: pointTypes) {
             if (pointType.getName().equals(pointTypeName)) {
-                return pointType.getValue();
+
+                return pointType.getId();
 
             }
 

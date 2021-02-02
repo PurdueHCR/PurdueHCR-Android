@@ -41,7 +41,6 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.Events;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.Laundry;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointApprovalFragment;
@@ -183,9 +182,9 @@ public class NavigationActivity extends AppCompatActivity {
                         case R.id.nav_events:
                             fragmentClass = Events.class;
                             break;
-                        case R.id.nav_laundry:
-                            fragmentClass = Laundry.class;
-                            break;
+                     //   case R.id.nav_laundry:
+                       //     fragmentClass = Laundry.class;
+                       //     break;
                         default:
 
                             //By default display the house overview
