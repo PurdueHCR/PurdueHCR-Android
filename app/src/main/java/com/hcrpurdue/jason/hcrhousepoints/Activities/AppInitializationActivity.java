@@ -237,6 +237,7 @@ public class AppInitializationActivity extends AppCompatActivity {
      * @param e
      */
     private void handleDataInitializationError(Exception e){
+        System.out.println("Error" + e.getMessage());
         Toast.makeText(this, "Failed to load house data. ", Toast.LENGTH_LONG).show();
         launchSignInActivity();
     }

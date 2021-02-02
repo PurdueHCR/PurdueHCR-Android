@@ -9,15 +9,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.method.LinkMovementMethod;
-import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,20 +27,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.AlertDialogInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class HouseSignUpActivity extends AppCompatActivity {
 
@@ -76,6 +68,8 @@ public class HouseSignUpActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+
         handleJoinHouseLink(this);
     }
 
@@ -112,6 +106,7 @@ public class HouseSignUpActivity extends AppCompatActivity {
         String last = lastNameEditText.getText().toString();
         String code = houseCodeEditText.getText().toString();
         if(areFieldsValid(first,last,code, privacyCheckBox.isChecked())){
+            System.out.println(code);
             HouseCode houseCode = getHouseCode(code);
             if(houseCode != null) {
                 createUser(houseCode);

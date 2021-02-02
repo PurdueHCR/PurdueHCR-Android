@@ -7,6 +7,10 @@
             android:checked="true"
             android:title="Profile" />
         <item
+            android:id="@+id/nav_events"
+            android:icon="@android:drawable/ic_menu_my_calendar"
+            android:title="Events" />
+        <item
             android:id="@+id/nav_point_type_list"
             android:icon="@drawable/ic_add"
             android:title="Submit Points" />
@@ -63,5 +67,10 @@
             android:id="@+id/nav_notification_fragment"
             android:visible="false"
             />
+        <item
+            android:id="@+id/nav_laundry"
+            android:title="Laundry"
+            android:visible="true"
+            android:icon="@drawable/laundry"/>
     </group>
 </menu>

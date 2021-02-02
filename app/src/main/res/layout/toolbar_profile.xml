@@ -74,9 +74,9 @@
             android:text="91"
             android:textColor="@color/text_main"
             android:textSize="16sp"
-            app:layout_constraintTop_toBottomOf="@id/CONSTANT_TOTAL_POINTS"
             app:layout_constraintEnd_toEndOf="@+id/CONSTANT_TOTAL_POINTS"
-            app:layout_constraintStart_toStartOf="@+id/CONSTANT_TOTAL_POINTS"/>
+            app:layout_constraintStart_toStartOf="@+id/CONSTANT_TOTAL_POINTS"
+            app:layout_constraintTop_toBottomOf="@id/CONSTANT_TOTAL_POINTS" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraintLayout"
