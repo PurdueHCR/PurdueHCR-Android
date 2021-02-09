@@ -39,10 +39,13 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.Events;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.FHPProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
@@ -142,10 +145,17 @@ public class NavigationActivity extends AppCompatActivity {
                                 case PRIVILEGED_RESIDENT:
                                     fragmentClass = ResidentProfileFragment.class;
                                     break;
+                                case FHP:
+                                    fragmentClass = FHPProfileFragment.class;
+                                    break;
                                 default:
                                     throw new Error("UNIMPLEMENTED PERMISSION DEFAULT FRAGMENT");
                             }
                             break;
+                        case R.id.nav_events:
+                            fragmentClass = Events.class;
+                            break;
+
                         case R.id.nav_scan_code:
                             //If the QR scanner is selected, check permission and display if approved
                             if (ContextCompat.checkSelfPermission(Objects.requireNonNull(this), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -260,6 +270,11 @@ public class NavigationActivity extends AppCompatActivity {
                     menu.findItem(R.id.nav_qr_code_list).setVisible(true);
                     break;
                 case FHP:;//Facility Member
+                    menu.findItem(R.id.nav_submit_point).setVisible(false);
+                    menu.findItem(R.id.nav_approve_point).setVisible(false);
+                    menu.findItem(R.id.nav_scan_code).setVisible(false);
+                    menu.findItem(R.id.nav_point_history).setVisible(true);
+                    menu.findItem(R.id.nav_qr_code_list).setVisible(true);
                 case PROFESSIONAL_STAFF:;//Professional Staff
                 case RHP://RHP
                     menu.findItem(R.id.nav_approve_point).setVisible(true);
@@ -332,7 +347,7 @@ public class NavigationActivity extends AppCompatActivity {
      * Used when a task is successful to display to the user that it is a success
      */
     public void animateSuccess() {
-        LinearLayout successLayout = findViewById(R.id.success_layout);
+        RelativeLayout successLayout = findViewById(R.id.success_layout);
         Animation showAnim = new AlphaAnimation(0.0f, 1.0f);
         showAnim.setDuration(1000);
         showAnim.setInterpolator(new DecelerateInterpolator());
@@ -395,6 +410,9 @@ public class NavigationActivity extends AppCompatActivity {
                         break;
                     case PRIVILEGED_RESIDENT:
                         fragmentManager.beginTransaction().replace(R.id.content_frame, ResidentProfileFragment.class.newInstance(), Integer.toString(R.id.nav_profile)).addToBackStack("BASE").commit();
+                        break;
+                    case FHP:
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, FHPProfileFragment.class.newInstance(), Integer.toString(R.id.nav_profile)).addToBackStack("BASE").commit();
                         break;
                     default:
                             throw new Error("UNIMPLEMENTED PERMISSION DEFAULT FRAGMENT");
