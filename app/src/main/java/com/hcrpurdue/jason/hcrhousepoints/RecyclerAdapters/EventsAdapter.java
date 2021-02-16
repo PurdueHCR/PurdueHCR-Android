@@ -54,7 +54,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyHolder> 
         // holder.location.setText("Dfsf");
         //@TODO bind data here
         holder.title.setText(data.getName());
-        System.out.println(data.getStartDate().substring(0, 19));
+    System.out.println(data.getStartDate().substring(0, 19));
         String s1 = data.getStartDate().substring(0, 10);
         String s2 = data.getStartDate().substring(11, 19);
         System.out.println(s1);

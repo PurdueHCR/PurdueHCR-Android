@@ -15,9 +15,10 @@
     android:background="@color/black">
 
 </LinearLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="238dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="@+id/cnIcon"
         app:layout_constraintTop_toBottomOf="@+id/cnIcon">
@@ -37,24 +38,29 @@
             tools:layout_editor_absoluteY="3dp" />
 
         <TextView
-            android:layout_toRightOf="@id/cnIcon"
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="6dp"
+            android:layout_toRightOf="@id/cnIcon"
             android:text="@string/app_name"
             android:textColor="#000000"
             android:textSize="18sp"
             tools:layout_editor_absoluteX="112dp"
             tools:layout_editor_absoluteY="16dp" />
+
+
         <ScrollView
 
             android:id="@+id/descriptionScrollView"
 
+            android:layout_width="365dp"
+            android:layout_height="110dp"
             android:layout_below="@id/cnIcon"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_margin="10dp">
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="29dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp">
 
             <TextView
                 android:id="@+id/description"
@@ -69,13 +75,13 @@
                 android:layout_marginRight="8dp"
                 android:layout_marginBottom="4dp"
 
+                android:linksClickable="true"
                 android:textAlignment="textStart"
                 android:textColor="@color/black"
+                android:textIsSelectable="true"
                 tools:layout_editor_absoluteX="26dp"
-                tools:layout_editor_absoluteY="98dp"
-                tools:text="@string/test_message" />
+                tools:layout_editor_absoluteY="98dp" />
         </ScrollView>
-
 
         <TextView
             android:id="@+id/timeStamp"
@@ -108,14 +114,14 @@
 
         <TextView
 
-            android:layout_below="@id/timeStamp"
             android:id="@+id/points"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/timeStamp"
 
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="40dp"
-          android:layout_alignParentRight="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="38dp"
+            android:layout_marginRight="48dp"
             android:text="Points"
             android:textSize="12sp" />
 

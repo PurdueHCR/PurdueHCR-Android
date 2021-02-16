@@ -40,9 +40,7 @@ import androidx.fragment.app.FragmentManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.Events;
-
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.FHPProfileFragment;
-
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
@@ -54,6 +52,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRScannerFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.RHPProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.ResidentProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.SubmitPointsFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
@@ -122,10 +121,12 @@ public class NavigationActivity extends AppCompatActivity {
                                     .setNegativeButton(android.R.string.no, null).show();
                             break;
                         case R.id.nav_point_type_list:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             //If Submit points is tapped, display the Point Type list
                             fragmentClass = PointTypeListFragment.class;
                             break;
                         case R.id.nav_approve_point:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             //If RHP taps approve option, display PointApproval list
                             fragmentClass = PointApprovalFragment.class;
                             break;
@@ -152,6 +153,7 @@ public class NavigationActivity extends AppCompatActivity {
                             break;
 
                         case R.id.nav_scan_code:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             //If the QR scanner is selected, check permission and display if approved
                             if (ContextCompat.checkSelfPermission(Objects.requireNonNull(this), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 10);
@@ -176,22 +178,24 @@ public class NavigationActivity extends AppCompatActivity {
                             break;
                         case R.id.nav_point_history:
                             //Open Point history fragment
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             fragmentClass = HousePointHistoryFragment.class;
                             break;
                         case R.id.nav_submit_point:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             //Set fragment class as submit points fragment
                             fragmentClass = SubmitPointsFragment.class;
                             break;
                         case R.id.nav_personal_point_log_list:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             //Display fragment with all of a user's submitted point
                             fragmentClass = PersonalPointLogListFragment.class;
                             break;
                         case R.id.nav_notification_fragment:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             fragmentClass = NotificationListFragment.class;
                             break;
-                        case R.id.nav_events:
-                            fragmentClass = Events.class;
-                            break;
+
                      //   case R.id.nav_laundry:
                        //     fragmentClass = Laundry.class;
                        //     break;
@@ -272,13 +276,13 @@ public class NavigationActivity extends AppCompatActivity {
                     menu.findItem(R.id.nav_qr_code_list).setVisible(true);
                     break;
 
-                case FHP:;//Facility Member
+                case FHP://Facility Member
                     menu.findItem(R.id.nav_submit_point).setVisible(false);
                     menu.findItem(R.id.nav_approve_point).setVisible(false);
                     menu.findItem(R.id.nav_scan_code).setVisible(false);
                     menu.findItem(R.id.nav_point_history).setVisible(true);
                     menu.findItem(R.id.nav_qr_code_list).setVisible(true);
-                case PROFESSIONAL_STAFF:;//Professional Staff
+                case PROFESSIONAL_STAFF://Professional Staff
 
                 case RHP://RHP
                     menu.findItem(R.id.nav_approve_point).setVisible(true);
