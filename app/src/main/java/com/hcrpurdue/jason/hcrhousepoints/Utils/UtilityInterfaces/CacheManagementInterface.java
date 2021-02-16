@@ -5,22 +5,23 @@ import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Event;
 import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
+import com.hcrpurdue.jason.hcrhousepoints.Models.PointTypeList;
 import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseCodeMessage;
-import com.hcrpurdue.jason.hcrhousepoints.Models.ResponseMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public interface CacheManagementInterface {
     default void onPointTypeComplete(List<PointType> data) { }
@@ -60,5 +61,6 @@ public interface CacheManagementInterface {
     default void onGetHouseCodes(List<HouseCode> codes){}
 
     default void onGetRank(AuthRank rank){}
-
+    default void  onGetEvent(ArrayList<Event> events){}
+    default void onGetPointTypes(PointTypeList pointTypeList) {}
 }

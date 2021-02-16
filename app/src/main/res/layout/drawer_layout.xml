@@ -43,7 +43,7 @@
        android:layout_height="match_parent"
        android:visibility="invisible"
        android:orientation="vertical">
-
+<!-- removed  app:srcCompat="@drawable/rectangle"-->
        <ImageView
            android:id="@+id/backGround"
            android:layout_width="match_parent"
@@ -52,7 +52,7 @@
            android:layout_marginTop="540dp"
            android:layout_marginRight="20dp"
            android:background="#00050404"
-           app:srcCompat="@drawable/rectangle" />
+           />
 
        <TextView
            android:id="@+id/success_message"

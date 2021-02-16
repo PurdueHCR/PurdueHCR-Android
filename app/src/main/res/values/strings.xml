@@ -40,4 +40,30 @@
     </string-array>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_laundry_tabs">LaundryTabs</string>
+    <string name="washers">Washer</string>
+    <string name="dryers">Dryers</string>
+    <string name="laundry">Laundry</string>
+    <string name="unavailable">Unavailable</string>
+    <string-array name="houseList">
+        <item>Copper</item>
+        <item>Silver</item>
+        <item>Palladium</item>
+        <item>Platinum</item>
+        <item>Titanium</item>
+    </string-array>
+    <string-array name="floorList">
+        <item>1N</item>
+        <item>2N</item>
+        <item>3N</item>
+        <item>4N</item>
+        <item>5N</item>
+        <item>6N</item>
+        <item>1S</item>
+        <item>2S</item>
+        <item>3S</item>
+        <item>4S</item>
+        <item>5S</item>
+        <item>6S</item>
+    </string-array>
 </resources>

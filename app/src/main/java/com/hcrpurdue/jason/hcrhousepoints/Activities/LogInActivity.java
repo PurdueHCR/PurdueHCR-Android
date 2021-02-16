@@ -7,11 +7,8 @@ package com.hcrpurdue.jason.hcrhousepoints.Activities;
 
 import android.content.Context;
 import android.content.Intent;
-
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Pair;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -19,13 +16,11 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.Map;
-
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.ForgotPasswordDialog;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 public class LogInActivity extends AppCompatActivity {
     private FirebaseAuth auth;
@@ -88,6 +83,8 @@ public class LogInActivity extends AppCompatActivity {
                             //If the sign in is successful, return to the initialization activity
                             launchInitializationActivity();
                         } else {
+                            System.out.println(task.getException().toString());
+
                             //If it fails, toast error and reenable login button
                             Toast.makeText(this, "Authentication failed. Please verify your email and password and try again.",
                                     Toast.LENGTH_LONG).show();
@@ -121,9 +118,10 @@ public class LogInActivity extends AppCompatActivity {
             Toast.makeText(this, "Please enter your email.", Toast.LENGTH_SHORT).show();
             return true;
         }
-
+        System.out.println(emailText);
         // Checks the password text
         String passwordText = password.getText().toString();
+        System.out.println(passwordText);
         if (TextUtils.isEmpty(passwordText)) {
             Toast.makeText(this, "Please enter your password.", Toast.LENGTH_SHORT).show();
             return true;
@@ -136,6 +134,7 @@ public class LogInActivity extends AppCompatActivity {
      * Transition to the initialization activity. This ensures that all the other data is cached before moving on.
      */
     private void launchInitializationActivity() {
+
         stopLoading();
         Intent intent = new Intent(this, AppInitializationActivity.class);
         startActivity(intent);

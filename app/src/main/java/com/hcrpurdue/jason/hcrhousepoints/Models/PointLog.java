@@ -2,15 +2,14 @@ package com.hcrpurdue.jason.hcrhousepoints.Models;
 
 import android.content.Context;
 
+import com.google.firebase.Timestamp;
+import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.google.firebase.Timestamp;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 
 public class PointLog implements Comparable<PointLog>, Serializable {
 
@@ -39,13 +38,13 @@ public class PointLog implements Comparable<PointLog>, Serializable {
     private String approvedBy;
     private Timestamp approvedOn;
     private String pointDescription;
-    private String floorID;
-    private PointType type;
+    private final String floorID;
+    private final PointType type;
     private String residentFirstName;
-    private String residentLastName;
-    private String residentId;
-    private Timestamp dateSubmitted;
-    private Timestamp dateOccurred;
+    private final String residentLastName;
+    private final String residentId;
+    private final Timestamp dateSubmitted;
+    private final Timestamp dateOccurred;
     private String logID;
     private int residentNotifications;
     private int rhpNotifications;
@@ -133,16 +132,11 @@ public class PointLog implements Comparable<PointLog>, Serializable {
             this.rhpNotifications = rhpNotifs.intValue();
         }
 
+
         int idValue = ((Long) document.get(POINT_TYPE_ID_KEY)).intValue();
 
 
-        if (idValue < 1) {
-
-            this.wasHandled = false;
-        } else {
-
-            this.wasHandled = true;
-        }
+        this.wasHandled = idValue >= 1;
 
         this.type = CacheManager.getInstance(context).getPointTypeWithID(Math.abs(idValue));
 
