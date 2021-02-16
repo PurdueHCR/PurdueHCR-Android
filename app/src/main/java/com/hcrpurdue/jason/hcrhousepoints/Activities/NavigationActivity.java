@@ -11,23 +11,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-
-import com.google.android.material.navigation.NavigationView;
-
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.ListFragment;
-
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,31 +21,44 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.Events;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.FHPProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointApprovalFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PointTypeListFragment;
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.RHPProfileFragment;
-import com.hcrpurdue.jason.hcrhousepoints.Fragments.ResidentProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCodeListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRCreationFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.QRScannerFragment;
-
-import java.util.Objects;
-
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.RHPProfileFragment;
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.ResidentProfileFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.SubmitPointsFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
+
+import java.util.Objects;
 
 public class NavigationActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
@@ -125,10 +121,12 @@ public class NavigationActivity extends AppCompatActivity {
                                     .setNegativeButton(android.R.string.no, null).show();
                             break;
                         case R.id.nav_point_type_list:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             //If Submit points is tapped, display the Point Type list
                             fragmentClass = PointTypeListFragment.class;
                             break;
                         case R.id.nav_approve_point:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             //If RHP taps approve option, display PointApproval list
                             fragmentClass = PointApprovalFragment.class;
                             break;
@@ -143,6 +141,9 @@ public class NavigationActivity extends AppCompatActivity {
                                 case PRIVILEGED_RESIDENT:
                                     fragmentClass = ResidentProfileFragment.class;
                                     break;
+                                case FHP:
+                                    fragmentClass = FHPProfileFragment.class;
+                                    break;
                                 default:
                                     throw new Error("UNIMPLEMENTED PERMISSION DEFAULT FRAGMENT");
                             }
@@ -152,6 +153,7 @@ public class NavigationActivity extends AppCompatActivity {
                             break;
 
                         case R.id.nav_scan_code:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             //If the QR scanner is selected, check permission and display if approved
                             if (ContextCompat.checkSelfPermission(Objects.requireNonNull(this), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 10);
@@ -176,20 +178,29 @@ public class NavigationActivity extends AppCompatActivity {
                             break;
                         case R.id.nav_point_history:
                             //Open Point history fragment
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             fragmentClass = HousePointHistoryFragment.class;
                             break;
                         case R.id.nav_submit_point:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             //Set fragment class as submit points fragment
                             fragmentClass = SubmitPointsFragment.class;
                             break;
                         case R.id.nav_personal_point_log_list:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             //Display fragment with all of a user's submitted point
                             fragmentClass = PersonalPointLogListFragment.class;
                             break;
                         case R.id.nav_notification_fragment:
+                            if(cacheManager.getUser().getPermissionLevel() == UserPermissionLevel.FHP) { break;}
                             fragmentClass = NotificationListFragment.class;
                             break;
+
+                     //   case R.id.nav_laundry:
+                       //     fragmentClass = Laundry.class;
+                       //     break;
                         default:
+
                             //By default display the house overview
                             fragmentClass = ResidentProfileFragment.class;
                             break;
@@ -264,8 +275,15 @@ public class NavigationActivity extends AppCompatActivity {
                 case PRIVILEGED_RESIDENT: //privileged Resident Case
                     menu.findItem(R.id.nav_qr_code_list).setVisible(true);
                     break;
-                case FHP:;//Facility Member
-                case PROFESSIONAL_STAFF:;//Professional Staff
+
+                case FHP://Facility Member
+                    menu.findItem(R.id.nav_submit_point).setVisible(false);
+                    menu.findItem(R.id.nav_approve_point).setVisible(false);
+                    menu.findItem(R.id.nav_scan_code).setVisible(false);
+                    menu.findItem(R.id.nav_point_history).setVisible(true);
+                    menu.findItem(R.id.nav_qr_code_list).setVisible(true);
+                case PROFESSIONAL_STAFF://Professional Staff
+
                 case RHP://RHP
                     menu.findItem(R.id.nav_approve_point).setVisible(true);
                     menu.findItem(R.id.nav_point_history).setVisible(true);
@@ -299,7 +317,7 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == 10) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 try {
@@ -337,7 +355,7 @@ public class NavigationActivity extends AppCompatActivity {
      * Used when a task is successful to display to the user that it is a success
      */
     public void animateSuccess() {
-        LinearLayout successLayout = findViewById(R.id.success_layout);
+        RelativeLayout successLayout = findViewById(R.id.success_layout);
         Animation showAnim = new AlphaAnimation(0.0f, 1.0f);
         showAnim.setDuration(1000);
         showAnim.setInterpolator(new DecelerateInterpolator());
@@ -400,6 +418,9 @@ public class NavigationActivity extends AppCompatActivity {
                         break;
                     case PRIVILEGED_RESIDENT:
                         fragmentManager.beginTransaction().replace(R.id.content_frame, ResidentProfileFragment.class.newInstance(), Integer.toString(R.id.nav_profile)).addToBackStack("BASE").commit();
+                        break;
+                    case FHP:
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, FHPProfileFragment.class.newInstance(), Integer.toString(R.id.nav_profile)).addToBackStack("BASE").commit();
                         break;
                     default:
                             throw new Error("UNIMPLEMENTED PERMISSION DEFAULT FRAGMENT");
