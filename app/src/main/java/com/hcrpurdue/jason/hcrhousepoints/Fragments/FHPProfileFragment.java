@@ -14,11 +14,8 @@ import com.hcrpurdue.jason.hcrhousepoints.Views.RewardCard;
 
 public class FHPProfileFragment extends BaseProfileFragment {
 
-    // TODO: What do these objects do?
     private ResidentProfileToolbar residentProfileToolbar;
     private HouseCompetitionCard houseCompetitionCard;
-    private RewardCard rewardCard;
-    private RecentPointSubmissionCard recentPointSubmissionCard;
 
 
     @Override
@@ -42,12 +39,6 @@ public class FHPProfileFragment extends BaseProfileFragment {
             }
         });
 
-        flu.getRewardsListener().addCallback(PROFILE_FRAGMENT, new ListenerCallbackInterface() {
-            @Override
-            public void onUpdate() {
-                handleRewardUpdate();
-            }
-        });
         flu.getSystemPreferenceListener().addCallback(PROFILE_FRAGMENT, new ListenerCallbackInterface() {
             @Override
             public void onUpdate() {
@@ -66,8 +57,6 @@ public class FHPProfileFragment extends BaseProfileFragment {
     protected void setupCards(View view) {
         residentProfileToolbar = new ResidentProfileToolbar(context, view);
         houseCompetitionCard = new HouseCompetitionCard(context, view);
-        rewardCard = new RewardCard(context, view.findViewById(R.id.profile_reward_card), cacheManager.getSystemPreferences().shouldShowRewards());
-        recentPointSubmissionCard = new RecentPointSubmissionCard(context, view);
     }
 
 
@@ -78,8 +67,6 @@ public class FHPProfileFragment extends BaseProfileFragment {
     private void handleNotificationsUpdate(){
         if(notificationsButton != null)
             notificationsButton.handleNotificationUpdate();
-        if(recentPointSubmissionCard != null)
-            recentPointSubmissionCard.handleNotificationsUpdate();
     }
 
     /**
@@ -102,20 +89,12 @@ public class FHPProfileFragment extends BaseProfileFragment {
         }
     }
 
-    private void handleRewardUpdate() {
-        if(rewardCard != null)
-            rewardCard.handleRewardUpdate();
-    }
-
     private void handleSystemPreferenceUpdate(){
         if(houseCompetitionCard != null){
             houseCompetitionCard.handleSysPrefUpdate();
         }
         if(residentProfileToolbar != null){
             residentProfileToolbar.handleSysPrefUpdate();
-        }
-        if(rewardCard != null){
-            rewardCard.handleSystemPreferencesUpdate();
         }
     }
 }

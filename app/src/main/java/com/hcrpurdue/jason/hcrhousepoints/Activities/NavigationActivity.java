@@ -40,6 +40,9 @@ import androidx.fragment.app.FragmentManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.Events;
+
+import com.hcrpurdue.jason.hcrhousepoints.Fragments.FHPProfileFragment;
+
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.HousePointHistoryFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.NotificationListFragment;
 import com.hcrpurdue.jason.hcrhousepoints.Fragments.PersonalPointLogListFragment;
@@ -137,10 +140,17 @@ public class NavigationActivity extends AppCompatActivity {
                                 case PRIVILEGED_RESIDENT:
                                     fragmentClass = ResidentProfileFragment.class;
                                     break;
+                                case FHP:
+                                    fragmentClass = FHPProfileFragment.class;
+                                    break;
                                 default:
                                     throw new Error("UNIMPLEMENTED PERMISSION DEFAULT FRAGMENT");
                             }
                             break;
+                        case R.id.nav_events:
+                            fragmentClass = Events.class;
+                            break;
+
                         case R.id.nav_scan_code:
                             //If the QR scanner is selected, check permission and display if approved
                             if (ContextCompat.checkSelfPermission(Objects.requireNonNull(this), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -261,8 +271,15 @@ public class NavigationActivity extends AppCompatActivity {
                 case PRIVILEGED_RESIDENT: //privileged Resident Case
                     menu.findItem(R.id.nav_qr_code_list).setVisible(true);
                     break;
-                case FHP://Facility Member
-                case PROFESSIONAL_STAFF://Professional Staff
+
+                case FHP:;//Facility Member
+                    menu.findItem(R.id.nav_submit_point).setVisible(false);
+                    menu.findItem(R.id.nav_approve_point).setVisible(false);
+                    menu.findItem(R.id.nav_scan_code).setVisible(false);
+                    menu.findItem(R.id.nav_point_history).setVisible(true);
+                    menu.findItem(R.id.nav_qr_code_list).setVisible(true);
+                case PROFESSIONAL_STAFF:;//Professional Staff
+
                 case RHP://RHP
                     menu.findItem(R.id.nav_approve_point).setVisible(true);
                     menu.findItem(R.id.nav_point_history).setVisible(true);
@@ -397,6 +414,9 @@ public class NavigationActivity extends AppCompatActivity {
                         break;
                     case PRIVILEGED_RESIDENT:
                         fragmentManager.beginTransaction().replace(R.id.content_frame, ResidentProfileFragment.class.newInstance(), Integer.toString(R.id.nav_profile)).addToBackStack("BASE").commit();
+                        break;
+                    case FHP:
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, FHPProfileFragment.class.newInstance(), Integer.toString(R.id.nav_profile)).addToBackStack("BASE").commit();
                         break;
                     default:
                             throw new Error("UNIMPLEMENTED PERMISSION DEFAULT FRAGMENT");

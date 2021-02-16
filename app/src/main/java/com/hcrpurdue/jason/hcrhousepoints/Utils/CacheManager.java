@@ -36,6 +36,7 @@ import retrofit2.Response;
 
 // Because non-global variables are for people who care about technical debt
 public class CacheManager {
+
     private static CacheManager instance = null;
     private final FirebaseUtil fbutil = new FirebaseUtil();
     private final CacheUtil cacheUtil = new CacheUtil();
