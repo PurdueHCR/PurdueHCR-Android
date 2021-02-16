@@ -326,10 +326,10 @@ public class editEvent extends AppCompatActivity {
                     System.out.println("SD:" + actualSD);
                     System.out.println("ED:" + actualED);
                     System.out.println("Location:" + locationstr);
-                    System.out.println("Points:" + fetchPointValue(pointTypeName));
+                    System.out.println("Points:" + fetchPointId(pointTypeName));
                     //System.out.println("Floor id:" + floorID[0]);
                     System.out.println("Host:" + host);
-                    event = new Event(name, description, actualSD, actualED, locationstr, fetchPointValue(pointTypeName), floorIDS, publicEvent, isAllFloors, host, finalPassEvent.getId());
+                    event = new Event(name, description, actualSD, actualED, locationstr, fetchPointId(pointTypeName), floorIDS, publicEvent, isAllFloors, host, finalPassEvent.getId());
                     // String[] flooors = new String[1];
                     // flooors[0] = "2N";
                     //event = new Event("A Very Fun Event","A very fun event by me!","2020-11-08T10:00:00+04:00","2020-11-08T10:00:00+04:00","HCRS 1066",22,flooors,false,false,"The Society");
@@ -436,11 +436,11 @@ public class editEvent extends AppCompatActivity {
 
     }
 
-    private int fetchPointValue(String pointTypeName) {
+    private int fetchPointId(String pointTypeName) {
         List<PointType> pointTypes = cacheManager.getPointTypeList();
         for (PointType pointType : pointTypes) {
             if (pointType.getName().equals(pointTypeName)) {
-                return pointType.getValue();
+                return pointType.getId();
 
             }
 

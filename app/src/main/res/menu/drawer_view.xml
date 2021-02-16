@@ -67,10 +67,6 @@
             android:id="@+id/nav_notification_fragment"
             android:visible="false"
             />
-        <item
-            android:id="@+id/nav_laundry"
-            android:title="Laundry"
-            android:visible="true"
-            android:icon="@drawable/laundry"/>
+
     </group>
 </menu>

@@ -180,7 +180,9 @@
             android:layout_marginBottom="4dp"
             android:text="details_placeholder"
             android:textAlignment="center"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:textIsSelectable="true"
+            android:linksClickable="true"/>
 
     <TextView
         android:layout_centerHorizontal="true"
