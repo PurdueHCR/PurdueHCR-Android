@@ -3,6 +3,7 @@ package com.hcrpurdue.jason.hcrhousepoints.Fragments;
 
 import android.view.View;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.ListenerCallbackInterface;
@@ -55,8 +56,10 @@ public class FHPProfileFragment extends BaseProfileFragment {
 
     @Override
     protected void setupCards(View view) {
-        residentProfileToolbar = new ResidentProfileToolbar(context, view);
-        houseCompetitionCard = new HouseCompetitionCard(context, view);
+        if(cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
+            residentProfileToolbar = new ResidentProfileToolbar(context, view);
+            houseCompetitionCard = new HouseCompetitionCard(context, view);
+        }
     }
 
 
