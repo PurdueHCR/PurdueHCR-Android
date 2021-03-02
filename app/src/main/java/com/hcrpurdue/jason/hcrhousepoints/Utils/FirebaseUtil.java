@@ -1,15 +1,8 @@
 package com.hcrpurdue.jason.hcrhousepoints.Utils;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.text.TextUtils;
-import android.util.Pair;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -21,31 +14,32 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.annotation.Nullable;
-
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
-import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.HouseCode;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLogMessage;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.FirebaseUtilInterface;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import static com.hcrpurdue.jason.hcrhousepoints.Models.User.ENABLED;
+import static com.hcrpurdue.jason.hcrhousepoints.Models.User.FIRST_NAME_KEY;
+import static com.hcrpurdue.jason.hcrhousepoints.Models.User.HOUSE_KEY;
+import static com.hcrpurdue.jason.hcrhousepoints.Models.User.LAST_NAME_KEY;
+import static com.hcrpurdue.jason.hcrhousepoints.Models.User.PERMISSION_LEVEL_KEY;
+import static com.hcrpurdue.jason.hcrhousepoints.Models.User.TOTAL_POINTS_KEY;
+
 public class FirebaseUtil {
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Context context;
 
     public static String ROOT_HOUSE_KEY = "House";
@@ -373,8 +367,13 @@ public class FirebaseUtil {
                             if (task.isSuccessful()) {
                                 Map<String, Object> data = task.getResult().getData();
                                 if (data != null) {
-                                    User user = new User(id, data);
+                                    if (data.containsKey(TOTAL_POINTS_KEY)) {
+                                        User user = new User(id, data);
+                                        fui.onUserGetSuccess(user);
+                                }else {
+                                        User user = new User(id, data.get(FIRST_NAME_KEY).toString(), data.get(LAST_NAME_KEY).toString(), data.get(HOUSE_KEY).toString(),  ((Long) data.get(PERMISSION_LEVEL_KEY)).intValue(), (Boolean) data.get(ENABLED));
                                     fui.onUserGetSuccess(user);
+                                    }
                                 }
                                 else {
                                     fui.onError(new IllegalStateException("User does not exist."), context);

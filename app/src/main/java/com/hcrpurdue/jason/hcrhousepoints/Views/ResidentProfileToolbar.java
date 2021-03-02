@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.ImageCacheManager;
@@ -16,58 +17,68 @@ public class ResidentProfileToolbar {
     private TextView userPointTotalTextView;
     private TextView userHouseRankTextView;
     private TextView semesterRankTextView;
-    private TextView houseNameTextView;
-    private ImageView houseImageView;
+    private final TextView houseNameTextView;
+    private final ImageView houseImageView;
 
-    private CacheManager cacheManager;
-    private Resources resources;
-    private String packageName;
-    private Context context;
+    private final CacheManager cacheManager;
+    private final Resources resources;
+    private final String packageName;
+    private final Context context;
     private AuthRank userRank;
 
     ImageCacheManager imageCacheManager;
 
 
-    public ResidentProfileToolbar(Context context, View parentView){
+    public ResidentProfileToolbar(Context context, View parentView) {
         System.out.println("INIT TOOLBAR");
-        houseNameTextView = parentView.findViewById(R.id.house_name_text_view);
-        userPointTotalTextView = parentView.findViewById(R.id.your_points_text_view);
-        userHouseRankTextView = parentView.findViewById(R.id.house_rank_text_view);
-        houseImageView = parentView.findViewById(R.id.profile_house_image_view);
-        semesterRankTextView = parentView.findViewById(R.id.semester_rank_text_view);
-        this.context = context;
         this.cacheManager = CacheManager.getInstance(context);
+        houseNameTextView = parentView.findViewById(R.id.house_name_text_view);
+        if (cacheManager.getPermissionLevel() != UserPermissionLevel.FHP || cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
+
+            userPointTotalTextView = parentView.findViewById(R.id.your_points_text_view);
+            userHouseRankTextView = parentView.findViewById(R.id.house_rank_text_view);
+            semesterRankTextView = parentView.findViewById(R.id.semester_rank_text_view);
+        }
+        houseImageView = parentView.findViewById(R.id.profile_house_image_view);
+
+        this.context = context;
+
         this.resources = context.getResources();
         this.packageName = context.getPackageName();
         imageCacheManager = ImageCacheManager.getInstance();
-        refreshRank();
+        if (cacheManager.getPermissionLevel() != UserPermissionLevel.FHP || cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
+
+            refreshRank();
+        }
         populateTopBar();
+
     }
 
     /**
      * SEt text on top Bar
      */
-    private void populateTopBar(){
+    private void populateTopBar() {
         System.out.println("POPULATE");
         int drawableID = resources.getIdentifier("hcr_icon_square", "drawable", packageName);
 
         houseImageView.setImageResource(drawableID);
         houseNameTextView.setText(cacheManager.getHouseAndPermissionName());
-        String userPointsText = "" + cacheManager.getUser().getTotalPoints();
-        String houseRankText = (userRank.getHouseRank() != -1)? "# "+userRank.getHouseRank(): "";
-        String semesterRankText = (userRank.getSemesterRank() != -1)? "# "+userRank.getSemesterRank(): "";
-        userPointTotalTextView.setText(userPointsText);
-        userHouseRankTextView.setText(houseRankText);
-        semesterRankTextView.setText(semesterRankText);
+        if (cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
+            String userPointsText = "" + cacheManager.getUser().getTotalPoints();
+            String houseRankText = (userRank.getHouseRank() != -1) ? "# " + userRank.getHouseRank() : "";
+            String semesterRankText = (userRank.getSemesterRank() != -1) ? "# " + userRank.getSemesterRank() : "";
+            userPointTotalTextView.setText(userPointsText);
+            userHouseRankTextView.setText(houseRankText);
+            semesterRankTextView.setText(semesterRankText);
+        }
 
-
-        if(cacheManager.getUserHouse() != null && cacheManager.getUserHouse().getDownloadURL() != null){
+        if (cacheManager.getUserHouse() != null && cacheManager.getUserHouse().getDownloadURL() != null) {
             imageCacheManager.setImageViewFromDownloadURL(cacheManager.getUserHouse().getDownloadURL(), houseImageView);
         }
 
     }
 
-    private void refreshRank(){
+    private void refreshRank() {
 
         cacheManager.getUserRank(context, new CacheManagementInterface() {
             @Override
@@ -88,18 +99,24 @@ public class ResidentProfileToolbar {
     /**
      * Call this method when the UserListener fires
      */
-    public void handleUserUpdate(){
+    public void handleUserUpdate() {
         populateTopBar();
     }
 
     public void handleSysPrefUpdate() {
-        if(cacheManager.getSystemPreferences().isCompetitionVisible()){
-            userHouseRankTextView.setVisibility(View.VISIBLE);
-            semesterRankTextView.setVisibility(View.VISIBLE);
-        }
-        else {
-            userHouseRankTextView.setVisibility(View.INVISIBLE);
-            semesterRankTextView.setVisibility(View.INVISIBLE);
+        if (cacheManager.getSystemPreferences().isCompetitionVisible()) {
+            if (cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
+
+                userHouseRankTextView.setVisibility(View.VISIBLE);
+                semesterRankTextView.setVisibility(View.VISIBLE);
+            }
+        } else {
+            if (cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
+
+                userHouseRankTextView.setVisibility(View.INVISIBLE);
+                semesterRankTextView.setVisibility(View.INVISIBLE);
+            }
+
         }
     }
 
