@@ -749,26 +749,30 @@ public class CacheManager {
      * @param cmi
      */
     public void refreshUserRank(Context context, CacheManagementInterface cmi){
-        APIHelper.getInstance(context).getRank().enqueue(new retrofit2.Callback<AuthRank>() {
-            @Override
-            public void onResponse(Call<AuthRank> call, Response<AuthRank> response) {
-                System.out.println("GOT A RESPONSE FROM RANK");
-                if(response.isSuccessful()) {
-                    userRank = response.body();
-                    cmi.onGetRank(userRank);
+        if(!(user.getPermissionLevel().canSubmitPoints())) {
+            //any user account that is not resident, priv resident, or RHP will not have a rank
+            cmi.onGetRank(null);
+        } else {
+            APIHelper.getInstance(context).getRank().enqueue(new retrofit2.Callback<AuthRank>() {
+                @Override
+                public void onResponse(Call<AuthRank> call, Response<AuthRank> response) {
+                    System.out.println("GOT A RESPONSE FROM RANK");
+                    if (response.isSuccessful()) {
+                        userRank = response.body();
+                        cmi.onGetRank(userRank);
+                    } else {
+                        System.out.println(response.code() + ": " + response.message());
+                        cmi.onError(new Exception(response.code() + ": " + response.message()), context);
+                    }
                 }
-                else {
-                    System.out.println(response.code() + ": " + response.message());
-                    cmi.onError(new Exception(response.code() + ": " + response.message()), context);
-                }
-            }
 
-            @Override
-            public void onFailure(Call<AuthRank> call, Throwable t) {
-                System.out.println("ERROR ON GET RANK: "+t.getMessage());
-                cmi.onError(new Exception(t.getMessage()), context);
-            }
-        });
+                @Override
+                public void onFailure(Call<AuthRank> call, Throwable t) {
+                    System.out.println("ERROR ON GET RANK: " + t.getMessage());
+                    cmi.onError(new Exception(t.getMessage()), context);
+                }
+            });
+        }
     }
     // @TODO need to save event in Cache Manager. API is currently being called from Events class
     public void getEvents(Context context ){

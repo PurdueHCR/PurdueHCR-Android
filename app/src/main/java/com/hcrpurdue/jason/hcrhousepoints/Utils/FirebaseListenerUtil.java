@@ -11,9 +11,7 @@
 package com.hcrpurdue.jason.hcrhousepoints.Utils;
 
 import android.content.Context;
-import android.widget.Toast;
 
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,7 +25,6 @@ import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.Models.User;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirebaseCollectionListener;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirebaseListener;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.Listeners.FirestoreDocumentListener;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.SnapshotInterface;
 
@@ -38,7 +35,7 @@ import java.util.List;
 
 public class FirebaseListenerUtil {
 
-    private Context context;
+    private final Context context;
     protected FirebaseFirestore db = FirebaseFirestore.getInstance();
     protected CacheManager cacheManager;
     static FirebaseListenerUtil fluListener;
@@ -147,7 +144,9 @@ public class FirebaseListenerUtil {
             public void handleDocumentSnapshot(DocumentSnapshot documentSnapshot, Exception e) {
                 if( e == null){
                     User user = (User) userAccountListener.getUpdatingObject();
-                    user.setTotalPoints(((Long) documentSnapshot.getData().get(User.TOTAL_POINTS_KEY)).intValue());
+                    if(user.getPermissionLevel().canSubmitPoints()) {
+                        user.setTotalPoints(((Long) documentSnapshot.getData().get(User.TOTAL_POINTS_KEY)).intValue());
+                    }
                 }
             }
         };
@@ -278,6 +277,7 @@ public class FirebaseListenerUtil {
 
     public void createSystemPreferencesListener(){
         SystemPreferences systemPreferences = cacheManager.getSystemPreferences();
+        System.out.println("Check system pref:" +(systemPreferences==null));
         DocumentReference documentReference = db.collection("SystemPreferences")
                 .document("Preferences");
         SnapshotInterface si = new SnapshotInterface() {
@@ -285,6 +285,8 @@ public class FirebaseListenerUtil {
             public void handleDocumentSnapshot(DocumentSnapshot documentSnapshot, Exception e) {
                 if(e == null){
                     SystemPreferences sp = (SystemPreferences) systemPreferenceListener.getUpdatingObject();
+                    System.out.println(sp);
+                    System.out.println(documentSnapshot.getData().toString());
                     sp.updateValues(documentSnapshot.getData());
                 }
             }
