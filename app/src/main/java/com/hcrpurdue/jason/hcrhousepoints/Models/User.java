@@ -2,7 +2,6 @@ package com.hcrpurdue.jason.hcrhousepoints.Models;
 
 import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class User {
@@ -16,15 +15,15 @@ public class User {
     public static final String SEMESTER_POINTS = "SemesterPoints";
     public static final String ENABLED = "Enabled";
 
-    private String firstName;
+    private final String firstName;
     private String floorId;
-    private String house;
-    private String lastName;
+    private final String house;
+    private final String lastName;
     private int semesterPoints;
-    private boolean enabled;
-    private int permissionLevel;
+    private final boolean enabled;
+    private final int permissionLevel;
     private int totalPoints;
-    private String id;
+    private final String id;
 
     public User(String userId, String firstName, String lastName, String floorId, String house,  int permissionLevel, int totalPoints, int semesterPoints, boolean isEnabled){
         this.id = userId;
@@ -37,8 +36,19 @@ public class User {
         this.semesterPoints = semesterPoints;
         this.enabled = isEnabled;
     }
+    public User(String userId, String firstName, String lastName, String house,  int permissionLevel, boolean isEnabled){
+        this.id = userId;
+        this.firstName = firstName;
+
+        this.house = house;
+        this.lastName = lastName;
+        this.permissionLevel = permissionLevel;
+
+        this.enabled = isEnabled;
+    }
 
     public User(String id, Map<String,Object> data){
+        System.out.println(id);
         this.id = id;
         this.firstName = (String) data.get(FIRST_NAME_KEY);
         this.floorId = (String) data.get(FLOOR_ID_KEY);

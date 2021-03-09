@@ -45,7 +45,7 @@
                 <data
                     android:host="hcrpoint.page.link"
                     android:scheme="https" />
-                <data
+               <data
                     android:host="purduehcr.page.link"
                     android:scheme="https" />
                 <!-- note that the leading "/" is required for pathPrefix -->

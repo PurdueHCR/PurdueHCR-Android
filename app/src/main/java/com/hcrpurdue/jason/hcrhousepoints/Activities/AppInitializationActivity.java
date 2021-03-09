@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -22,26 +21,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
-import com.hcrpurdue.jason.hcrhousepoints.Models.House;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Reward;
 import com.hcrpurdue.jason.hcrhousepoints.Models.SystemPreferences;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.AlertDialogHelper;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
-import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.AlertDialogInterface;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
@@ -64,7 +57,8 @@ public class AppInitializationActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         cacheManager = CacheManager.getInstance(getApplicationContext());
         initializeViews();
-        initializeUserData();
+
+            initializeUserData();
 
     }
 
@@ -94,7 +88,8 @@ public class AppInitializationActivity extends AppCompatActivity {
                     cacheManager.getUserData(new CacheManagementInterface() {
                         public void onSuccess() {
                             //Got the user data, now lets get the Firebase token to use with the API
-                            initializeCompetitionData();
+                               initializeCompetitionData();
+
                         }
                         public void onError(Exception e, Context context){
                             if(e.getMessage().equals("User does not exist.")){
@@ -116,7 +111,9 @@ public class AppInitializationActivity extends AppCompatActivity {
                     cacheManager.getUserDataNoCache(new CacheManagementInterface() {
                         public void onSuccess() {
                             //Once User data is cached, start initializing the competition data
-                            initializeCompetitionData();
+
+                                initializeCompetitionData();
+
                         }
                         public void onError(Exception e, Context context){
                             if(e.getMessage().equals("User does not exist.")){
@@ -155,68 +152,65 @@ public class AppInitializationActivity extends AppCompatActivity {
     private void initializeCompetitionData(){
 
         try {
-            System.out.println("RANK 1");
-            //get point types from Firestore
-            cacheManager.getUpdatedPointTypes(new CacheManagementInterface() {
-                public void onPointTypeComplete(List<PointType> data) {
-                    System.out.println("RANK 2");
-                    //get System Preferences from Firestore
-                    cacheManager.getSystemPreferences(new CacheManagementInterface() {
-                        @Override
-                        public void onGetSystemPreferencesSuccess(SystemPreferences sp) {
-                            System.out.println("RANK 3");
-                            //Get the rewards for the house competition
-                            cacheManager.initPersonalPointLogs(new CacheManagementInterface() {
-                                @Override
-                                public void onGetPersonalPointLogs(List<PointLog> personalLogs) {
-                                    System.out.println("RANK 4");
-                                    //Refresh the user rank
-                                    cacheManager.refreshUserRank(getBaseContext(), new CacheManagementInterface() {
-                                        @Override
-                                        public void onError(Exception e, Context context) {
-                                            System.out.println("RANK FAILED!!!!!!");
-                                            handleDataInitializationError(e);
-                                        }
-
-                                        @Override
-                                        public void onGetRank(AuthRank rank) {
-                                            System.out.println("RANK: "+rank.getHouseRank()+" sem: "+rank.getSemesterRank());
-                                            //Check the system preferences for app version, and if not in sync, post update message
-                                            if(!sp.isAppUpToDate()){
-                                                alertOutOfDateApp();
+                 System.out.println("RANK 1");
+                //get point types from Firestore
+                cacheManager.getUpdatedPointTypes(new CacheManagementInterface() {
+                    public void onPointTypeComplete(List<PointType> data) {
+                        System.out.println("RANK 2");
+                        //get System Preferences from Firestore
+                        cacheManager.getSystemPreferences(new CacheManagementInterface() {
+                            @Override
+                            public void onGetSystemPreferencesSuccess(SystemPreferences sp) {
+                                System.out.println("RANK 3");
+                                //Get the rewards for the house competition
+                                cacheManager.initPersonalPointLogs(new CacheManagementInterface() {
+                                    @Override
+                                    public void onGetPersonalPointLogs(List<PointLog> personalLogs) {
+                                        System.out.println("RANK 4");
+                                        //Refresh the user rank
+                                        cacheManager.refreshUserRank(getBaseContext(), new CacheManagementInterface() {
+                                            @Override
+                                            public void onError(Exception e, Context context) {
+                                                System.out.println("RANK FAILED!!!!!!");
+                                                handleDataInitializationError(e);
                                             }
-                                            else{
-                                                //If everything checks out, transition to the main activity
-                                                checkForLinks();
+
+                                            @Override
+                                            public void onGetRank(AuthRank rank) {
+                                                 //Check the system preferences for app version, and if not in sync, post update message
+                                                if (!sp.isAppUpToDate()) {
+                                                    alertOutOfDateApp();
+                                                } else {
+                                                    //If everything checks out, transition to the main activity
+                                                    checkForLinks();
+                                                }
                                             }
-                                        }
-                                    });
+                                        });
 
-                                }
+                                    }
 
-                                @Override
-                                public void onError(Exception e, Context context) {
-                                    handleDataInitializationError(e);
-                                }
-                            });
-                        }
+                                    @Override
+                                    public void onError(Exception e, Context context) {
+                                        handleDataInitializationError(e);
+                                    }
+                                });
+                            }
 
-                        @Override
-                        public void onError(Exception e, Context context) {
-                            handleDataInitializationError(e);
-                        }
-                    });
-                }
+                            @Override
+                            public void onError(Exception e, Context context) {
+                                handleDataInitializationError(e);
+                            }
+                        });
+                    }
 
-                @Override
-                public void onError(Exception e, Context context) {
-                    handleDataInitializationError(e);
-                }
-            });
-
-        } catch (Exception e) {
-            handleDataInitializationError(e);
-        }
+                    @Override
+                    public void onError(Exception e, Context context) {
+                        handleDataInitializationError(e);
+                    }
+                });
+            } catch(Exception e){
+                handleDataInitializationError(e);
+            }
 
     }
 
@@ -248,11 +242,7 @@ public class AppInitializationActivity extends AppCompatActivity {
      */
     private boolean isLoggedIn(){
         FirebaseUser currentUser = auth.getCurrentUser();
-        if (currentUser == null) {
-            return false;
-        } else {
-            return true;
-        }
+        return currentUser != null;
     }
 
     /**

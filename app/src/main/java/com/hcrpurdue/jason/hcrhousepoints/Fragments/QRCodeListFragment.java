@@ -29,7 +29,7 @@ import com.hcrpurdue.jason.hcrhousepoints.ListAdapters.QrCodeListAdapter;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.UtilityInterfaces.CacheManagementInterface;
 
-public class QRCodeListFragment extends ListFragment implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener {
+public class QRCodeListFragment extends ListFragment implements SearchView.OnQueryTextListener, MenuItem.OnActionExpandListener, QrCodeCreateBottomDialogFragment.OnQRCodeCreatedListener {
     static private CacheManager cacheManager;
     private Context context;
     private ProgressBar progressBar;
@@ -72,6 +72,9 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
         qrCodeCreateFab.setOnClickListener(view1 -> {
 
             QrCodeCreateBottomDialogFragment createFragment = new QrCodeCreateBottomDialogFragment(context);
+
+            createFragment.setOnQRCodeCreatedListener(this);
+
             createFragment.show(getFragmentManager(), "Create QR Code");
         });
 
@@ -145,5 +148,11 @@ public class QRCodeListFragment extends ListFragment implements SearchView.OnQue
         return false;
     }
 
-
+    /**
+     * Refreshes on successful QR code creation
+     */
+    @Override
+    public void onQRCodeCreated() {
+        getQRCodesFromServer(null);
+    }
 }

@@ -247,7 +247,7 @@ public class HouseSignUpActivity extends AppCompatActivity {
         loadingBar.setVisibility(View.INVISIBLE);
         joinButton.setEnabled(true);
     }
-
+//@TODO add logic to app initialization activity
     private void handleJoinHouseLink(AppCompatActivity activity) {
 
         FirebaseDynamicLinks.getInstance()

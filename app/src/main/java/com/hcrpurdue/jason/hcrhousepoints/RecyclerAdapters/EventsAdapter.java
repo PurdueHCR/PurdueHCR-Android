@@ -20,6 +20,7 @@ import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -71,12 +72,15 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyHolder> 
 
         System.out.println(s3);
 
-
         StringBuilder sb = new StringBuilder();
         //creating timestamp for start date
         Timestamp timestamp = Timestamp.valueOf(s1);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(timestamp);
+
+        // @TODO Temporary 4 hour offset fix
+        calendar.add(Calendar.HOUR, 4);
+
         int month = calendar.get(Calendar.MONTH);
         int dayOFMonth = calendar.get(Calendar.DAY_OF_MONTH);
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -87,6 +91,10 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyHolder> 
         Timestamp timestamp2 = Timestamp.valueOf(s3);
         Calendar calendar2 = Calendar.getInstance();
         calendar2.setTime(timestamp2);
+
+        // @TODO Temporary 4 hour offset fix
+        calendar2.add(Calendar.HOUR, 4);
+
         int month2 = calendar.get(Calendar.MONTH);
         int dayOFMonth2 = calendar2.get(Calendar.DAY_OF_MONTH);
         int hour2 = calendar2.get(Calendar.HOUR_OF_DAY);

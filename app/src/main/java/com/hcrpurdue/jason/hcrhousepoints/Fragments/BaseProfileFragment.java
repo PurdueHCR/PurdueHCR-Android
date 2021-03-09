@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.R;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.CacheManager;
 import com.hcrpurdue.jason.hcrhousepoints.Utils.FirebaseListenerUtil;
@@ -88,8 +89,9 @@ public abstract class BaseProfileFragment extends Fragment {
 
         scrollView = baseView.findViewById(R.id.profile_scroll_view);
         scrollView.smoothScrollTo(0,0);
-
-        setupCards(baseView);
+        if(cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
+            setupCards(baseView);
+        }
 
         return baseView;
     }
