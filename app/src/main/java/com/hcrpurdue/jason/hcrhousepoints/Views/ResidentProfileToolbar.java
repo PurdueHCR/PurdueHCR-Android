@@ -70,6 +70,10 @@ public class ResidentProfileToolbar {
             userPointTotalTextView.setText(userPointsText);
             userHouseRankTextView.setText(houseRankText);
             semesterRankTextView.setText(semesterRankText);
+        } else {
+            userPointTotalTextView.setVisibility(View.INVISIBLE);
+            userHouseRankTextView.setVisibility(View.INVISIBLE);
+            semesterRankTextView.setVisibility(View.INVISIBLE);
         }
 
         if (cacheManager.getUserHouse() != null && cacheManager.getUserHouse().getDownloadURL() != null) {

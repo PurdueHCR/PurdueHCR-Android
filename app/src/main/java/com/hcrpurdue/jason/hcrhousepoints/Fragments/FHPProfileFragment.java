@@ -56,10 +56,8 @@ public class FHPProfileFragment extends BaseProfileFragment {
 
     @Override
     protected void setupCards(View view) {
-        if(cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
-            residentProfileToolbar = new ResidentProfileToolbar(context, view);
-            houseCompetitionCard = new HouseCompetitionCard(context, view);
-        }
+        residentProfileToolbar = new ResidentProfileToolbar(context, view);
+        houseCompetitionCard = new HouseCompetitionCard(context, view);
     }
 
 

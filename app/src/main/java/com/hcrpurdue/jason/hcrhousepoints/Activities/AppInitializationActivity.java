@@ -28,7 +28,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import com.hcrpurdue.jason.hcrhousepoints.Models.AuthRank;
-import com.hcrpurdue.jason.hcrhousepoints.Models.Enums.UserPermissionLevel;
 import com.hcrpurdue.jason.hcrhousepoints.Models.Link;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointLog;
 import com.hcrpurdue.jason.hcrhousepoints.Models.PointType;
@@ -58,10 +57,9 @@ public class AppInitializationActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         cacheManager = CacheManager.getInstance(getApplicationContext());
         initializeViews();
-        if(cacheManager.getPermissionLevel() != UserPermissionLevel.FHP || cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
 
             initializeUserData();
-        }
+
     }
 
     /**
@@ -90,9 +88,8 @@ public class AppInitializationActivity extends AppCompatActivity {
                     cacheManager.getUserData(new CacheManagementInterface() {
                         public void onSuccess() {
                             //Got the user data, now lets get the Firebase token to use with the API
-                            if(cacheManager.getPermissionLevel() != UserPermissionLevel.FHP || cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
-                                initializeCompetitionData();
-                            }
+                               initializeCompetitionData();
+
                         }
                         public void onError(Exception e, Context context){
                             if(e.getMessage().equals("User does not exist.")){
@@ -114,10 +111,9 @@ public class AppInitializationActivity extends AppCompatActivity {
                     cacheManager.getUserDataNoCache(new CacheManagementInterface() {
                         public void onSuccess() {
                             //Once User data is cached, start initializing the competition data
-                            if(cacheManager.getPermissionLevel() != UserPermissionLevel.FHP || cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
 
                                 initializeCompetitionData();
-                            }
+
                         }
                         public void onError(Exception e, Context context){
                             if(e.getMessage().equals("User does not exist.")){
@@ -156,8 +152,7 @@ public class AppInitializationActivity extends AppCompatActivity {
     private void initializeCompetitionData(){
 
         try {
-            if (cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
-                System.out.println("RANK 1");
+                 System.out.println("RANK 1");
                 //get point types from Firestore
                 cacheManager.getUpdatedPointTypes(new CacheManagementInterface() {
                     public void onPointTypeComplete(List<PointType> data) {
@@ -182,8 +177,7 @@ public class AppInitializationActivity extends AppCompatActivity {
 
                                             @Override
                                             public void onGetRank(AuthRank rank) {
-                                                System.out.println("RANK: " + rank.getHouseRank() + " sem: " + rank.getSemesterRank());
-                                                //Check the system preferences for app version, and if not in sync, post update message
+                                                 //Check the system preferences for app version, and if not in sync, post update message
                                                 if (!sp.isAppUpToDate()) {
                                                     alertOutOfDateApp();
                                                 } else {
@@ -214,7 +208,6 @@ public class AppInitializationActivity extends AppCompatActivity {
                         handleDataInitializationError(e);
                     }
                 });
-            } else { checkForLinks();}
             } catch(Exception e){
                 handleDataInitializationError(e);
             }
