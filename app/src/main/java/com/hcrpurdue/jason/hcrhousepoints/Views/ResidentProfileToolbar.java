@@ -17,6 +17,10 @@ public class ResidentProfileToolbar {
     private TextView userPointTotalTextView;
     private TextView userHouseRankTextView;
     private TextView semesterRankTextView;
+    private TextView yourPointsTitle;
+    private TextView houseRankTitle;
+    private TextView overallLabel;
+    private TextView semesterLabel;
     private final TextView houseNameTextView;
     private final ImageView houseImageView;
 
@@ -33,12 +37,16 @@ public class ResidentProfileToolbar {
         System.out.println("INIT TOOLBAR");
         this.cacheManager = CacheManager.getInstance(context);
         houseNameTextView = parentView.findViewById(R.id.house_name_text_view);
-        if (cacheManager.getPermissionLevel() != UserPermissionLevel.FHP || cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
+        //not needed if (cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
 
             userPointTotalTextView = parentView.findViewById(R.id.your_points_text_view);
             userHouseRankTextView = parentView.findViewById(R.id.house_rank_text_view);
             semesterRankTextView = parentView.findViewById(R.id.semester_rank_text_view);
-        }
+        //}
+        yourPointsTitle = parentView.findViewById(R.id.CONSTANT_TOTAL_POINTS);
+        houseRankTitle = parentView.findViewById(R.id.CONSTANT_TOTAL_POINTS2);
+        overallLabel = parentView.findViewById(R.id.CONSTANT_HOUSE_RANK);
+        semesterLabel = parentView.findViewById(R.id.CONSTANT_SEMESTER_RANK);
         houseImageView = parentView.findViewById(R.id.profile_house_image_view);
 
         this.context = context;
@@ -46,7 +54,7 @@ public class ResidentProfileToolbar {
         this.resources = context.getResources();
         this.packageName = context.getPackageName();
         imageCacheManager = ImageCacheManager.getInstance();
-        if (cacheManager.getPermissionLevel() != UserPermissionLevel.FHP || cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
+        if (cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
 
             refreshRank();
         }
@@ -71,6 +79,10 @@ public class ResidentProfileToolbar {
             userHouseRankTextView.setText(houseRankText);
             semesterRankTextView.setText(semesterRankText);
         } else {
+            yourPointsTitle.setVisibility(View.INVISIBLE);
+            houseRankTitle.setVisibility(View.INVISIBLE);
+            overallLabel.setVisibility(View.INVISIBLE);
+            semesterLabel.setVisibility(View.INVISIBLE);
             userPointTotalTextView.setVisibility(View.INVISIBLE);
             userHouseRankTextView.setVisibility(View.INVISIBLE);
             semesterRankTextView.setVisibility(View.INVISIBLE);
