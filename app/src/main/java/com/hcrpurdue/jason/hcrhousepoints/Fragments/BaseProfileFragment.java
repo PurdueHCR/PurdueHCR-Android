@@ -89,9 +89,9 @@ public abstract class BaseProfileFragment extends Fragment {
 
         scrollView = baseView.findViewById(R.id.profile_scroll_view);
         scrollView.smoothScrollTo(0,0);
-        if(cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
+        //if(cacheManager.getPermissionLevel() != UserPermissionLevel.FHP && cacheManager.getPermissionLevel() != UserPermissionLevel.PROFESSIONAL_STAFF) {
             setupCards(baseView);
-        }
+        //}
 
         return baseView;
     }
